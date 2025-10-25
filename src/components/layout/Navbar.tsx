@@ -49,7 +49,7 @@ export default function Navbar() {
           <Link href="/" className="flex items-center space-x-3">
             <motion.div
               whileHover={{ scale: 1.05 }}
-              className="relative h-12 w-48"
+              className="relative h-20 w-56"
             >
               <Image
                 src="/halohairlogo.png"
