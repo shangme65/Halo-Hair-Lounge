@@ -9,6 +9,7 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        border: "hsl(214.3 31.8% 91.4%)",
         primary: {
           50: "#fdf4ff",
           100: "#fae8ff",

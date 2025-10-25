@@ -8,21 +8,44 @@
     --font-playfair: "Playfair Display", serif;
   }
 
+  html {
+    @apply text-sm sm:text-base;
+  }
+
   * {
     @apply border-border;
   }
 
   body {
-    @apply text-dark-900 dark:text-dark-50;
+    @apply text-dark-900 dark:text-dark-50 text-sm sm:text-base;
   }
 
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
+  h1 {
+    @apply font-display text-2xl sm:text-3xl md:text-4xl lg:text-5xl;
+  }
+
+  h2 {
+    @apply font-display text-xl sm:text-2xl md:text-3xl lg:text-4xl;
+  }
+
+  h3 {
+    @apply font-display text-lg sm:text-xl md:text-2xl lg:text-3xl;
+  }
+
+  h4 {
+    @apply font-display text-base sm:text-lg md:text-xl lg:text-2xl;
+  }
+
+  h5 {
+    @apply font-display text-sm sm:text-base md:text-lg lg:text-xl;
+  }
+
   h6 {
-    @apply font-display;
+    @apply font-display text-xs sm:text-sm md:text-base lg:text-lg;
+  }
+
+  p {
+    @apply text-sm sm:text-base;
   }
 }
 

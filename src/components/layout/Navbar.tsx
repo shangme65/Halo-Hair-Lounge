@@ -2,37 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
-import {
-  Menu,
-  X,
-  ShoppingCart,
-  User,
-  Calendar,
-  Home,
-  Info,
-  Scissors,
-  Mail,
-  Store,
-} from "lucide-react";
-import { useSession, signOut } from "next-auth/react";
-import Button from "@/components/ui/Button";
-
-const navigation = [
-  { name: "Home", href: "/", icon: Home },
-  { name: "About", href: "/about", icon: Info },
-  { name: "Services", href: "/services", icon: Scissors },
-  { name: "Store", href: "/store", icon: Store },
-  { name: "Book Now", href: "/book", icon: Calendar },
-  { name: "Contact", href: "/contact", icon: Mail },
-];
-
-export default function Navbar() {
-  "use client";
-
-import { useState } from "react";
-import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
@@ -62,12 +31,10 @@ const navigation = [
 ];
 
 export default function Navbar() {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
   const { data: session } = useSession();
   const totalItems = useCartStore((state) => state.getTotalItems());
-  const pathname = usePathname();
-  const { data: session } = useSession();
 
   return (
     <motion.nav
