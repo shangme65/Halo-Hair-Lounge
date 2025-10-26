@@ -57,7 +57,9 @@ const Button = forwardRef<HTMLButtonElement, AnimatedButtonProps>(
           </div>
         ) : (
           <>
-            <span className="relative z-10">{children}</span>
+            <div className="relative z-10 flex items-center justify-center">
+              {children}
+            </div>
             <motion.div
               className="absolute inset-0 bg-white opacity-0"
               whileHover={{ opacity: 0.1 }}

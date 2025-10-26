@@ -94,19 +94,14 @@ export default function Home() {
 
         {/* Content */}
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-32 relative z-10">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={currentSlide}
-              initial={{ opacity: 0, y: 50 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -50 }}
-              transition={{ duration: 0.7 }}
-              className="text-center max-w-5xl mx-auto"
-            >
+          <div className="text-center max-w-5xl mx-auto">
+            <AnimatePresence mode="wait">
               <motion.div
-                initial={{ scale: 0.9 }}
-                animate={{ scale: 1 }}
-                transition={{ duration: 0.5, delay: 0.2 }}
+                key={`subtitle-${currentSlide}`}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.5 }}
                 className="inline-block mb-6 px-6 py-3 glass rounded-full"
               >
                 <span className="text-primary-300 font-semibold text-sm flex items-center">
@@ -114,50 +109,77 @@ export default function Home() {
                   {slide.subtitle}
                 </span>
               </motion.div>
+            </AnimatePresence>
 
-              <h1 className="text-5xl sm:text-6xl lg:text-8xl font-display font-bold mb-6 animate-gradient bg-gradient-to-r from-white via-primary-300 to-white bg-size-200 bg-clip-text text-transparent">
+            <AnimatePresence mode="wait">
+              <motion.h1
+                key={`title-${currentSlide}`}
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -30 }}
+                transition={{ duration: 0.6, delay: 0.1 }}
+                className="text-5xl sm:text-6xl lg:text-8xl font-display font-bold mb-6 animate-gradient bg-gradient-to-r from-white via-primary-300 to-white bg-size-200 bg-clip-text text-transparent"
+              >
                 {slide.title}
-              </h1>
+              </motion.h1>
+            </AnimatePresence>
 
-              <p className="text-xl sm:text-2xl text-dark-200 mb-12 max-w-3xl mx-auto leading-relaxed">
+            <AnimatePresence mode="wait">
+              <motion.p
+                key={`description-${currentSlide}`}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+                className="text-xl sm:text-2xl text-dark-200 mb-12 max-w-3xl mx-auto leading-relaxed"
+              >
                 {slide.description}
-              </p>
+              </motion.p>
+            </AnimatePresence>
 
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={`buttons-${currentSlide}`}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+                className="flex flex-col sm:flex-row items-center justify-center gap-4"
+              >
                 <Link href={slide.cta.href}>
-                  <Button size="lg" className="group">
-                    {slide.cta.text}
+                  <Button size="md" className="group flex items-center">
+                    <span>{slide.cta.text}</span>
                     <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
                   </Button>
                 </Link>
                 <Link href="/services">
                   <Button
-                    size="lg"
+                    size="md"
                     variant="outline"
                     className="border-white text-white hover:bg-white/10"
                   >
                     Explore Services
                   </Button>
                 </Link>
-              </div>
+              </motion.div>
+            </AnimatePresence>
 
-              {/* Slide Indicators */}
-              <div className="flex items-center justify-center gap-3 mt-12">
-                {heroSlides.map((_, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => setCurrentSlide(idx)}
-                    className={`h-2 rounded-full transition-all duration-300 ${
-                      idx === currentSlide
-                        ? "w-12 bg-primary-500"
-                        : "w-2 bg-white/30 hover:bg-white/50"
-                    }`}
-                    aria-label={`Go to slide ${idx + 1}`}
-                  />
-                ))}
-              </div>
-            </motion.div>
-          </AnimatePresence>
+            {/* Slide Indicators */}
+            <div className="flex items-center justify-center gap-3 mt-12">
+              {heroSlides.map((_, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setCurrentSlide(idx)}
+                  className={`h-2 rounded-full transition-all duration-300 ${
+                    idx === currentSlide
+                      ? "w-12 bg-primary-500"
+                      : "w-2 bg-white/30 hover:bg-white/50"
+                  }`}
+                  aria-label={`Go to slide ${idx + 1}`}
+                />
+              ))}
+            </div>
+          </div>
         </div>
 
         {/* Scroll Indicator */}
