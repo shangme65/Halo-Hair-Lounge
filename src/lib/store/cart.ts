@@ -89,6 +89,7 @@ export const useCartStore = create<CartStore>()(
     }),
     {
       name: "halo-cart-storage",
+      skipHydration: typeof window === "undefined",
     }
   )
 );

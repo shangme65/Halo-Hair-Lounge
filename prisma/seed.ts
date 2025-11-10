@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, ServiceCategory, ProductCategory } from "@prisma/client";
 import bcrypt from "bcrypt";
 
 const prisma = new PrismaClient();
@@ -46,7 +46,7 @@ async function main() {
         "Professional haircut with styling consultation. Includes wash and blow dry.",
       price: 65.0,
       duration: 60,
-      category: "HAIRCUT",
+      category: ServiceCategory.HAIRCUT,
       image: "https://images.unsplash.com/photo-1562322140-8baeececf3df?w=800",
     },
     {
@@ -55,7 +55,7 @@ async function main() {
         "Full color service with premium products. Includes toner and deep conditioning.",
       price: 180.0,
       duration: 180,
-      category: "COLORING",
+      category: ServiceCategory.COLORING,
       image: "https://images.unsplash.com/photo-1560066984-138dadb4c035?w=800",
     },
     {
@@ -63,7 +63,7 @@ async function main() {
       description: "Hand-painted highlights for a natural, sun-kissed look.",
       price: 220.0,
       duration: 210,
-      category: "COLORING",
+      category: ServiceCategory.COLORING,
       image:
         "https://images.unsplash.com/photo-1522337660859-02fbefca4702?w=800",
     },
@@ -72,7 +72,7 @@ async function main() {
       description: "Intensive moisture therapy for damaged or dry hair.",
       price: 85.0,
       duration: 45,
-      category: "TREATMENT",
+      category: ServiceCategory.TREATMENT,
       image:
         "https://images.unsplash.com/photo-1519699047748-de8e457a634e?w=800",
     },
@@ -82,7 +82,7 @@ async function main() {
         "Elegant updo or styling for weddings and special occasions.",
       price: 120.0,
       duration: 90,
-      category: "STYLING",
+      category: ServiceCategory.STYLING,
       image:
         "https://images.unsplash.com/photo-1487412912498-0447578fcca8?w=800",
     },
@@ -92,7 +92,7 @@ async function main() {
         "Premium quality hair extensions with professional installation.",
       price: 450.0,
       duration: 240,
-      category: "EXTENSIONS",
+      category: ServiceCategory.EXTENSIONS,
       image:
         "https://images.unsplash.com/photo-1522338140262-f46f5913618a?w=800",
     },
@@ -101,7 +101,7 @@ async function main() {
       description: "Protective styling with premium synthetic or human hair.",
       price: 200.0,
       duration: 300,
-      category: "BRAIDING",
+      category: ServiceCategory.BRAIDING,
       image:
         "https://images.unsplash.com/photo-1605980676233-e14c31c797b3?w=800",
     },
@@ -110,7 +110,7 @@ async function main() {
       description: "Smoothing treatment that eliminates frizz and adds shine.",
       price: 300.0,
       duration: 180,
-      category: "TREATMENT",
+      category: ServiceCategory.TREATMENT,
       image:
         "https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?w=800",
     },
@@ -140,7 +140,7 @@ async function main() {
       images: [
         "https://images.unsplash.com/photo-1571875257727-256c39da42af?w=800",
       ],
-      category: "SHAMPOO",
+      category: ProductCategory.SHAMPOO,
       brand: "Halo Signature",
       stock: 50,
       isFeatured: true,
@@ -155,7 +155,7 @@ async function main() {
       images: [
         "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=800",
       ],
-      category: "CONDITIONER",
+      category: ProductCategory.CONDITIONER,
       brand: "Halo Signature",
       stock: 45,
       isFeatured: true,
@@ -169,7 +169,7 @@ async function main() {
       images: [
         "https://images.unsplash.com/photo-1535585209827-a15fcdbc4c2d?w=800",
       ],
-      category: "SHAMPOO",
+      category: ProductCategory.SHAMPOO,
       brand: "Halo Pro",
       stock: 30,
       isFeatured: false,
@@ -184,7 +184,7 @@ async function main() {
       images: [
         "https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?w=800",
       ],
-      category: "TREATMENT",
+      category: ProductCategory.TREATMENT,
       brand: "Halo Labs",
       stock: 25,
       isFeatured: true,
@@ -198,7 +198,7 @@ async function main() {
       images: [
         "https://images.unsplash.com/photo-1629198688000-71f23e745b6e?w=800",
       ],
-      category: "STYLING",
+      category: ProductCategory.STYLING,
       brand: "Halo Style",
       stock: 40,
       isFeatured: false,
@@ -212,7 +212,7 @@ async function main() {
       images: [
         "https://images.unsplash.com/photo-1620967098601-c44db8f51667?w=800",
       ],
-      category: "STYLING",
+      category: ProductCategory.STYLING,
       brand: "Halo Style",
       stock: 55,
       isFeatured: true,
@@ -225,7 +225,7 @@ async function main() {
       images: [
         "https://images.unsplash.com/photo-1570554886111-e80fcca6a029?w=800",
       ],
-      category: "TREATMENT",
+      category: ProductCategory.TREATMENT,
       brand: "Halo Signature",
       stock: 35,
       isFeatured: true,
@@ -240,7 +240,7 @@ async function main() {
       images: [
         "https://images.unsplash.com/photo-1522338242992-e1a54906a8da?w=800",
       ],
-      category: "TOOLS",
+      category: ProductCategory.TOOLS,
       brand: "Halo Pro",
       stock: 15,
       isFeatured: true,
@@ -254,7 +254,7 @@ async function main() {
       images: [
         "https://images.unsplash.com/photo-1519699047748-de8e457a634e?w=800",
       ],
-      category: "TOOLS",
+      category: ProductCategory.TOOLS,
       brand: "Halo Pro",
       stock: 20,
       isFeatured: false,
@@ -268,7 +268,7 @@ async function main() {
       images: [
         "https://images.unsplash.com/photo-1535083783855-76ae62b2914e?w=800",
       ],
-      category: "ACCESSORIES",
+      category: ProductCategory.ACCESSORIES,
       brand: "Halo Essentials",
       stock: 60,
       isFeatured: false,
@@ -281,7 +281,7 @@ async function main() {
       images: [
         "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=800",
       ],
-      category: "COLORING",
+      category: ProductCategory.COLORING,
       brand: "Halo Color",
       stock: 30,
       isFeatured: false,
@@ -294,7 +294,7 @@ async function main() {
       images: [
         "https://images.unsplash.com/photo-1526045478516-99145907023c?w=800",
       ],
-      category: "SHAMPOO",
+      category: ProductCategory.SHAMPOO,
       brand: "Halo Pro",
       stock: 40,
       isFeatured: false,

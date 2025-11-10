@@ -4,7 +4,16 @@ import { InputHTMLAttributes, forwardRef } from "react";
 import { motion } from "framer-motion";
 import { clsx } from "clsx";
 
-interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
+interface InputProps
+  extends Omit<
+    InputHTMLAttributes<HTMLInputElement>,
+    | "onDrag"
+    | "onDragStart"
+    | "onDragEnd"
+    | "onAnimationStart"
+    | "onAnimationEnd"
+    | "onAnimationIteration"
+  > {
   label?: string;
   error?: string;
 }

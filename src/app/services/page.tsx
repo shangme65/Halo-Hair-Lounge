@@ -89,7 +89,9 @@ export default function ServicesPage() {
               <Card
                 key={i}
                 className="h-64 animate-pulse bg-dark-100 dark:bg-dark-800"
-              />
+              >
+                <div />
+              </Card>
             ))}
           </div>
         ) : (

@@ -1,10 +1,19 @@
 "use client";
 
-import { motion, HTMLMotionProps } from "framer-motion";
+import { motion } from "framer-motion";
 import { ButtonHTMLAttributes, forwardRef } from "react";
 import { clsx } from "clsx";
 
-interface AnimatedButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+interface AnimatedButtonProps
+  extends Omit<
+    ButtonHTMLAttributes<HTMLButtonElement>,
+    | "onDrag"
+    | "onDragStart"
+    | "onDragEnd"
+    | "onAnimationStart"
+    | "onAnimationEnd"
+    | "onAnimationIteration"
+  > {
   variant?: "primary" | "secondary" | "outline" | "ghost";
   size?: "sm" | "md" | "lg";
   isLoading?: boolean;
