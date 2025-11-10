@@ -1,10 +1,19 @@
 "use client";
 
-import { motion, HTMLMotionProps } from "framer-motion";
+import { motion } from "framer-motion";
 import { ButtonHTMLAttributes, forwardRef } from "react";
 import { clsx } from "clsx";
 
-interface AnimatedButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+interface AnimatedButtonProps
+  extends Omit<
+    ButtonHTMLAttributes<HTMLButtonElement>,
+    | "onDrag"
+    | "onDragStart"
+    | "onDragEnd"
+    | "onAnimationStart"
+    | "onAnimationEnd"
+    | "onAnimationIteration"
+  > {
   variant?: "primary" | "secondary" | "outline" | "ghost";
   size?: "sm" | "md" | "lg";
   isLoading?: boolean;
@@ -57,7 +66,9 @@ const Button = forwardRef<HTMLButtonElement, AnimatedButtonProps>(
           </div>
         ) : (
           <>
-            <span className="relative z-10">{children}</span>
+            <div className="relative z-10 flex items-center justify-center">
+              {children}
+            </div>
             <motion.div
               className="absolute inset-0 bg-white opacity-0"
               whileHover={{ opacity: 0.1 }}

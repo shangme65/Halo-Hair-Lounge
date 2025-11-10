@@ -130,7 +130,9 @@ export default function StorePage() {
               <Card
                 key={i}
                 className="h-96 animate-pulse bg-dark-100 dark:bg-dark-800"
-              />
+              >
+                <div />
+              </Card>
             ))}
           </div>
         ) : filteredProducts.length === 0 ? (

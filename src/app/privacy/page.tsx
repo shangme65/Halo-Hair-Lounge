@@ -1,13 +1,8 @@
-import { Metadata } from "next";
+"use client";
+
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Shield, Mail, Lock, Eye, UserCheck, AlertCircle } from "lucide-react";
-
-export const metadata: Metadata = {
-  title: "Privacy Policy | Halo Hair Lounge",
-  description:
-    "Learn how Halo Hair Lounge collects, uses, and protects your personal information.",
-};
 
 export default function PrivacyPolicyPage() {
   const sections = [
