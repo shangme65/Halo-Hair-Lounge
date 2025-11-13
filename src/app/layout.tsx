@@ -42,6 +42,11 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
+  icons: {
+    icon: [{ url: "/HaloLogo4.png", sizes: "1024x1024", type: "image/png" }],
+    shortcut: "/HaloLogo4.png",
+    apple: [{ url: "/HaloLogo4.png", sizes: "1024x1024", type: "image/png" }],
+  },
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
   ),

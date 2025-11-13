@@ -50,10 +50,10 @@ export default function Navbar() {
             <Link href="/" className="flex items-center space-x-3">
               <motion.div
                 whileHover={{ scale: 1.05 }}
-                className="relative h-20 w-56"
+                className="relative h-16 w-48"
               >
                 <Image
-                  src="/halohairlogo.png"
+                  src="/HaloLogo5.png"
                   alt="Halo Hair Lounge"
                   fill
                   className="object-contain"
