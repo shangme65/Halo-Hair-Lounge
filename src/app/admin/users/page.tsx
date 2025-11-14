@@ -19,8 +19,6 @@ import {
   Mail,
   Phone,
   Calendar,
-  ShoppingBag,
-  CalendarCheck,
 } from "lucide-react";
 
 interface User {
@@ -159,7 +157,7 @@ export default function UsersManagement() {
   const getRoleIcon = (role: string) => {
     switch (role) {
       case "ADMIN":
-        return <ShieldCheck className="text-red-500" size={20} />;
+        return <ShieldCheck className="text-green-500" size={20} />;
       case "STAFF":
         return <Shield className="text-yellow-500" size={20} />;
       default:
@@ -169,7 +167,7 @@ export default function UsersManagement() {
 
   const getRoleBadge = (role: string) => {
     const styles = {
-      ADMIN: "bg-red-500/20 text-red-400 border-red-500/30",
+      ADMIN: "bg-green-500/20 text-green-400 border-green-500/30",
       STAFF: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
       USER: "bg-blue-500/20 text-blue-400 border-blue-500/30",
     };
@@ -232,11 +230,11 @@ export default function UsersManagement() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-dark-400 text-sm">Admins</p>
-                  <p className="text-3xl font-bold text-red-400 mt-1">
+                  <p className="text-3xl font-bold text-green-400 mt-1">
                     {stats.admins}
                   </p>
                 </div>
-                <ShieldCheck className="text-red-500" size={32} />
+                <ShieldCheck className="text-green-500" size={32} />
               </div>
             </Card>
 
@@ -336,18 +334,6 @@ export default function UsersManagement() {
                         <span>
                           Joined {new Date(user.createdAt).toLocaleDateString()}
                         </span>
-                      </div>
-                    </div>
-
-                    {/* Stats */}
-                    <div className="flex gap-4 pt-3 border-t border-dark-800">
-                      <div className="flex items-center gap-2 text-dark-400 text-sm">
-                        <CalendarCheck size={16} />
-                        <span>{user._count.appointments} appts</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-dark-400 text-sm">
-                        <ShoppingBag size={16} />
-                        <span>{user._count.orders} orders</span>
                       </div>
                     </div>
 
