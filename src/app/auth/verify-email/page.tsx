@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -9,7 +9,7 @@ import Button from "@/components/ui/Button";
 import Link from "next/link";
 import toast from "react-hot-toast";
 
-export default function VerifyEmailPage() {
+function VerifyEmailContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const email = searchParams.get("email");
@@ -404,7 +404,6 @@ export default function VerifyEmailPage() {
             )}
           </AnimatePresence>
         </div>
-
         {!showSuccess && (
           <p className="text-center text-dark-600 mt-6 text-sm">
             Need help?{" "}
@@ -415,8 +414,22 @@ export default function VerifyEmailPage() {
               Contact Support
             </Link>
           </p>
-        )}
+        )}{" "}
       </motion.div>
     </div>
+  );
+}
+
+export default function VerifyEmailPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          <Loader2 className="w-8 h-8 animate-spin text-primary-600" />
+        </div>
+      }
+    >
+      <VerifyEmailContent />
+    </Suspense>
   );
 }

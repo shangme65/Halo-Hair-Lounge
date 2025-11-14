@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { motion } from "framer-motion";
@@ -15,6 +15,7 @@ export default function CheckoutPage() {
   const router = useRouter();
   const { data: session } = useSession();
   const { items, getTotalPrice, clearCart } = useCartStore();
+  const [isMounted, setIsMounted] = useState(false);
 
   const [formData, setFormData] = useState({
     name: session?.user?.name || "",
@@ -31,9 +32,19 @@ export default function CheckoutPage() {
 
   const [isProcessing, setIsProcessing] = useState(false);
 
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   const totalPrice = getTotalPrice();
   const tax = totalPrice * 0.08;
   const finalTotal = totalPrice + tax;
+
+  useEffect(() => {
+    if (isMounted && items.length === 0) {
+      router.push("/cart");
+    }
+  }, [isMounted, items.length, router]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -59,8 +70,11 @@ export default function CheckoutPage() {
     setIsProcessing(false);
   };
 
+  if (!isMounted) {
+    return null;
+  }
+
   if (items.length === 0) {
-    router.push("/cart");
     return null;
   }
 
