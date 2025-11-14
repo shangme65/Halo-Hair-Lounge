@@ -5,6 +5,7 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { Providers } from "./providers";
 import { Toaster } from "react-hot-toast";
+import CookieConsent from "@/components/ui/CookieConsent";
 
 const roboto = Roboto({
   subsets: ["latin"],
@@ -120,6 +121,7 @@ export default function RootLayout({
               },
             }}
           />
+          <CookieConsent />
         </Providers>
       </body>
     </html>
