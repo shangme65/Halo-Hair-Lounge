@@ -211,7 +211,7 @@ export default function AdminProductsPage() {
     <div className="min-h-screen bg-gradient-to-br from-dark-50 via-white to-primary-50 dark:from-dark-950 dark:via-dark-900 dark:to-dark-950">
       <AdminSidebar />
 
-      <div className="lg:ml-64 p-8">
+      <div className="p-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

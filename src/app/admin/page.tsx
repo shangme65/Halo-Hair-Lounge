@@ -61,7 +61,7 @@ export default function AdminDashboard() {
       <AdminSidebar />
 
       {/* Main Content */}
-      <div className="lg:ml-64 p-8">
+      <div className="p-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

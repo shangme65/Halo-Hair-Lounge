@@ -1,50 +1,9 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useSession } from "next-auth/react";
-import { motion } from "framer-motion";
-import {
-  LayoutDashboard,
-  Scissors,
-  ShoppingBag,
-  Calendar,
-  Users,
-  LogOut,
-} from "lucide-react";
-import { signOut } from "next-auth/react";
-
-const allNavigation = [
-  { name: "Overview", href: "/admin", icon: LayoutDashboard, roles: ["ADMIN"] },
-  {
-    name: "Services",
-    href: "/admin/services",
-    icon: Scissors,
-    roles: ["ADMIN"],
-  },
-  {
-    name: "Products",
-    href: "/admin/products",
-    icon: ShoppingBag,
-    roles: ["ADMIN"],
-  },
-  {
-    name: "Appointments",
-    href: "/admin/appointments",
-    icon: Calendar,
-    roles: ["ADMIN", "STAFF"],
-  },
-  { name: "Users", href: "/admin/users", icon: Users, roles: ["ADMIN"] },
-];
-
 export default function AdminSidebar() {
-  const pathname = usePathname();
-  const { data: session } = useSession();
-
-  // Filter navigation based on user role
-  const navigation = allNavigation.filter((item) =>
-    item.roles.includes(session?.user?.role || "")
-  );
+  // Sidebar removed - navigation now handled by main Navbar in header
+  return null;
+}
 
   return (
     <>

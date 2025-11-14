@@ -204,7 +204,7 @@ export default function UsersManagement() {
     <div className="flex min-h-screen bg-dark-950">
       <AdminSidebar />
 
-      <main className="flex-1 lg:ml-64 p-8">
+      <main className="flex-1 p-8">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
           <div className="mb-8">
