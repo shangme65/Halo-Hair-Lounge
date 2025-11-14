@@ -57,7 +57,7 @@ export default function Navbar() {
                 animate={{
                   x: 0,
                   opacity: 1,
-                  filter: "drop-shadow(0 0 8px rgba(14, 165, 233, 0.4))",
+                  filter: "drop-shadow(0 0 12px rgba(14, 165, 233, 0.6))",
                 }}
                 transition={{ duration: 0.8, ease: "easeOut" }}
                 whileHover={{ scale: 1.05 }}

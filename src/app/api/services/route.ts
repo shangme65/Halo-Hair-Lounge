@@ -10,7 +10,7 @@ export async function GET(req: NextRequest) {
       orderBy: { name: "asc" },
     });
 
-    return NextResponse.json({ services });
+    return NextResponse.json(services);
   } catch (error) {
     console.error("Get services error:", error);
     return NextResponse.json(
