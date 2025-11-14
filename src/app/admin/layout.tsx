@@ -14,7 +14,8 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
       redirect("/auth/signin");
     }
 
-    if (session?.user?.role !== "ADMIN") {
+    // Allow both ADMIN and STAFF to access admin panel
+    if (session?.user?.role !== "ADMIN" && session?.user?.role !== "STAFF") {
       redirect("/dashboard");
     }
   }, [session, status]);

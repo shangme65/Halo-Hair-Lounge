@@ -214,6 +214,7 @@ model Review {
 
 enum Role {
   USER
+  STAFF
   ADMIN
 }
 

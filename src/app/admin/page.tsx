@@ -1,6 +1,8 @@
 "use client";
 
+import { useEffect } from "react";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import {
   Users,
@@ -46,6 +48,13 @@ const stats = [
 
 export default function AdminDashboard() {
   const { data: session } = useSession();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (session && session.user.role !== "ADMIN") {
+      router.push("/admin/appointments");
+    }
+  }, [session, router]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-dark-50 via-white to-primary-50 dark:from-dark-950 dark:via-dark-900 dark:to-dark-950">

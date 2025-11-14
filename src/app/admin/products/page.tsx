@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Plus,
@@ -36,6 +38,8 @@ interface Product {
 }
 
 export default function AdminProductsPage() {
+  const { data: session } = useSession();
+  const router = useRouter();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -56,8 +60,12 @@ export default function AdminProductsPage() {
   });
 
   useEffect(() => {
+    if (session && session.user.role !== "ADMIN") {
+      router.push("/admin/appointments");
+      return;
+    }
     fetchProducts();
-  }, []);
+  }, [session, router]);
 
   const fetchProducts = async () => {
     try {

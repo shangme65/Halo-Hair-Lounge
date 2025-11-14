@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Plus,
@@ -30,6 +32,8 @@ interface Service {
 }
 
 export default function AdminServicesPage() {
+  const { data: session } = useSession();
+  const router = useRouter();
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -46,8 +50,12 @@ export default function AdminServicesPage() {
   });
 
   useEffect(() => {
+    if (session && session.user.role !== "ADMIN") {
+      router.push("/admin/appointments");
+      return;
+    }
     fetchServices();
-  }, []);
+  }, [session, router]);
 
   const fetchServices = async () => {
     try {
