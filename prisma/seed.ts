@@ -6,37 +6,33 @@ const prisma = new PrismaClient();
 async function main() {
   console.log("🌱 Seeding database...");
 
-  // Create admin user
-  const hashedPassword = await bcrypt.hash("admin123", 10);
+  // Create admin user from environment variables
+  const adminEmail = process.env.ADMIN_EMAIL;
+  const adminName = process.env.ADMIN_NAME;
+  const adminPassword = process.env.ADMIN_PASSWORD;
+  const adminPhone = process.env.ADMIN_PHONE;
+
+  if (!adminEmail || !adminPassword) {
+    throw new Error(
+      "ADMIN_EMAIL and ADMIN_PASSWORD must be set in environment variables"
+    );
+  }
+
+  const hashedPassword = await bcrypt.hash(adminPassword, 10);
   const admin = await prisma.user.upsert({
-    where: { email: "admin@halohairlounge.com" },
+    where: { email: adminEmail },
     update: {},
     create: {
-      email: "admin@halohairlounge.com",
-      name: "Admin User",
+      email: adminEmail,
+      name: adminName || "Admin User",
       password: hashedPassword,
       role: "ADMIN",
-      phone: "+1234567890",
+      phone: adminPhone || "+1234567890",
+      emailVerified: new Date(), // Admin email is pre-verified
     },
   });
 
   console.log("✅ Created admin user:", admin.email);
-
-  // Create demo customer
-  const customerPassword = await bcrypt.hash("customer123", 10);
-  const customer = await prisma.user.upsert({
-    where: { email: "customer@example.com" },
-    update: {},
-    create: {
-      email: "customer@example.com",
-      name: "Jane Doe",
-      password: customerPassword,
-      role: "USER",
-      phone: "+1234567891",
-    },
-  });
-
-  console.log("✅ Created customer user:", customer.email);
 
   // Create services
   const services = [
@@ -309,25 +305,6 @@ async function main() {
   }
 
   console.log("✅ Created products");
-
-  // Create sample appointment
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  tomorrow.setHours(14, 0, 0, 0);
-
-  await prisma.appointment.create({
-    data: {
-      userId: customer.id,
-      serviceId: "classic-haircut",
-      date: tomorrow,
-      startTime: "14:00",
-      endTime: "15:00",
-      status: "CONFIRMED",
-      notes: "First time customer",
-    },
-  });
-
-  console.log("✅ Created sample appointment");
 
   console.log("🎉 Seeding completed successfully!");
 }
