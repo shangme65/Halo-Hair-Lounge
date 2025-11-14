@@ -51,8 +51,23 @@ export default function SignUpPage() {
         throw new Error(data.error || "Failed to create account");
       }
 
-      toast.success("Account created successfully!");
-      router.push("/auth/signin?message=Account created. Please sign in.");
+      toast.success("Please check your email for verification code");
+
+      // Store email and password in session storage for auto-login after verification
+      if (typeof window !== "undefined") {
+        sessionStorage.setItem(
+          "pendingVerification",
+          JSON.stringify({
+            email: formData.email,
+            password: formData.password,
+            timestamp: Date.now(),
+          })
+        );
+      }
+
+      router.push(
+        `/auth/verify-email?email=${encodeURIComponent(formData.email)}`
+      );
     } catch (error: any) {
       toast.error(error.message || "Something went wrong");
     } finally {

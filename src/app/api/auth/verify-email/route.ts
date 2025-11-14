@@ -2,6 +2,77 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { sendWelcomeEmail } from "@/lib/email";
 
+// Handle email button verification (from email link)
+export async function GET(req: NextRequest) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const token = searchParams.get("token");
+
+    if (!token) {
+      // Redirect to verification page with error
+      return NextResponse.redirect(
+        new URL("/auth/verify-email?error=missing-token", req.url)
+      );
+    }
+
+    // Find user with this verification token
+    const user = await prisma.user.findUnique({
+      where: { verificationToken: token },
+    });
+
+    if (!user) {
+      return NextResponse.redirect(
+        new URL("/auth/verify-email?error=invalid-token", req.url)
+      );
+    }
+
+    // Check if token has expired
+    if (
+      user.verificationTokenExpiry &&
+      user.verificationTokenExpiry < new Date()
+    ) {
+      return NextResponse.redirect(
+        new URL("/auth/verify-email?error=expired-token", req.url)
+      );
+    }
+
+    // Update user to mark email as verified
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        emailVerified: new Date(),
+        verificationToken: null,
+        verificationTokenExpiry: null,
+      },
+    });
+
+    // Send welcome email
+    try {
+      await sendWelcomeEmail({
+        to: user.email,
+        name: user.name || "User",
+      });
+    } catch (emailError) {
+      console.error("Failed to send welcome email:", emailError);
+    }
+
+    // Redirect to success page with auto-login enabled
+    return NextResponse.redirect(
+      new URL(
+        `/auth/verify-email?verified=true&email=${encodeURIComponent(
+          user.email
+        )}`,
+        req.url
+      )
+    );
+  } catch (error: any) {
+    console.error("Email verification error:", error);
+    return NextResponse.redirect(
+      new URL("/auth/verify-email?error=server-error", req.url)
+    );
+  }
+}
+
 export async function POST(req: NextRequest) {
   try {
     const { token } = await req.json();
@@ -67,8 +138,14 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(
       {
-        message: "Email verified successfully! You can now sign in.",
+        message: "Email verified successfully!",
         verified: true,
+        user: {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          role: user.role,
+        },
       },
       { status: 200 }
     );

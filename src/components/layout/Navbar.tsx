@@ -49,6 +49,17 @@ export default function Navbar() {
             {/* Logo */}
             <Link href="/" className="flex items-center space-x-3">
               <motion.div
+                initial={{
+                  x: -100,
+                  opacity: 0,
+                  filter: "drop-shadow(0 0 20px rgba(14, 165, 233, 0.8))",
+                }}
+                animate={{
+                  x: 0,
+                  opacity: 1,
+                  filter: "drop-shadow(0 0 8px rgba(14, 165, 233, 0.4))",
+                }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
                 whileHover={{ scale: 1.05 }}
                 className="relative h-16 w-48"
               >
@@ -60,8 +71,7 @@ export default function Navbar() {
                   priority
                 />
               </motion.div>
-            </Link>
-
+            </Link>{" "}
             {/* Desktop Navigation */}
             <div className="hidden lg:flex items-center space-x-1">
               {navigation.map((item) => {
@@ -86,7 +96,6 @@ export default function Navbar() {
                 );
               })}
             </div>
-
             {/* Right Actions */}
             <div className="hidden lg:flex items-center space-x-4">
               <Link href="/cart">
@@ -125,7 +134,6 @@ export default function Navbar() {
                 </Link>
               )}
             </div>
-
             {/* Mobile Menu Button */}
             <button
               className="lg:hidden p-2 rounded-xl hover:bg-primary-50 dark:hover:bg-primary-950 transition-colors"
@@ -157,7 +165,7 @@ export default function Navbar() {
 
             {/* Sidebar */}
             <motion.div
-              className="fixed top-0 right-0 bottom-0 w-80 bg-white dark:bg-dark-900 shadow-2xl z-[120] lg:hidden overflow-y-auto"
+              className="fixed top-0 right-0 bottom-0 w-64 bg-white dark:bg-dark-900 shadow-2xl z-[120] lg:hidden overflow-y-auto"
               initial={{ x: "100%" }}
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
