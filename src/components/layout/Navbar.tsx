@@ -16,12 +16,15 @@ import {
   Scissors,
   Mail,
   Store,
+  LayoutDashboard,
+  ShoppingBag,
+  Users,
 } from "lucide-react";
 import { useSession, signOut } from "next-auth/react";
 import Button from "@/components/ui/Button";
 import { useCartStore } from "@/lib/store/cart";
 
-const navigation = [
+const publicNavigation = [
   { name: "Home", href: "/", icon: Home },
   { name: "About", href: "/about", icon: Info },
   { name: "Services", href: "/services", icon: Scissors },
@@ -30,11 +33,25 @@ const navigation = [
   { name: "Contact", href: "/contact", icon: Mail },
 ];
 
+const adminNavigation = [
+  { name: "Overview", href: "/admin", icon: LayoutDashboard, roles: ["ADMIN"] },
+  { name: "Services", href: "/admin/services", icon: Scissors, roles: ["ADMIN"] },
+  { name: "Products", href: "/admin/products", icon: ShoppingBag, roles: ["ADMIN"] },
+  { name: "Appointments", href: "/admin/appointments", icon: Calendar, roles: ["ADMIN", "STAFF"] },
+  { name: "Users", href: "/admin/users", icon: Users, roles: ["ADMIN"] },
+];
+
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
   const { data: session } = useSession();
   const totalItems = useCartStore((state) => state.getTotalItems());
+
+  // Determine which navigation to show based on user role
+  const isAdmin = session?.user?.role === "ADMIN" || session?.user?.role === "STAFF";
+  const navigation = isAdmin 
+    ? adminNavigation.filter(item => item.roles.includes(session?.user?.role || ""))
+    : publicNavigation;
 
   return (
     <>
@@ -98,24 +115,27 @@ export default function Navbar() {
             </div>
             {/* Right Actions */}
             <div className="hidden lg:flex items-center space-x-4">
-              <Link href="/cart">
-                <motion.div
-                  className="p-2 rounded-xl hover:bg-primary-50 dark:hover:bg-primary-950 transition-colors relative"
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
-                >
-                  <ShoppingCart className="w-6 h-6" />
-                  {totalItems > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-primary-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-                      {totalItems}
-                    </span>
-                  )}
-                </motion.div>
-              </Link>
+              {/* Show cart only for non-admin users */}
+              {!isAdmin && (
+                <Link href="/cart">
+                  <motion.div
+                    className="p-2 rounded-xl hover:bg-primary-50 dark:hover:bg-primary-950 transition-colors relative"
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                  >
+                    <ShoppingCart className="w-6 h-6" />
+                    {totalItems > 0 && (
+                      <span className="absolute -top-1 -right-1 bg-primary-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                        {totalItems}
+                      </span>
+                    )}
+                  </motion.div>
+                </Link>
+              )}
 
               {session ? (
                 <div className="flex items-center space-x-3">
-                  <Link href="/dashboard">
+                  <Link href={isAdmin ? "/admin" : "/dashboard"}>
                     <motion.div
                       className="flex items-center space-x-2 px-4 py-2 rounded-xl hover:bg-primary-50 dark:hover:bg-primary-950 transition-colors"
                       whileHover={{ scale: 1.05 }}
@@ -208,27 +228,29 @@ export default function Navbar() {
                   })}
                 </div>
 
-                {/* Cart */}
-                <Link href="/cart" onClick={() => setMobileMenuOpen(false)}>
-                  <div className="px-4 py-3 rounded-xl flex items-center justify-between hover:bg-primary-50 dark:hover:bg-primary-950 mb-4">
-                    <div className="flex items-center space-x-3">
-                      <ShoppingCart className="w-5 h-5" />
-                      <span className="font-medium">Cart</span>
+                {/* Cart - Only show for non-admin users */}
+                {!isAdmin && (
+                  <Link href="/cart" onClick={() => setMobileMenuOpen(false)}>
+                    <div className="px-4 py-3 rounded-xl flex items-center justify-between hover:bg-primary-50 dark:hover:bg-primary-950 mb-4">
+                      <div className="flex items-center space-x-3">
+                        <ShoppingCart className="w-5 h-5" />
+                        <span className="font-medium">Cart</span>
+                      </div>
+                      {totalItems > 0 && (
+                        <span className="bg-primary-600 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
+                          {totalItems}
+                        </span>
+                      )}
                     </div>
-                    {totalItems > 0 && (
-                      <span className="bg-primary-600 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
-                        {totalItems}
-                      </span>
-                    )}
-                  </div>
-                </Link>
+                  </Link>
+                )}
 
                 {/* User Actions */}
                 <div className="pt-4 border-t border-dark-200 dark:border-dark-800 space-y-2">
                   {session ? (
                     <>
                       <Link
-                        href="/dashboard"
+                        href={isAdmin ? "/admin" : "/dashboard"}
                         onClick={() => setMobileMenuOpen(false)}
                       >
                         <div className="px-4 py-3 rounded-xl flex items-center space-x-3 hover:bg-primary-50 dark:hover:bg-primary-950">
