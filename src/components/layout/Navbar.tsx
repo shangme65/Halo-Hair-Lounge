@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -35,22 +35,46 @@ const publicNavigation = [
 
 const adminNavigation = [
   { name: "Overview", href: "/admin", icon: LayoutDashboard, roles: ["ADMIN"] },
-  { name: "Services", href: "/admin/services", icon: Scissors, roles: ["ADMIN"] },
-  { name: "Products", href: "/admin/products", icon: ShoppingBag, roles: ["ADMIN"] },
-  { name: "Appointments", href: "/admin/appointments", icon: Calendar, roles: ["ADMIN", "STAFF"] },
+  {
+    name: "Services",
+    href: "/admin/services",
+    icon: Scissors,
+    roles: ["ADMIN"],
+  },
+  {
+    name: "Products",
+    href: "/admin/products",
+    icon: ShoppingBag,
+    roles: ["ADMIN"],
+  },
+  {
+    name: "Appointments",
+    href: "/admin/appointments",
+    icon: Calendar,
+    roles: ["ADMIN", "STAFF"],
+  },
   { name: "Users", href: "/admin/users", icon: Users, roles: ["ADMIN"] },
 ];
 
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
   const { data: session } = useSession();
   const totalItems = useCartStore((state) => state.getTotalItems());
 
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   // Determine which navigation to show based on user role
-  const isAdmin = session?.user?.role === "ADMIN" || session?.user?.role === "STAFF";
-  const navigation = isAdmin 
-    ? adminNavigation.filter(item => item.roles.includes(session?.user?.role || ""))
+  const isAdmin =
+    mounted &&
+    (session?.user?.role === "ADMIN" || session?.user?.role === "STAFF");
+  const navigation = isAdmin
+    ? adminNavigation.filter((item) =>
+        item.roles.includes(session?.user?.role || "")
+      )
     : publicNavigation;
 
   return (
@@ -116,7 +140,7 @@ export default function Navbar() {
             {/* Right Actions */}
             <div className="hidden lg:flex items-center space-x-4">
               {/* Show cart only for non-admin users */}
-              {!isAdmin && (
+              {mounted && !isAdmin && (
                 <Link href="/cart">
                   <motion.div
                     className="p-2 rounded-xl hover:bg-primary-50 dark:hover:bg-primary-950 transition-colors relative"
@@ -133,7 +157,7 @@ export default function Navbar() {
                 </Link>
               )}
 
-              {session ? (
+              {mounted && session ? (
                 <div className="flex items-center space-x-3">
                   <Link href={isAdmin ? "/admin" : "/dashboard"}>
                     <motion.div
@@ -148,11 +172,11 @@ export default function Navbar() {
                     Sign Out
                   </Button>
                 </div>
-              ) : (
+              ) : mounted ? (
                 <Link href="/auth/signin">
                   <Button size="sm">Sign In</Button>
                 </Link>
-              )}
+              ) : null}
             </div>
             {/* Mobile Menu Button */}
             <button
@@ -229,7 +253,7 @@ export default function Navbar() {
                 </div>
 
                 {/* Cart - Only show for non-admin users */}
-                {!isAdmin && (
+                {mounted && !isAdmin && (
                   <Link href="/cart" onClick={() => setMobileMenuOpen(false)}>
                     <div className="px-4 py-3 rounded-xl flex items-center justify-between hover:bg-primary-50 dark:hover:bg-primary-950 mb-4">
                       <div className="flex items-center space-x-3">
@@ -247,7 +271,7 @@ export default function Navbar() {
 
                 {/* User Actions */}
                 <div className="pt-4 border-t border-dark-200 dark:border-dark-800 space-y-2">
-                  {session ? (
+                  {mounted && session ? (
                     <>
                       <Link
                         href={isAdmin ? "/admin" : "/dashboard"}
@@ -271,14 +295,14 @@ export default function Navbar() {
                         Sign Out
                       </Button>
                     </>
-                  ) : (
+                  ) : mounted ? (
                     <Link
                       href="/auth/signin"
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       <Button className="w-full">Sign In</Button>
                     </Link>
-                  )}
+                  ) : null}
                 </div>
               </div>
             </motion.div>
