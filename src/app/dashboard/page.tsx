@@ -68,9 +68,14 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (status === "authenticated") {
+      // Redirect admins and staff to admin panel
+      if (session?.user?.role === "ADMIN" || session?.user?.role === "STAFF") {
+        redirect("/admin");
+        return;
+      }
       fetchAppointments();
     }
-  }, [status]);
+  }, [status, session]);
 
   if (status === "unauthenticated") {
     redirect("/auth/signin");
