@@ -3,15 +3,13 @@
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import {
   Plus,
   Search,
   Edit2,
   Trash2,
-  X,
   Loader2,
-  Check,
   Image as ImageIcon,
 } from "lucide-react";
 import AdminSidebar from "@/components/admin/AdminSidebar";
@@ -37,17 +35,6 @@ export default function AdminServicesPage() {
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const [showModal, setShowModal] = useState(false);
-  const [editingService, setEditingService] = useState<Service | null>(null);
-  const [formData, setFormData] = useState({
-    name: "",
-    description: "",
-    price: "",
-    duration: "",
-    category: "HAIRCUT",
-    image: "",
-    isActive: true,
-  });
 
   useEffect(() => {
     if (session && session.user.role !== "ADMIN") {
@@ -69,52 +56,8 @@ export default function AdminServicesPage() {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-
-    try {
-      const url = editingService
-        ? `/api/admin/services/${editingService.id}`
-        : "/api/admin/services";
-
-      const method = editingService ? "PUT" : "POST";
-
-      const res = await fetch(url, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...formData,
-          price: parseFloat(formData.price),
-          duration: parseInt(formData.duration),
-        }),
-      });
-
-      if (!res.ok) throw new Error("Failed to save service");
-
-      toast.success(editingService ? "Service updated!" : "Service created!");
-      setShowModal(false);
-      resetForm();
-      fetchServices();
-    } catch (error) {
-      toast.error("Failed to save service");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleEdit = (service: Service) => {
-    setEditingService(service);
-    setFormData({
-      name: service.name,
-      description: service.description,
-      price: service.price.toString(),
-      duration: service.duration.toString(),
-      category: service.category,
-      image: service.image,
-      isActive: service.isActive,
-    });
-    setShowModal(true);
+    router.push(`/admin/services/${service.id}/edit`);
   };
 
   const handleDelete = async (id: string) => {
@@ -151,19 +94,6 @@ export default function AdminServicesPage() {
     }
   };
 
-  const resetForm = () => {
-    setEditingService(null);
-    setFormData({
-      name: "",
-      description: "",
-      price: "",
-      duration: "",
-      category: "HAIRCUT",
-      image: "",
-      isActive: true,
-    });
-  };
-
   const filteredServices = services.filter((service) =>
     service.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -188,10 +118,7 @@ export default function AdminServicesPage() {
               </p>
             </div>
             <Button
-              onClick={() => {
-                resetForm();
-                setShowModal(true);
-              }}
+              onClick={() => router.push("/admin/services/new")}
               className="flex items-center gap-2"
             >
               <Plus size={20} />
@@ -322,171 +249,6 @@ export default function AdminServicesPage() {
           </Card>
         </motion.div>
       </div>
-
-      {/* Add/Edit Modal */}
-      <AnimatePresence>
-        {showModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-white dark:bg-dark-800 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
-            >
-              <div className="p-6 border-b border-dark-200 dark:border-dark-700 flex justify-between items-center sticky top-0 bg-white dark:bg-dark-800 z-10">
-                <h2 className="text-2xl font-bold text-dark-900 dark:text-white">
-                  {editingService ? "Edit Service" : "Add New Service"}
-                </h2>
-                <button
-                  onClick={() => setShowModal(false)}
-                  className="p-2 hover:bg-dark-100 dark:hover:bg-dark-700 rounded-lg transition-colors"
-                >
-                  <X size={20} />
-                </button>
-              </div>
-
-              <form onSubmit={handleSubmit} className="p-6 space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
-                    Service Name *
-                  </label>
-                  <Input
-                    type="text"
-                    value={formData.name}
-                    onChange={(e) =>
-                      setFormData({ ...formData, name: e.target.value })
-                    }
-                    placeholder="e.g., Women's Haircut"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
-                    Description *
-                  </label>
-                  <textarea
-                    value={formData.description}
-                    onChange={(e) =>
-                      setFormData({ ...formData, description: e.target.value })
-                    }
-                    placeholder="Describe the service..."
-                    rows={3}
-                    required
-                    className="w-full px-4 py-2 bg-dark-50 dark:bg-dark-700 border border-dark-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
-                      Price ($) *
-                    </label>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      value={formData.price}
-                      onChange={(e) =>
-                        setFormData({ ...formData, price: e.target.value })
-                      }
-                      placeholder="0.00"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
-                      Duration (minutes) *
-                    </label>
-                    <Input
-                      type="number"
-                      value={formData.duration}
-                      onChange={(e) =>
-                        setFormData({ ...formData, duration: e.target.value })
-                      }
-                      placeholder="60"
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
-                    Category *
-                  </label>
-                  <select
-                    value={formData.category}
-                    onChange={(e) =>
-                      setFormData({ ...formData, category: e.target.value })
-                    }
-                    className="w-full px-4 py-2 bg-dark-50 dark:bg-dark-700 border border-dark-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                    required
-                  >
-                    <option value="HAIRCUT">Haircut</option>
-                    <option value="COLORING">Coloring</option>
-                    <option value="TREATMENT">Treatment</option>
-                    <option value="STYLING">Styling</option>
-                    <option value="EXTENSION">Extension</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
-                    Image URL
-                  </label>
-                  <Input
-                    type="url"
-                    value={formData.image}
-                    onChange={(e) =>
-                      setFormData({ ...formData, image: e.target.value })
-                    }
-                    placeholder="https://..."
-                  />
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <input
-                    type="checkbox"
-                    id="isActive"
-                    checked={formData.isActive}
-                    onChange={(e) =>
-                      setFormData({ ...formData, isActive: e.target.checked })
-                    }
-                    className="w-4 h-4 text-primary-600 rounded focus:ring-2 focus:ring-primary-500"
-                  />
-                  <label
-                    htmlFor="isActive"
-                    className="text-sm font-medium text-dark-700 dark:text-dark-300"
-                  >
-                    Service is active
-                  </label>
-                </div>
-
-                <div className="flex gap-3 pt-4">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setShowModal(false)}
-                    className="flex-1"
-                  >
-                    Cancel
-                  </Button>
-                  <Button type="submit" disabled={loading} className="flex-1">
-                    {loading ? (
-                      <Loader2 className="w-5 h-5 animate-spin" />
-                    ) : (
-                      <span className="flex items-center gap-2">
-                        <Check size={20} />
-                        {editingService ? "Update Service" : "Create Service"}
-                      </span>
-                    )}
-                  </Button>
-                </div>
-              </form>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
     </div>
   );
 }
