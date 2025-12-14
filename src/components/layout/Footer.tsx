@@ -22,13 +22,11 @@ const footerLinks = {
     { name: "About Us", href: "/about" },
     { name: "Contact", href: "/contact" },
     { name: "Careers", href: "/careers" },
-    { name: "Blog", href: "/blog" },
   ],
   Support: [
     { name: "FAQ", href: "/faq" },
     { name: "Privacy Policy", href: "/privacy" },
     { name: "Terms of Service", href: "/terms" },
-    { name: "Returns", href: "/returns" },
   ],
 };
 
