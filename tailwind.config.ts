@@ -51,8 +51,8 @@ const config: Config = {
         },
       },
       fontFamily: {
-        sans: ["var(--font-roboto)", "system-ui", "sans-serif"],
-        display: ["var(--font-playfair)", "serif"],
+        sans: ["var(--font-roboto)", "Arial", "system-ui", "sans-serif"],
+        display: ["var(--font-roboto)", "Arial", "system-ui", "sans-serif"],
       },
       animation: {
         float: "float 6s ease-in-out infinite",

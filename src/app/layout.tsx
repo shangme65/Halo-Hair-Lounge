@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Roboto, Playfair_Display } from "next/font/google";
+import { Roboto } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -12,12 +12,15 @@ const roboto = Roboto({
   weight: ["300", "400", "500", "700"],
   variable: "--font-roboto",
   display: "swap",
+  fallback: ["Arial", "system-ui", "sans-serif"],
 });
 
-const playfair = Playfair_Display({
+const playfair = Roboto({
   subsets: ["latin"],
+  weight: ["300", "400", "500", "700"],
   variable: "--font-playfair",
   display: "swap",
+  fallback: ["Arial", "system-ui", "sans-serif"],
 });
 
 export const metadata: Metadata = {
