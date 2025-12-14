@@ -2,8 +2,18 @@
 
 import { useState, useEffect, FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
-import { Shield, User, Mail, Lock, Phone, Key } from "lucide-react";
+import { useSession, signOut } from "next-auth/react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Shield,
+  User,
+  Mail,
+  Lock,
+  Phone,
+  Key,
+  Trash2,
+  AlertTriangle,
+} from "lucide-react";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Card from "@/components/ui/Card";
@@ -23,6 +33,9 @@ export default function AdminSetupPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [alreadyInitialized, setAlreadyInitialized] = useState(false);
   const [checkingStatus, setCheckingStatus] = useState(true);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const { data: session } = useSession();
 
   // Check if admin already exists on component mount
   useEffect(() => {
@@ -46,6 +59,42 @@ export default function AdminSetupPage() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!session) {
+      toast.error("Please sign in first to delete your account");
+      router.push("/auth/signin");
+      return;
+    }
+
+    setIsDeleting(true);
+    try {
+      const response = await fetch("/api/halo-admin-api/account/delete-self", {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete account");
+      }
+
+      toast.success("Account deleted successfully. Logging out...");
+
+      // Clear cache
+      if ("caches" in window) {
+        const cacheNames = await caches.keys();
+        await Promise.all(cacheNames.map((name) => caches.delete(name)));
+      }
+
+      // Sign out and redirect
+      await signOut({ redirect: false });
+      router.push("/");
+      router.refresh();
+    } catch (error) {
+      toast.error("Failed to delete account");
+      setIsDeleting(false);
+      setShowDeleteModal(false);
+    }
   };
 
   const handleSubmit = async (e: FormEvent) => {
@@ -115,42 +164,117 @@ export default function AdminSetupPage() {
 
   if (alreadyInitialized) {
     return (
-      <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="max-w-md w-full text-center"
-        >
+      <>
+        <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
           <motion.div
-            className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-600 mb-4"
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ type: "spring", stiffness: 200 }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="max-w-md w-full text-center"
           >
-            <Shield className="w-8 h-8 text-white" />
-          </motion.div>
-          <h1 className="text-3xl font-display font-bold mb-2 text-dark-800 dark:text-dark-200">
-            Already Initialized
-          </h1>
-          <p className="text-dark-600 dark:text-dark-400 mb-8">
-            The admin account has already been set up. Please sign in to access
-            the admin portal.
-          </p>
-          <Button
-            onClick={() => router.push("/auth/signin")}
-            size="lg"
-            className="w-full"
-          >
-            Go to Sign In
-          </Button>
-          <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl">
-            <p className="text-xs text-blue-800 dark:text-blue-200">
-              <strong>Note:</strong> Additional admin accounts can be created
-              from within the admin portal by existing administrators.
+            <motion.div
+              className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-600 mb-4"
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring", stiffness: 200 }}
+            >
+              <Shield className="w-8 h-8 text-white" />
+            </motion.div>
+            <h1 className="text-3xl font-display font-bold mb-2 text-dark-800 dark:text-dark-200">
+              Already Initialized
+            </h1>
+            <p className="text-dark-600 dark:text-dark-400 mb-8">
+              The admin account has already been set up. Please sign in to
+              access the admin portal.
             </p>
-          </div>
-        </motion.div>
-      </div>
+            <div className="space-y-3">
+              <Button
+                onClick={() => router.push("/auth/signin")}
+                size="lg"
+                className="w-full"
+              >
+                Go to Sign In
+              </Button>
+              {session && session.user.role === "ADMIN" && (
+                <Button
+                  onClick={() => setShowDeleteModal(true)}
+                  size="lg"
+                  className="w-full bg-red-600 hover:bg-red-700 text-white"
+                >
+                  <Trash2 className="w-5 h-5 mr-2" />
+                  Delete My Admin Account
+                </Button>
+              )}
+            </div>
+            <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl">
+              <p className="text-xs text-blue-800 dark:text-blue-200">
+                <strong>Note:</strong> Additional admin accounts can be created
+                from within the admin portal by existing administrators.
+              </p>
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Delete Account Confirmation Modal */}
+        <AnimatePresence>
+          {showDeleteModal && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+              onClick={() => !isDeleting && setShowDeleteModal(false)}
+            >
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                onClick={(e) => e.stopPropagation()}
+                className="bg-white dark:bg-dark-800 rounded-2xl shadow-2xl max-w-md w-full p-6"
+              >
+                <div className="flex items-center justify-center w-16 h-16 rounded-full bg-red-100 dark:bg-red-900/30 mx-auto mb-4">
+                  <AlertTriangle className="w-8 h-8 text-red-600" />
+                </div>
+
+                <h2 className="text-2xl font-bold text-dark-900 dark:text-white text-center mb-2">
+                  Delete Your Account?
+                </h2>
+
+                <p className="text-dark-600 dark:text-dark-400 text-center mb-6">
+                  This action is permanent and cannot be undone. Your account
+                  will be immediately deleted, cache cleared, and you will be
+                  logged out.
+                </p>
+
+                <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-xl p-4 mb-6">
+                  <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                    <strong>Warning:</strong> After deletion, you can create a
+                    new admin account using this page with the secret key.
+                  </p>
+                </div>
+
+                <div className="flex gap-3">
+                  <Button
+                    onClick={() => setShowDeleteModal(false)}
+                    variant="secondary"
+                    className="flex-1"
+                    disabled={isDeleting}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleDeleteAccount}
+                    className="flex-1 bg-red-600 hover:bg-red-700 text-white"
+                    isLoading={isDeleting}
+                    disabled={isDeleting}
+                  >
+                    {isDeleting ? "Deleting..." : "Delete Account"}
+                  </Button>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </>
     );
   }
 
