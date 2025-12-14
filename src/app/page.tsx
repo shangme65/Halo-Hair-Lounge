@@ -31,13 +31,6 @@ const heroSlides = [
     cta: { text: "View Services", href: "/services" },
   },
   {
-    title: "Shop Premium Products",
-    subtitle: "Professional Quality At Home",
-    description: "Exclusive hair care products for every need",
-    colorScheme: "teal" as const,
-    cta: { text: "Shop Now", href: "/store" },
-  },
-  {
     title: "Your Hair Journey",
     subtitle: "Starts Here Today",
     description: "Personalized consultations and expert care",

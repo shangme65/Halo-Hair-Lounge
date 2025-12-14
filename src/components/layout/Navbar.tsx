@@ -8,27 +8,23 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Menu,
   X,
-  ShoppingCart,
   User,
   Calendar,
   Home,
   Info,
   Scissors,
   Mail,
-  Store,
   LayoutDashboard,
   ShoppingBag,
   Users,
 } from "lucide-react";
 import { useSession, signOut } from "next-auth/react";
 import Button from "@/components/ui/Button";
-import { useCartStore } from "@/lib/store/cart";
 
 const publicNavigation = [
   { name: "Home", href: "/", icon: Home },
   { name: "About", href: "/about", icon: Info },
   { name: "Services", href: "/services", icon: Scissors },
-  { name: "Store", href: "/store", icon: Store },
   { name: "Book Now", href: "/book", icon: Calendar },
   { name: "Contact", href: "/contact", icon: Mail },
 ];
@@ -71,7 +67,6 @@ export default function Navbar() {
   const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
   const { data: session } = useSession();
-  const totalItems = useCartStore((state) => state.getTotalItems());
 
   useEffect(() => {
     setMounted(true);
@@ -149,24 +144,6 @@ export default function Navbar() {
             </div>
             {/* Right Actions */}
             <div className="hidden lg:flex items-center space-x-4">
-              {/* Show cart only for non-admin users */}
-              {mounted && !isAdmin && (
-                <Link href="/cart">
-                  <motion.div
-                    className="p-2 rounded-xl hover:bg-primary-50 dark:hover:bg-primary-950 transition-colors relative"
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                  >
-                    <ShoppingCart className="w-6 h-6" />
-                    {totalItems > 0 && (
-                      <span className="absolute -top-1 -right-1 bg-primary-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-                        {totalItems}
-                      </span>
-                    )}
-                  </motion.div>
-                </Link>
-              )}
-
               {/* Admin user actions - only show if logged in as admin */}
               {mounted && session && isAdmin && (
                 <div className="flex items-center space-x-3">
@@ -258,23 +235,6 @@ export default function Navbar() {
                     );
                   })}
                 </div>
-
-                {/* Cart - Only show for non-admin users */}
-                {mounted && !isAdmin && (
-                  <Link href="/cart" onClick={() => setMobileMenuOpen(false)}>
-                    <div className="px-4 py-3 rounded-xl flex items-center justify-between hover:bg-primary-50 dark:hover:bg-primary-950 mb-4">
-                      <div className="flex items-center space-x-3">
-                        <ShoppingCart className="w-5 h-5" />
-                        <span className="font-medium">Cart</span>
-                      </div>
-                      {totalItems > 0 && (
-                        <span className="bg-primary-600 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
-                          {totalItems}
-                        </span>
-                      )}
-                    </div>
-                  </Link>
-                )}
 
                 {/* Admin User Actions - only show if logged in as admin */}
                 {mounted && session && isAdmin && (
