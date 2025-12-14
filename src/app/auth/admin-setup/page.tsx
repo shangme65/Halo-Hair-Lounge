@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useSession, signOut } from "next-auth/react";
+import { useSession, signOut, signIn } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Shield, Trash2, AlertTriangle } from "lucide-react";
 import Button from "@/components/ui/Button";
@@ -91,12 +91,25 @@ export default function AdminSetupPage() {
         throw new Error(data.error || "Failed to create admin account");
       }
 
-      toast.success(
-        "Admin account created successfully! Redirecting to sign in..."
-      );
-      setTimeout(() => {
-        router.push("/auth/signin");
-      }, 2000);
+      toast.success("Admin account created successfully! Logging in...");
+
+      // Auto-login with credentials returned from API
+      const { email, password } = data.credentials;
+
+      const result = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+      });
+
+      if (result?.error) {
+        toast.error("Login failed. Please try signing in manually.");
+      } else {
+        toast.success("Logged in successfully! Redirecting to admin portal...");
+        setTimeout(() => {
+          router.push("/halo-admin-portal-2024");
+        }, 1000);
+      }
     } catch (error: any) {
       toast.error(error.message || "Failed to create admin account");
     } finally {
@@ -291,19 +304,18 @@ export default function AdminSetupPage() {
                 <Shield className="w-5 h-5 mr-2" />
                 {isLoading ? "Initializing..." : "Initialize Admin Account"}
               </Button>
-            </div>
 
-            {/* Sign In Link */}
-            <div className="text-center pt-4 border-t border-dark-200 dark:border-dark-700">
-              <p className="text-sm text-dark-600 dark:text-dark-400">
-                Already have an account?{" "}
-                <a
-                  href="/auth/signin"
-                  className="font-semibold text-primary-600 hover:text-primary-700"
+              {/* Delete Account Button - Only show if logged in as admin */}
+              {session && session.user.role === "ADMIN" && (
+                <Button
+                  onClick={() => setShowDeleteModal(true)}
+                  size="lg"
+                  className="w-full bg-red-600 hover:bg-red-700 text-white mt-3"
                 >
-                  Sign In
-                </a>
-              </p>
+                  <Trash2 className="w-5 h-5 mr-2" />
+                  Delete My Admin Account
+                </Button>
+              )}
             </div>
           </div>
         </Card>
@@ -323,6 +335,67 @@ export default function AdminSetupPage() {
           </p>
         </motion.div>
       </motion.div>
+
+      {/* Delete Account Confirmation Modal */}
+      <AnimatePresence>
+        {showDeleteModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            onClick={() => !isDeleting && setShowDeleteModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white dark:bg-dark-800 rounded-2xl shadow-2xl max-w-md w-full p-6"
+            >
+              <div className="flex items-center justify-center w-16 h-16 rounded-full bg-red-100 dark:bg-red-900/30 mx-auto mb-4">
+                <AlertTriangle className="w-8 h-8 text-red-600" />
+              </div>
+
+              <h2 className="text-2xl font-bold text-dark-900 dark:text-white text-center mb-2">
+                Delete Your Account?
+              </h2>
+
+              <p className="text-dark-600 dark:text-dark-400 text-center mb-6">
+                This action is permanent and cannot be undone. Your account will
+                be immediately deleted, cache cleared, and you will be logged
+                out.
+              </p>
+
+              <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-xl p-4 mb-6">
+                <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                  <strong>Warning:</strong> After deletion, you can create a new
+                  admin account using this page.
+                </p>
+              </div>
+
+              <div className="flex gap-3">
+                <Button
+                  onClick={() => setShowDeleteModal(false)}
+                  variant="secondary"
+                  className="flex-1"
+                  disabled={isDeleting}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleDeleteAccount}
+                  className="flex-1 bg-red-600 hover:bg-red-700 text-white"
+                  isLoading={isDeleting}
+                  disabled={isDeleting}
+                >
+                  {isDeleting ? "Deleting..." : "Delete Account"}
+                </Button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

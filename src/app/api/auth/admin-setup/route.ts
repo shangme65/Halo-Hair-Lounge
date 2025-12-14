@@ -72,6 +72,10 @@ export async function POST(req: NextRequest) {
       {
         message: "Admin account created successfully",
         user,
+        credentials: {
+          email: adminEmail,
+          password: adminPassword, // Return plain password for auto-login only
+        },
       },
       { status: 201 }
     );
