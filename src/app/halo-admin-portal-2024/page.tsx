@@ -52,7 +52,7 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     if (session && session.user.role !== "ADMIN") {
-      router.push("/admin/appointments");
+      router.push("/halo-admin-portal-2024/appointments");
     }
   }, [session, router]);
 
@@ -129,7 +129,7 @@ export default function AdminDashboard() {
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <a
-                  href="/admin/services"
+                  href="/halo-admin-portal-2024/services"
                   className="p-6 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl text-white hover:shadow-lg transition-all group"
                 >
                   <Scissors className="w-8 h-8 mb-3 group-hover:scale-110 transition-transform" />
@@ -140,7 +140,7 @@ export default function AdminDashboard() {
                 </a>
 
                 <a
-                  href="/admin/products"
+                  href="/halo-admin-portal-2024/products"
                   className="p-6 bg-gradient-to-br from-secondary-500 to-secondary-600 rounded-xl text-white hover:shadow-lg transition-all group"
                 >
                   <ShoppingBag className="w-8 h-8 mb-3 group-hover:scale-110 transition-transform" />
@@ -151,7 +151,7 @@ export default function AdminDashboard() {
                 </a>
 
                 <a
-                  href="/admin/appointments"
+                  href="/halo-admin-portal-2024/appointments"
                   className="p-6 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl text-white hover:shadow-lg transition-all group"
                 >
                   <Calendar className="w-8 h-8 mb-3 group-hover:scale-110 transition-transform" />

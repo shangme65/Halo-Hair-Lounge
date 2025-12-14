@@ -1,10 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Calendar as CalendarIcon, Clock, Scissors } from "lucide-react";
+import { Calendar as CalendarIcon, Clock, Scissors, User } from "lucide-react";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
@@ -42,7 +41,6 @@ const timeSlots = [
 ];
 
 export default function BookingPage() {
-  const { data: session } = useSession();
   const router = useRouter();
 
   const [services, setServices] = useState<Service[]>([]);
@@ -50,6 +48,9 @@ export default function BookingPage() {
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
   const [notes, setNotes] = useState("");
+  const [customerName, setCustomerName] = useState("");
+  const [customerEmail, setCustomerEmail] = useState("");
+  const [customerPhone, setCustomerPhone] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingServices, setIsLoadingServices] = useState(true);
 
@@ -72,14 +73,15 @@ export default function BookingPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!session) {
-      toast.error("Please sign in to book an appointment");
-      router.push("/auth/signin?from=/book");
-      return;
-    }
-
-    if (!selectedService || !selectedDate || !selectedTime) {
-      toast.error("Please fill in all fields");
+    if (
+      !customerName ||
+      !customerEmail ||
+      !customerPhone ||
+      !selectedService ||
+      !selectedDate ||
+      !selectedTime
+    ) {
+      toast.error("Please fill in all required fields");
       return;
     }
 
@@ -94,6 +96,9 @@ export default function BookingPage() {
           date: selectedDate,
           startTime: selectedTime,
           notes,
+          customerName,
+          customerEmail,
+          customerPhone,
         }),
       });
 
@@ -103,8 +108,17 @@ export default function BookingPage() {
         throw new Error(data.error || "Failed to book appointment");
       }
 
-      toast.success("Appointment booked successfully!");
-      router.push("/dashboard/appointments");
+      toast.success(
+        "Appointment booked successfully! We'll contact you to confirm."
+      );
+      // Reset form
+      setSelectedService("");
+      setSelectedDate("");
+      setSelectedTime("");
+      setNotes("");
+      setCustomerName("");
+      setCustomerEmail("");
+      setCustomerPhone("");
     } catch (error: any) {
       toast.error(error.message || "Failed to book appointment");
     } finally {
@@ -132,6 +146,35 @@ export default function BookingPage() {
 
         <Card>
           <form onSubmit={handleSubmit} className="space-y-8">
+            {/* Customer Information */}
+            <div className="space-y-4">
+              <h2 className="text-xl font-semibold flex items-center">
+                <User className="w-5 h-5 mr-2 text-primary-600" />
+                Your Information
+              </h2>
+              <Input
+                type="text"
+                placeholder="Full Name *"
+                value={customerName}
+                onChange={(e) => setCustomerName(e.target.value)}
+                required
+              />
+              <Input
+                type="email"
+                placeholder="Email Address *"
+                value={customerEmail}
+                onChange={(e) => setCustomerEmail(e.target.value)}
+                required
+              />
+              <Input
+                type="tel"
+                placeholder="Phone Number *"
+                value={customerPhone}
+                onChange={(e) => setCustomerPhone(e.target.value)}
+                required
+              />
+            </div>
+
             {/* Service Selection */}
             <div>
               <label className="block text-lg font-semibold mb-4 flex items-center">
@@ -300,9 +343,16 @@ export default function BookingPage() {
               size="lg"
               className="w-full"
               isLoading={isLoading}
-              disabled={!selectedService || !selectedDate || !selectedTime}
+              disabled={
+                !customerName ||
+                !customerEmail ||
+                !customerPhone ||
+                !selectedService ||
+                !selectedDate ||
+                !selectedTime
+              }
             >
-              {session ? "Confirm Booking" : "Sign In to Book"}
+              Confirm Booking
             </Button>
           </form>
         </Card>

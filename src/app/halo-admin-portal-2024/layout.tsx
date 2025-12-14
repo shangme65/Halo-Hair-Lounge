@@ -11,12 +11,12 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     if (status === "loading") return;
 
     if (!session) {
-      redirect("/auth/signin");
+      redirect("/auth/signin?from=/halo-admin-portal-2024");
     }
 
     // Allow both ADMIN and STAFF to access admin panel
     if (session?.user?.role !== "ADMIN" && session?.user?.role !== "STAFF") {
-      redirect("/dashboard");
+      redirect("/");
     }
   }, [session, status]);
 

@@ -64,7 +64,7 @@ export default function AdminAppointmentsPage() {
 
   const fetchAppointments = async () => {
     try {
-      const res = await fetch("/api/admin/appointments");
+      const res = await fetch("/api/halo-admin-api/appointments");
       const data = await res.json();
       setAppointments(data);
     } catch (error) {
@@ -76,7 +76,7 @@ export default function AdminAppointmentsPage() {
 
   const updateStatus = async (id: string, status: string) => {
     try {
-      const res = await fetch(`/api/admin/appointments/${id}`, {
+      const res = await fetch(`/api/halo-admin-api/appointments/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status }),

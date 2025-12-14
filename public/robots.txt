@@ -1,8 +1,7 @@
 User-agent: *
 Allow: /
 Disallow: /api/
-Disallow: /dashboard/
-Disallow: /admin/
+Disallow: /halo-admin-portal-2024/
 Disallow: /auth/
 
 Sitemap: https://www.halohairlounge.com/sitemap.xml

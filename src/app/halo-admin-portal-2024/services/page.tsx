@@ -38,7 +38,7 @@ export default function AdminServicesPage() {
 
   useEffect(() => {
     if (session && session.user.role !== "ADMIN") {
-      router.push("/admin/appointments");
+      router.push("/halo-admin-portal-2024/appointments");
       return;
     }
     fetchServices();
@@ -57,14 +57,14 @@ export default function AdminServicesPage() {
   };
 
   const handleEdit = (service: Service) => {
-    router.push(`/admin/services/${service.id}/edit`);
+    router.push(`/halo-admin-portal-2024/services/${service.id}/edit`);
   };
 
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this service?")) return;
 
     try {
-      const res = await fetch(`/api/admin/services/${id}`, {
+      const res = await fetch(`/api/halo-admin-api/services/${id}`, {
         method: "DELETE",
       });
 
@@ -79,7 +79,7 @@ export default function AdminServicesPage() {
 
   const toggleStatus = async (service: Service) => {
     try {
-      const res = await fetch(`/api/admin/services/${service.id}`, {
+      const res = await fetch(`/api/halo-admin-api/services/${service.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...service, isActive: !service.isActive }),
@@ -118,7 +118,9 @@ export default function AdminServicesPage() {
               </p>
             </div>
             <Button
-              onClick={() => router.push("/admin/services/new")}
+              onClick={() =>
+                router.push("/halo-admin-portal-2024/services/new")
+              }
               className="flex items-center gap-2"
             >
               <Plus size={20} />

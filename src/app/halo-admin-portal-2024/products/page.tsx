@@ -61,7 +61,7 @@ export default function AdminProductsPage() {
 
   useEffect(() => {
     if (session && session.user.role !== "ADMIN") {
-      router.push("/admin/appointments");
+      router.push("/halo-admin-portal-2024/appointments");
       return;
     }
     fetchProducts();
@@ -69,7 +69,7 @@ export default function AdminProductsPage() {
 
   const fetchProducts = async () => {
     try {
-      const res = await fetch("/api/admin/products");
+      const res = await fetch("/api/halo-admin-api/products");
       const data = await res.json();
       setProducts(data);
     } catch (error) {
@@ -85,8 +85,8 @@ export default function AdminProductsPage() {
 
     try {
       const url = editingProduct
-        ? `/api/admin/products/${editingProduct.id}`
-        : "/api/admin/products";
+        ? `/api/halo-admin-api/products/${editingProduct.id}`
+        : "/api/halo-admin-api/products";
 
       const method = editingProduct ? "PUT" : "POST";
 
@@ -153,7 +153,7 @@ export default function AdminProductsPage() {
     if (!confirm("Are you sure you want to delete this product?")) return;
 
     try {
-      const res = await fetch(`/api/admin/products/${id}`, {
+      const res = await fetch(`/api/halo-admin-api/products/${id}`, {
         method: "DELETE",
       });
 
@@ -171,7 +171,7 @@ export default function AdminProductsPage() {
     field: "isActive" | "isFeatured"
   ) => {
     try {
-      const res = await fetch(`/api/admin/products/${product.id}`, {
+      const res = await fetch(`/api/halo-admin-api/products/${product.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...product, [field]: !product[field] }),

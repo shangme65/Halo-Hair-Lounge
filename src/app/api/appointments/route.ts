@@ -9,6 +9,9 @@ const appointmentSchema = z.object({
   date: z.string(),
   startTime: z.string(),
   notes: z.string().optional(),
+  customerName: z.string().optional(),
+  customerEmail: z.string().email().optional(),
+  customerPhone: z.string().optional(),
 });
 
 export async function GET(req: NextRequest) {
@@ -40,13 +43,22 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
     const body = await req.json();
     const validatedData = appointmentSchema.parse(body);
+
+    // For public bookings, require customer information
+    if (!session?.user) {
+      if (
+        !validatedData.customerName ||
+        !validatedData.customerEmail ||
+        !validatedData.customerPhone
+      ) {
+        return NextResponse.json(
+          { error: "Customer information is required for bookings" },
+          { status: 400 }
+        );
+      }
+    }
 
     // Get service to calculate end time
     const service = await prisma.service.findUnique({
@@ -66,16 +78,28 @@ export async function POST(req: NextRequest) {
       endMins
     ).padStart(2, "0")}`;
 
+    // Create appointment data - if there's no session, store customer info in notes
+    const appointmentData: any = {
+      serviceId: validatedData.serviceId,
+      date: new Date(validatedData.date),
+      startTime: validatedData.startTime,
+      endTime: endTime,
+      status: "PENDING",
+    };
+
+    if (session?.user) {
+      appointmentData.userId = session.user.id;
+      appointmentData.notes = validatedData.notes;
+    } else {
+      // For guest bookings, store customer info in notes
+      const customerInfo = `Guest Booking\nName: ${validatedData.customerName}\nEmail: ${validatedData.customerEmail}\nPhone: ${validatedData.customerPhone}`;
+      appointmentData.notes = validatedData.notes
+        ? `${customerInfo}\n\nNotes: ${validatedData.notes}`
+        : customerInfo;
+    }
+
     const appointment = await prisma.appointment.create({
-      data: {
-        userId: session.user.id,
-        serviceId: validatedData.serviceId,
-        date: new Date(validatedData.date),
-        startTime: validatedData.startTime,
-        endTime: endTime,
-        notes: validatedData.notes,
-        status: "PENDING",
-      },
+      data: appointmentData,
       include: {
         service: true,
       },

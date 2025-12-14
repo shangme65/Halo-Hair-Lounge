@@ -61,7 +61,7 @@ export default function UsersManagement() {
 
   const fetchUsers = async () => {
     try {
-      const response = await fetch("/api/admin/users");
+      const response = await fetch("/api/halo-admin-api/users");
       if (response.ok) {
         const data = await response.json();
         setUsers(data);
@@ -106,11 +106,14 @@ export default function UsersManagement() {
     if (!selectedUser) return;
 
     try {
-      const response = await fetch(`/api/admin/users/${selectedUser.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ role: newRole }),
-      });
+      const response = await fetch(
+        `/api/halo-admin-api/users/${selectedUser.id}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ role: newRole }),
+        }
+      );
 
       if (response.ok) {
         toast.success(`User role updated to ${newRole}`);
@@ -137,7 +140,7 @@ export default function UsersManagement() {
     }
 
     try {
-      const response = await fetch(`/api/admin/users/${userId}`, {
+      const response = await fetch(`/api/halo-admin-api/users/${userId}`, {
         method: "DELETE",
       });
 

@@ -14,7 +14,7 @@ import toast from "react-hot-toast";
 function SignInForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams?.get("from") || "/dashboard";
+  const callbackUrl = searchParams?.get("from") || "/halo-admin-portal-2024";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

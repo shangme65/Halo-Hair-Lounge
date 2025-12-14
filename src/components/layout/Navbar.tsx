@@ -34,26 +34,36 @@ const publicNavigation = [
 ];
 
 const adminNavigation = [
-  { name: "Overview", href: "/admin", icon: LayoutDashboard, roles: ["ADMIN"] },
+  {
+    name: "Overview",
+    href: "/halo-admin-portal-2024",
+    icon: LayoutDashboard,
+    roles: ["ADMIN"],
+  },
   {
     name: "Services",
-    href: "/admin/services",
+    href: "/halo-admin-portal-2024/services",
     icon: Scissors,
     roles: ["ADMIN"],
   },
   {
     name: "Products",
-    href: "/admin/products",
+    href: "/halo-admin-portal-2024/products",
     icon: ShoppingBag,
     roles: ["ADMIN"],
   },
   {
     name: "Appointments",
-    href: "/admin/appointments",
+    href: "/halo-admin-portal-2024/appointments",
     icon: Calendar,
     roles: ["ADMIN", "STAFF"],
   },
-  { name: "Users", href: "/admin/users", icon: Users, roles: ["ADMIN"] },
+  {
+    name: "Users",
+    href: "/halo-admin-portal-2024/users",
+    icon: Users,
+    roles: ["ADMIN"],
+  },
 ];
 
 export default function Navbar() {
@@ -157,9 +167,10 @@ export default function Navbar() {
                 </Link>
               )}
 
-              {mounted && session ? (
+              {/* Admin user actions - only show if logged in as admin */}
+              {mounted && session && isAdmin && (
                 <div className="flex items-center space-x-3">
-                  <Link href={isAdmin ? "/admin" : "/dashboard"}>
+                  <Link href="/halo-admin-portal-2024">
                     <motion.div
                       className="flex items-center space-x-2 px-4 py-2 rounded-xl hover:bg-primary-50 dark:hover:bg-primary-950 transition-colors"
                       whileHover={{ scale: 1.05 }}
@@ -172,11 +183,7 @@ export default function Navbar() {
                     Sign Out
                   </Button>
                 </div>
-              ) : mounted ? (
-                <Link href="/auth/signin">
-                  <Button size="sm">Sign In</Button>
-                </Link>
-              ) : null}
+              )}
             </div>
             {/* Mobile Menu Button */}
             <button
@@ -269,41 +276,30 @@ export default function Navbar() {
                   </Link>
                 )}
 
-                {/* User Actions */}
-                <div className="pt-4 border-t border-dark-200 dark:border-dark-800 space-y-2">
-                  {mounted && session ? (
-                    <>
-                      <Link
-                        href={isAdmin ? "/admin" : "/dashboard"}
-                        onClick={() => setMobileMenuOpen(false)}
-                      >
-                        <div className="px-4 py-3 rounded-xl flex items-center space-x-3 hover:bg-primary-50 dark:hover:bg-primary-950">
-                          <User className="w-5 h-5" />
-                          <span className="font-medium">
-                            {session.user.name}
-                          </span>
-                        </div>
-                      </Link>
-                      <Button
-                        variant="outline"
-                        className="w-full"
-                        onClick={() => {
-                          signOut();
-                          setMobileMenuOpen(false);
-                        }}
-                      >
-                        Sign Out
-                      </Button>
-                    </>
-                  ) : mounted ? (
+                {/* Admin User Actions - only show if logged in as admin */}
+                {mounted && session && isAdmin && (
+                  <div className="pt-4 border-t border-dark-200 dark:border-dark-800 space-y-2">
                     <Link
-                      href="/auth/signin"
+                      href="/halo-admin-portal-2024"
                       onClick={() => setMobileMenuOpen(false)}
                     >
-                      <Button className="w-full">Sign In</Button>
+                      <div className="px-4 py-3 rounded-xl flex items-center space-x-3 hover:bg-primary-50 dark:hover:bg-primary-950">
+                        <User className="w-5 h-5" />
+                        <span className="font-medium">{session.user.name}</span>
+                      </div>
                     </Link>
-                  ) : null}
-                </div>
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => {
+                        signOut();
+                        setMobileMenuOpen(false);
+                      }}
+                    >
+                      Sign Out
+                    </Button>
+                  </div>
+                )}
               </div>
             </motion.div>
           </>

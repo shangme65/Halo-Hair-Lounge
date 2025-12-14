@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
 import { motion } from "framer-motion";
 import { CreditCard, MapPin, User, Mail, Phone } from "lucide-react";
 import Card from "@/components/ui/Card";
@@ -13,13 +12,12 @@ import toast from "react-hot-toast";
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { data: session } = useSession();
   const { items, getTotalPrice, clearCart } = useCartStore();
   const [isMounted, setIsMounted] = useState(false);
 
   const [formData, setFormData] = useState({
-    name: session?.user?.name || "",
-    email: session?.user?.email || "",
+    name: "",
+    email: "",
     phone: "",
     address: "",
     city: "",
@@ -53,20 +51,16 @@ export default function CheckoutPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!session) {
-      toast.error("Please sign in to complete your purchase");
-      router.push("/auth/signin?from=/checkout");
-      return;
-    }
-
     setIsProcessing(true);
 
     // Simulate payment processing
     await new Promise((resolve) => setTimeout(resolve, 2000));
 
-    toast.success("Order placed successfully!");
+    toast.success(
+      "Order placed successfully! We'll contact you to confirm your order."
+    );
     clearCart();
-    router.push("/dashboard");
+    router.push("/store");
     setIsProcessing(false);
   };
 

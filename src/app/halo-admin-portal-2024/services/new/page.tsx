@@ -40,7 +40,7 @@ export default function ServiceFormPage() {
 
   useEffect(() => {
     if (session && session.user.role !== "ADMIN") {
-      router.push("/admin/appointments");
+      router.push("/halo-admin-portal-2024/appointments");
       return;
     }
 
@@ -69,7 +69,7 @@ export default function ServiceFormPage() {
         setImagePreview(service.image);
       } else {
         toast.error("Service not found");
-        router.push("/admin/services");
+        router.push("/halo-admin-portal-2024/services");
       }
     } catch (error) {
       toast.error("Failed to load service");
@@ -141,8 +141,8 @@ export default function ServiceFormPage() {
       setLoading(true);
 
       const url = isEdit
-        ? `/api/admin/services/${params.id}`
-        : "/api/admin/services";
+        ? `/api/halo-admin-api/services/${params.id}`
+        : "/api/halo-admin-api/services";
 
       const method = isEdit ? "PUT" : "POST";
 
@@ -159,7 +159,7 @@ export default function ServiceFormPage() {
       if (!res.ok) throw new Error("Failed to save service");
 
       toast.success(isEdit ? "Service updated!" : "Service created!");
-      router.push("/admin/services");
+      router.push("/halo-admin-portal-2024/services");
     } catch (error) {
       toast.error("Failed to save service");
     } finally {
@@ -406,7 +406,9 @@ export default function ServiceFormPage() {
               <div className="flex gap-4 pt-6 border-t border-dark-800">
                 <Button
                   type="button"
-                  onClick={() => router.push("/admin/services")}
+                  onClick={() =>
+                    router.push("/halo-admin-portal-2024/services")
+                  }
                   className="flex-1 bg-dark-800 hover:bg-dark-700 text-white"
                   disabled={loading}
                 >
