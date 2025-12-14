@@ -8,9 +8,10 @@ import path from "path";
 // PUT - Update product
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
 
     if (!session || session.user?.role !== "ADMIN") {
@@ -33,7 +34,7 @@ export async function PUT(
     } = body;
 
     const product = await prisma.product.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         ...(name && { name }),
         ...(description && { description }),
@@ -64,9 +65,10 @@ export async function PUT(
 // DELETE - Delete product
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
 
     if (!session || session.user?.role !== "ADMIN") {
@@ -75,7 +77,7 @@ export async function DELETE(
 
     // Get the product to retrieve image paths
     const product = await prisma.product.findUnique({
-      where: { id: params.id },
+      where: { id },
     });
 
     if (!product) {
@@ -84,7 +86,7 @@ export async function DELETE(
 
     // Delete the product from database
     await prisma.product.delete({
-      where: { id: params.id },
+      where: { id },
     });
 
     // Delete all product image files if they exist and are local uploads

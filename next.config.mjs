@@ -1,7 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  swcMinify: true,
   images: {
     remotePatterns: [
       {
@@ -11,21 +10,24 @@ const nextConfig = {
     ],
     formats: ["image/avif", "image/webp"],
   },
-  webpack: (config, { isServer }) => {
-    // Handle GLSL shader files for Three.js
-    config.module.rules.push({
-      test: /\.(glsl|vs|fs|vert|frag)$/,
-      exclude: /node_modules/,
-      use: ["raw-loader", "glslify-loader"],
-    });
-
-    // Handle audio/video files
-    config.module.rules.push({
-      test: /\.(mp3|wav|ogg|mp4|webm)$/,
-      type: "asset/resource",
-    });
-
-    return config;
+  turbopack: {
+    rules: {
+      "*.glsl": {
+        loaders: ["raw-loader"],
+      },
+      "*.vs": {
+        loaders: ["raw-loader"],
+      },
+      "*.fs": {
+        loaders: ["raw-loader"],
+      },
+      "*.vert": {
+        loaders: ["raw-loader"],
+      },
+      "*.frag": {
+        loaders: ["raw-loader"],
+      },
+    },
   },
   experimental: {
     optimizePackageImports: ["lucide-react"],

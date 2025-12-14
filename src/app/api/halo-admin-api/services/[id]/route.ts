@@ -8,9 +8,10 @@ import path from "path";
 // PUT - Update service
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
 
     if (!session || session.user?.role !== "ADMIN") {
@@ -22,7 +23,7 @@ export async function PUT(
       body;
 
     const service = await prisma.service.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         ...(name && { name }),
         ...(description && { description }),
@@ -47,9 +48,10 @@ export async function PUT(
 // DELETE - Delete service
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
 
     if (!session || session.user?.role !== "ADMIN") {
@@ -58,7 +60,7 @@ export async function DELETE(
 
     // Get the service to retrieve image path
     const service = await prisma.service.findUnique({
-      where: { id: params.id },
+      where: { id },
     });
 
     if (!service) {
@@ -67,7 +69,7 @@ export async function DELETE(
 
     // Delete the service from database
     await prisma.service.delete({
-      where: { id: params.id },
+      where: { id },
     });
 
     // Delete the image file if it exists and is a local upload

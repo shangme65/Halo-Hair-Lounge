@@ -6,7 +6,7 @@ import prisma from "@/lib/prisma";
 // PUT - Update appointment status
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -25,8 +25,10 @@ export async function PUT(
       );
     }
 
+    const { id } = await params;
+
     const appointment = await prisma.appointment.update({
-      where: { id: params.id },
+      where: { id },
       data: { status },
       include: {
         user: {
