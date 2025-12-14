@@ -1,19 +1,10 @@
 "use client";
 
-import { useState, useEffect, FormEvent } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  Shield,
-  User,
-  Mail,
-  Lock,
-  Phone,
-  Key,
-  Trash2,
-  AlertTriangle,
-} from "lucide-react";
+import { Shield, Trash2, AlertTriangle } from "lucide-react";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Card from "@/components/ui/Card";
@@ -21,15 +12,6 @@ import toast from "react-hot-toast";
 
 export default function AdminSetupPage() {
   const router = useRouter();
-
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-    phone: "",
-    secretKey: "",
-  });
   const [isLoading, setIsLoading] = useState(false);
   const [alreadyInitialized, setAlreadyInitialized] = useState(false);
   const [checkingStatus, setCheckingStatus] = useState(true);
@@ -56,10 +38,6 @@ export default function AdminSetupPage() {
     };
     checkAdminExists();
   }, []);
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
 
   const handleDeleteAccount = async () => {
     if (!session) {
@@ -97,37 +75,14 @@ export default function AdminSetupPage() {
     }
   };
 
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-
-    if (formData.password !== formData.confirmPassword) {
-      toast.error("Passwords do not match");
-      return;
-    }
-
-    if (formData.password.length < 8) {
-      toast.error("Password must be at least 8 characters");
-      return;
-    }
-
-    if (!formData.secretKey) {
-      toast.error("Secret key is required");
-      return;
-    }
-
+  const handleInitializeAdmin = async () => {
     setIsLoading(true);
 
     try {
       const response = await fetch("/api/auth/admin-setup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: formData.name,
-          email: formData.email,
-          password: formData.password,
-          phone: formData.phone || undefined,
-          secretKey: formData.secretKey,
-        }),
+        body: JSON.stringify({}),
       });
 
       const data = await response.json();
@@ -301,142 +256,45 @@ export default function AdminSetupPage() {
         </div>
 
         <Card>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Secret Key Field - Most Important */}
-            <div>
-              <label className="block text-sm font-semibold mb-2 text-primary-600">
-                Secret Key *
-              </label>
-              <div className="relative">
-                <Key className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-primary-600" />
-                <Input
-                  type="password"
-                  name="secretKey"
-                  value={formData.secretKey}
-                  onChange={handleChange}
-                  placeholder="Enter admin setup secret key"
-                  required
-                  className="pl-10 border-2 border-primary-200 focus:border-primary-500"
-                />
-              </div>
-              <p className="text-xs text-dark-500 mt-1">
-                Contact your system administrator for the secret key
+          <div className="space-y-6 text-center">
+            <div className="py-8">
+              <h2 className="text-xl font-semibold mb-4 text-dark-800 dark:text-dark-200">
+                Initialize Administrator Account
+              </h2>
+              <p className="text-dark-600 dark:text-dark-400 mb-6">
+                Click the button below to automatically create an admin account
+                using credentials from the environment configuration.
               </p>
+
+              <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4 mb-6 text-left">
+                <h3 className="text-sm font-semibold mb-2 text-blue-800 dark:text-blue-200">
+                  Admin Credentials (from .env):
+                </h3>
+                <ul className="text-xs text-blue-700 dark:text-blue-300 space-y-1">
+                  <li>
+                    • Email:{" "}
+                    {process.env.NEXT_PUBLIC_ADMIN_EMAIL ||
+                      "Configured in server"}
+                  </li>
+                  <li>• Name: Configured in environment</li>
+                  <li>• Password: Configured in environment</li>
+                </ul>
+              </div>
+
+              <Button
+                onClick={handleInitializeAdmin}
+                size="lg"
+                className="w-full"
+                isLoading={isLoading}
+                disabled={isLoading}
+              >
+                <Shield className="w-5 h-5 mr-2" />
+                {isLoading ? "Initializing..." : "Initialize Admin Account"}
+              </Button>
             </div>
-
-            <div className="border-t border-dark-200 dark:border-dark-700 pt-6">
-              <h3 className="text-sm font-semibold mb-4 text-dark-700 dark:text-dark-300">
-                Account Details
-              </h3>
-
-              {/* Name Field */}
-              <div className="mb-4">
-                <label className="block text-sm font-medium mb-2">
-                  Full Name *
-                </label>
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-dark-400" />
-                  <Input
-                    type="text"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    placeholder="John Doe"
-                    required
-                    className="pl-10"
-                  />
-                </div>
-              </div>
-
-              {/* Email Field */}
-              <div className="mb-4">
-                <label className="block text-sm font-medium mb-2">
-                  Email Address *
-                </label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-dark-400" />
-                  <Input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    placeholder="admin@example.com"
-                    required
-                    className="pl-10"
-                  />
-                </div>
-              </div>
-
-              {/* Phone Field */}
-              <div className="mb-4">
-                <label className="block text-sm font-medium mb-2">
-                  Phone Number (Optional)
-                </label>
-                <div className="relative">
-                  <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-dark-400" />
-                  <Input
-                    type="tel"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleChange}
-                    placeholder="+1 (555) 000-0000"
-                    className="pl-10"
-                  />
-                </div>
-              </div>
-
-              {/* Password Field */}
-              <div className="mb-4">
-                <label className="block text-sm font-medium mb-2">
-                  Password *
-                </label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-dark-400" />
-                  <Input
-                    type="password"
-                    name="password"
-                    value={formData.password}
-                    onChange={handleChange}
-                    placeholder="Minimum 8 characters"
-                    required
-                    className="pl-10"
-                  />
-                </div>
-              </div>
-
-              {/* Confirm Password Field */}
-              <div className="mb-4">
-                <label className="block text-sm font-medium mb-2">
-                  Confirm Password *
-                </label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-dark-400" />
-                  <Input
-                    type="password"
-                    name="confirmPassword"
-                    value={formData.confirmPassword}
-                    onChange={handleChange}
-                    placeholder="Re-enter password"
-                    required
-                    className="pl-10"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Submit Button */}
-            <Button
-              type="submit"
-              size="lg"
-              className="w-full"
-              isLoading={isLoading}
-            >
-              <Shield className="w-5 h-5 mr-2" />
-              Create Admin Account
-            </Button>
 
             {/* Sign In Link */}
-            <div className="text-center">
+            <div className="text-center pt-4 border-t border-dark-200 dark:border-dark-700">
               <p className="text-sm text-dark-600 dark:text-dark-400">
                 Already have an account?{" "}
                 <a
@@ -447,7 +305,7 @@ export default function AdminSetupPage() {
                 </a>
               </p>
             </div>
-          </form>
+          </div>
         </Card>
 
         {/* Security Notice */}
@@ -458,9 +316,10 @@ export default function AdminSetupPage() {
           transition={{ delay: 0.3 }}
         >
           <p className="text-xs text-yellow-800 dark:text-yellow-200">
-            <strong>Security Notice:</strong> This page is for initializing the
-            first admin account only. After setup, this page will be disabled
-            and additional admins must be created through the admin portal.
+            <strong>Security Notice:</strong> The admin account will be created
+            using credentials configured in your environment variables (.env
+            file). After setup, this page will be disabled and additional admins
+            must be created through the admin portal.
           </p>
         </motion.div>
       </motion.div>
