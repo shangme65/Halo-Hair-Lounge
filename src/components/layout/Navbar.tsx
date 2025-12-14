@@ -16,7 +16,6 @@ import {
   Mail,
   LayoutDashboard,
   ShoppingBag,
-  Users,
 } from "lucide-react";
 import { useSession, signOut } from "next-auth/react";
 import Button from "@/components/ui/Button";
@@ -53,12 +52,6 @@ const adminNavigation = [
     href: "/halo-admin-portal-2024/appointments",
     icon: Calendar,
     roles: ["ADMIN", "STAFF"],
-  },
-  {
-    name: "Users",
-    href: "/halo-admin-portal-2024/users",
-    icon: Users,
-    roles: ["ADMIN"],
   },
 ];
 
