@@ -20,21 +20,21 @@ const heroSlides = [
     title: "Transform Your Look",
     subtitle: "Premium Hair Care Excellence",
     description: "Experience luxury styling with our expert stylists",
-    colorScheme: "purple" as const,
+    colorScheme: "green" as const,
     cta: { text: "Book Appointment", href: "/book" },
   },
   {
     title: "Discover Beauty",
     subtitle: "Innovative Hair Solutions",
     description: "From classic cuts to bold transformations",
-    colorScheme: "gold" as const,
+    colorScheme: "green" as const,
     cta: { text: "View Services", href: "/services" },
   },
   {
     title: "Your Hair Journey",
     subtitle: "Starts Here Today",
     description: "Personalized consultations and expert care",
-    colorScheme: "rose" as const,
+    colorScheme: "green" as const,
     cta: { text: "Get Started", href: "/about" },
   },
 ];
@@ -78,7 +78,7 @@ export default function Home() {
   return (
     <div className="min-h-screen">
       {/* Hero Section with 3D Background */}
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+      <section className="relative min-h-[85vh] flex items-center justify-center overflow-hidden">
         {/* Animated 3D Background */}
         <HeroScene colorScheme={slide.colorScheme} />
 
@@ -111,7 +111,7 @@ export default function Home() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -30 }}
                 transition={{ duration: 0.6, delay: 0.1 }}
-                className="text-5xl sm:text-6xl lg:text-8xl font-display font-bold mb-6 animate-gradient bg-gradient-to-r from-white via-primary-300 to-white bg-size-200 bg-clip-text text-transparent"
+                className="text-4xl sm:text-5xl lg:text-6xl font-display font-bold mb-6 animate-gradient bg-gradient-to-r from-white via-primary-300 to-white bg-size-200 bg-clip-text text-transparent"
               >
                 {slide.title}
               </motion.h1>
@@ -192,49 +192,132 @@ export default function Home() {
       </section>
 
       {/* Features Section */}
-      <section className="py-24 bg-white dark:bg-dark-900">
+      <section className="pt-8 pb-12 bg-white dark:bg-dark-900">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="text-center mb-16"
+            className="text-center mb-16 max-w-4xl mx-auto"
           >
-            <h2 className="text-4xl sm:text-5xl font-display font-bold mb-6 bg-gradient-to-r from-primary-600 to-primary-800 bg-clip-text text-transparent">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="inline-block mb-4 px-6 py-2 bg-gradient-to-r from-green-100 to-primary-100 dark:from-green-950 dark:to-primary-950 rounded-full border border-green-200 dark:border-green-800 shadow-lg shadow-green-500/20"
+            >
+              <span className="text-sm font-semibold text-green-700 dark:text-green-400 uppercase tracking-wider">
+                Our Commitment
+              </span>
+            </motion.div>
+
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-display font-bold mb-5 bg-gradient-to-r from-green-600 via-primary-600 to-green-700 bg-clip-text text-transparent leading-tight whitespace-nowrap">
               Why Choose Halo Hair Lounge
             </h2>
-            <p className="text-xl text-dark-600 dark:text-dark-400 max-w-2xl mx-auto">
+
+            <p className="text-lg sm:text-xl text-dark-600 dark:text-dark-400 leading-relaxed max-w-3xl mx-auto">
               Experience the perfect blend of luxury, expertise, and innovation
+              at our premier salon
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {features.map((feature, idx) => {
               const Icon = feature.icon;
               return (
                 <motion.div
                   key={feature.title}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
+                  initial={{ opacity: 0, y: 50, rotateX: -15 }}
+                  whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
                   viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: idx * 0.1 }}
+                  transition={{
+                    duration: 0.7,
+                    delay: idx * 0.15,
+                    type: "spring",
+                    stiffness: 100,
+                  }}
+                  whileHover={{
+                    y: -8,
+                    rotateY: 3,
+                    rotateX: 3,
+                    scale: 1.02,
+                    transition: { duration: 0.3 },
+                  }}
+                  style={{
+                    perspective: 1000,
+                    transformStyle: "preserve-3d",
+                  }}
                 >
-                  <Card className="h-full text-center group">
+                  <div className="relative group cursor-pointer">
+                    {/* 3D Shadow Layers */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary-600/20 to-primary-800/20 rounded-2xl blur-xl transform translate-y-4 group-hover:translate-y-6 transition-transform duration-300" />
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary-600/10 to-primary-800/10 rounded-2xl blur-2xl transform translate-y-6 group-hover:translate-y-8 transition-transform duration-300" />
+
+                    {/* Main Card */}
                     <motion.div
-                      className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-primary-600 to-primary-700 mb-6 mx-auto"
-                      whileHover={{ scale: 1.1, rotate: 5 }}
-                      transition={{ type: "spring", stiffness: 400 }}
+                      className="relative bg-gradient-to-br from-white to-gray-50 dark:from-dark-800 dark:to-dark-900 rounded-2xl p-5 border border-dark-200/20 dark:border-dark-700/30 shadow-2xl overflow-hidden"
+                      style={{
+                        transformStyle: "preserve-3d",
+                        transform: "translateZ(50px)",
+                      }}
                     >
-                      <Icon className="w-8 h-8 text-white" />
+                      {/* Animated Background Gradient */}
+                      <div className="absolute inset-0 bg-gradient-to-br from-primary-500/5 via-transparent to-primary-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+                      {/* Shine Effect */}
+                      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700">
+                        <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent transform -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                      </div>
+
+                      {/* Icon and Title Row */}
+                      <div className="flex items-center gap-3 mb-3 relative">
+                        {/* Icon Container with 3D Effect */}
+                        <motion.div
+                          className="relative flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-primary-500 via-primary-600 to-primary-700 shadow-lg flex-shrink-0"
+                          style={{
+                            transformStyle: "preserve-3d",
+                            transform: "translateZ(75px)",
+                          }}
+                          whileHover={{
+                            scale: 1.1,
+                            rotate: [0, -5, 5, 0],
+                            transition: { duration: 0.5 },
+                          }}
+                        >
+                          {/* Icon Glow */}
+                          <div className="absolute inset-0 bg-primary-400 rounded-xl blur-lg opacity-50 group-hover:opacity-75 transition-opacity duration-300" />
+                          <Icon className="w-6 h-6 text-white relative z-10 drop-shadow-lg" />
+                        </motion.div>
+
+                        {/* Title */}
+                        <h3
+                          className="relative text-lg font-bold bg-gradient-to-r from-dark-900 to-primary-700 dark:from-white dark:to-primary-400 bg-clip-text text-transparent group-hover:scale-105 transition-transform duration-300"
+                          style={{
+                            transformStyle: "preserve-3d",
+                            transform: "translateZ(25px)",
+                          }}
+                        >
+                          {feature.title}
+                        </h3>
+                      </div>
+
+                      {/* Description */}
+                      <p
+                        className="relative text-sm text-dark-600 dark:text-dark-400 leading-relaxed"
+                        style={{
+                          transformStyle: "preserve-3d",
+                          transform: "translateZ(15px)",
+                        }}
+                      >
+                        {feature.description}
+                      </p>
+
+                      {/* Bottom Accent Line */}
+                      <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-primary-600 to-transparent transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500" />
                     </motion.div>
-                    <h3 className="text-xl font-semibold mb-3 group-hover:text-primary-600 transition-colors">
-                      {feature.title}
-                    </h3>
-                    <p className="text-dark-600 dark:text-dark-400">
-                      {feature.description}
-                    </p>
-                  </Card>
+                  </div>
                 </motion.div>
               );
             })}
@@ -243,7 +326,7 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-24 bg-gradient-to-br from-primary-600 via-primary-700 to-primary-800 text-white relative overflow-hidden">
+      <section className="pt-8 pb-24 bg-gradient-to-br from-primary-600 via-primary-700 to-primary-800 text-white relative overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-0 left-1/4 w-96 h-96 bg-white rounded-full blur-3xl animate-pulse-slow" />
           <div

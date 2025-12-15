@@ -48,7 +48,8 @@ const statusColors = {
     "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400",
   CONFIRMED:
     "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400",
-  COMPLETED: "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400",
+  COMPLETED:
+    "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400",
   CANCELLED: "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400",
 };
 
@@ -164,11 +165,11 @@ export default function AdminAppointmentsPage() {
                   <p className="text-sm text-dark-600 dark:text-dark-400">
                     Completed
                   </p>
-                  <p className="text-2xl font-bold text-blue-600">
+                  <p className="text-2xl font-bold text-green-600">
                     {stats.completed}
                   </p>
                 </div>
-                <CheckCircle className="w-8 h-8 text-blue-600" />
+                <CheckCircle className="w-8 h-8 text-green-600" />
               </div>
             </Card>
             <Card className="p-4">

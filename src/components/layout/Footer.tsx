@@ -38,15 +38,22 @@ const socialLinks = [
 
 export default function Footer() {
   return (
-    <footer className="relative bg-gradient-to-b from-dark-900 to-dark-950 text-white overflow-hidden">
-      {/* Animated background */}
-      <div className="absolute inset-0 opacity-10">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary-600 rounded-full blur-3xl animate-pulse-slow" />
+    <footer className="relative bg-gradient-to-br from-dark-900 via-green-950 to-dark-950 text-white overflow-hidden">
+      {/* Animated background with green gradient overlays */}
+      <div className="absolute inset-0 opacity-20">
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-gradient-to-br from-green-500 to-primary-600 rounded-full blur-3xl animate-pulse-slow" />
         <div
-          className="absolute bottom-0 right-1/4 w-96 h-96 bg-secondary-500 rounded-full blur-3xl animate-pulse-slow"
+          className="absolute bottom-0 right-1/4 w-96 h-96 bg-gradient-to-tr from-primary-500 to-green-600 rounded-full blur-3xl animate-pulse-slow"
           style={{ animationDelay: "1s" }}
         />
+        <div
+          className="absolute top-1/2 left-1/2 w-72 h-72 bg-gradient-to-r from-green-400 to-primary-500 rounded-full blur-3xl animate-pulse-slow"
+          style={{ animationDelay: "2s" }}
+        />
       </div>
+
+      {/* Top gradient border */}
+      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-green-500 to-transparent" />
 
       <div className="relative container mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12">
@@ -57,7 +64,7 @@ export default function Footer() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
             >
-              <h3 className="text-3xl font-display font-bold bg-gradient-to-r from-primary-400 to-primary-600 bg-clip-text text-transparent mb-4">
+              <h3 className="text-3xl font-display font-bold bg-gradient-to-r from-green-400 via-primary-500 to-green-600 bg-clip-text text-transparent mb-4">
                 Halo Hair Lounge
               </h3>
               <p className="text-dark-300 mb-6 leading-relaxed">
@@ -67,15 +74,15 @@ export default function Footer() {
 
               <div className="space-y-3">
                 <div className="flex items-center space-x-3 text-dark-300 hover:text-white transition-colors">
-                  <MapPin className="w-5 h-5 text-primary-500" />
+                  <MapPin className="w-5 h-5 text-green-500" />
                   <span>123 Beauty Street, Style City, SC 12345</span>
                 </div>
                 <div className="flex items-center space-x-3 text-dark-300 hover:text-white transition-colors">
-                  <Phone className="w-5 h-5 text-primary-500" />
+                  <Phone className="w-5 h-5 text-green-500" />
                   <span>(555) 123-4567</span>
                 </div>
                 <div className="flex items-center space-x-3 text-dark-300 hover:text-white transition-colors">
-                  <Mail className="w-5 h-5 text-primary-500" />
+                  <Mail className="w-5 h-5 text-green-500" />
                   <span>hello@halohairlounge.com</span>
                 </div>
               </div>
@@ -97,7 +104,7 @@ export default function Footer() {
                   <li key={link.name}>
                     <Link
                       href={link.href}
-                      className="text-dark-300 hover:text-primary-400 transition-colors inline-block"
+                      className="text-dark-300 hover:text-green-400 transition-colors inline-block"
                     >
                       <motion.span
                         whileHover={{ x: 5 }}
@@ -114,7 +121,7 @@ export default function Footer() {
         </div>
 
         {/* Social Links & Copyright */}
-        <div className="mt-16 pt-8 border-t border-dark-800">
+        <div className="mt-16 pt-8 border-t border-dark-800/50 bg-gradient-to-r from-transparent via-green-950/30 to-transparent">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <div className="flex space-x-4">
               {socialLinks.map((social) => {
@@ -123,7 +130,7 @@ export default function Footer() {
                   <motion.a
                     key={social.name}
                     href={social.href}
-                    className="p-3 bg-dark-800 rounded-xl hover:bg-primary-600 transition-colors"
+                    className="p-3 bg-gradient-to-br from-dark-800 to-green-950/50 rounded-xl hover:from-green-600 hover:to-primary-600 border border-green-900/30 hover:border-green-500/50 transition-all shadow-lg shadow-green-900/20"
                     whileHover={{ scale: 1.1, rotate: 5 }}
                     whileTap={{ scale: 0.9 }}
                     aria-label={social.name}

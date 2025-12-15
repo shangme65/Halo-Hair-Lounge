@@ -208,8 +208,8 @@ export default function AdminSetupPage() {
                 </Button>
               )}
             </div>
-            <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl">
-              <p className="text-xs text-blue-800 dark:text-blue-200">
+            <div className="mt-6 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl">
+              <p className="text-xs text-green-800 dark:text-green-200">
                 <strong>Note:</strong> Additional admin accounts can be created
                 from within the admin portal by existing administrators.
               </p>
@@ -314,11 +314,11 @@ export default function AdminSetupPage() {
                 using credentials from the environment configuration.
               </p>
 
-              <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4 mb-6 text-left">
-                <h3 className="text-sm font-semibold mb-2 text-blue-800 dark:text-blue-200">
+              <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-4 mb-6 text-left">
+                <h3 className="text-sm font-semibold mb-2 text-green-800 dark:text-green-200">
                   Admin Credentials (from .env):
                 </h3>
-                <ul className="text-xs text-blue-700 dark:text-blue-300 space-y-1">
+                <ul className="text-xs text-green-700 dark:text-green-300 space-y-1">
                   <li>
                     • Email:{" "}
                     {process.env.NEXT_PUBLIC_ADMIN_EMAIL ||

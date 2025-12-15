@@ -91,12 +91,12 @@ export default function Navbar() {
                 initial={{
                   x: -100,
                   opacity: 0,
-                  filter: "drop-shadow(0 0 20px rgba(14, 165, 233, 0.8))",
+                  filter: "drop-shadow(0 0 20px rgba(34, 197, 94, 0.8))",
                 }}
                 animate={{
                   x: 0,
                   opacity: 1,
-                  filter: "drop-shadow(0 0 12px rgba(14, 165, 233, 0.6))",
+                  filter: "drop-shadow(0 0 12px rgba(34, 197, 94, 0.6))",
                 }}
                 transition={{ duration: 0.8, ease: "easeOut" }}
                 whileHover={{ scale: 1.05 }}

@@ -34,7 +34,7 @@ export default function TermsPage() {
             <strong>Last Updated:</strong> November 14, 2025
           </p>
 
-          <div className="prose prose-blue max-w-none space-y-8">
+          <div className="prose prose-green max-w-none space-y-8">
             {/* Section 1 */}
             <section>
               <h2 className="text-2xl font-bold text-dark-900 mb-4">

@@ -66,9 +66,9 @@ export async function sendVerificationEmail({
               </p>
               
               <!-- Verification Code Box -->
-              <div style="background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%); border-radius: 12px; padding: 30px; text-align: center; margin-bottom: 30px;">
-                <p style="margin: 0 0 10px; color: #0c4a6e; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">Your Verification Code</p>
-                <p style="margin: 0; color: #0369a1; font-size: 36px; font-weight: bold; letter-spacing: 8px; font-family: 'Courier New', monospace;">${verificationCode}</p>
+              <div style="background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%); border-radius: 12px; padding: 30px; text-align: center; margin-bottom: 30px;">
+                <p style="margin: 0 0 10px; color: #14532d; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">Your Verification Code</p>
+                <p style="margin: 0; color: #15803d; font-size: 36px; font-weight: bold; letter-spacing: 8px; font-family: 'Courier New', monospace;">${verificationCode}</p>
               </div>
               
               <p style="margin: 0 0 25px; color: #475569; font-size: 16px; line-height: 1.6; text-align: center;">
@@ -77,7 +77,7 @@ export async function sendVerificationEmail({
               
               <!-- CTA Button -->
               <div style="text-align: center; margin-bottom: 30px;">
-                <a href="${verificationLink}" style="display: inline-block; background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); color: #ffffff; text-decoration: none; padding: 16px 48px; border-radius: 8px; font-weight: bold; font-size: 16px; box-shadow: 0 4px 6px rgba(14, 165, 233, 0.3);">
+                <a href="${verificationLink}" style="display: inline-block; background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); color: #ffffff; text-decoration: none; padding: 16px 48px; border-radius: 8px; font-weight: bold; font-size: 16px; box-shadow: 0 4px 6px rgba(34, 197, 94, 0.3);">
                   Verify Email Address
                 </a>
               </div>

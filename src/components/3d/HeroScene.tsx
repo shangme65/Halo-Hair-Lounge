@@ -6,7 +6,7 @@ import { Sphere, MeshDistortMaterial } from "@react-three/drei";
 import * as THREE from "three";
 
 interface HeroSceneProps {
-  colorScheme?: "purple" | "gold" | "teal" | "rose";
+  colorScheme?: "purple" | "gold" | "teal" | "rose" | "green";
 }
 
 const colorSchemes = {
@@ -14,6 +14,7 @@ const colorSchemes = {
   gold: { main: "#fbbf24", accent: "#f59e0b" },
   teal: { main: "#14b8a6", accent: "#0d9488" },
   rose: { main: "#fb7185", accent: "#f43f5e" },
+  green: { main: "#22c55e", accent: "#16a34a" },
 };
 
 function AnimatedBlob({ colorScheme = "purple" }: HeroSceneProps) {
