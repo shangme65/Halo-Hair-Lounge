@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
+import Image from "next/image";
 import {
   Sparkles,
   Calendar,
@@ -10,6 +11,11 @@ import {
   Scissors,
   ArrowRight,
   Star,
+  CheckCircle2,
+  Quote,
+  ChevronDown,
+  BadgeCheck,
+  CheckCircle,
 } from "lucide-react";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
@@ -62,8 +68,136 @@ const features = [
   },
 ];
 
+const testimonials = [
+  {
+    name: "Sarah Johnson",
+    role: "Regular Client",
+    verified: true,
+    rating: 4.9,
+    text: "Absolutely amazing experience! The stylists are incredibly talented and truly listen to what you want. My hair has never looked better.",
+    ringColor: "from-blue-400 to-blue-600",
+    image: "/uploads/testimonials/user1.jpg",
+  },
+  {
+    name: "Michael Chen",
+    role: "Happy Customer",
+    verified: true,
+    rating: 5.0,
+    text: "I've been coming here for over two years and they never disappoint. Professional service, premium products, and results that exceed expectations every single time.",
+    ringColor: "from-green-400 to-green-600",
+    image: "/uploads/testimonials/user2.jpg",
+  },
+  {
+    name: "Emma Williams",
+    role: "Loyal Client",
+    verified: true,
+    rating: 4.8,
+    text: "The best salon experience I've ever had! From the consultation to the final styling, everything was perfect. The team is friendly, skilled, and really passionate about hair care.",
+    ringColor: "from-purple-400 to-purple-600",
+    image: "/uploads/testimonials/user3.jpg",
+  },
+  {
+    name: "James Rodriguez",
+    role: "Satisfied Customer",
+    verified: true,
+    rating: 4.9,
+    text: "Outstanding service from start to finish! My stylist took the time to understand exactly what I wanted and delivered beyond my expectations.",
+    ringColor: "from-orange-400 to-orange-600",
+    image: "/uploads/testimonials/user4.jpg",
+  },
+  {
+    name: "Olivia Martinez",
+    role: "Beauty Enthusiast",
+    verified: true,
+    rating: 5.0,
+    text: "I was nervous about trying a new salon, but Halo Hair Lounge exceeded all my expectations. The consultation was thorough, and the results were stunning.",
+    ringColor: "from-pink-400 to-pink-600",
+    image: "/uploads/testimonials/user5.jpg",
+  },
+  {
+    name: "David Thompson",
+    role: "Professional Client",
+    verified: true,
+    rating: 4.7,
+    text: "Best hair care experience in the city! The attention to detail is remarkable, and they use only top-tier products. Worth every penny!",
+    ringColor: "from-teal-400 to-teal-600",
+    image: "/uploads/testimonials/user6.jpg",
+  },
+  {
+    name: "Sophia Anderson",
+    role: "Regular Visitor",
+    verified: true,
+    rating: 4.9,
+    text: "I've tried many salons over the years, but none compare to Halo. The stylists are true artists who genuinely care about their craft.",
+    ringColor: "from-indigo-400 to-indigo-600",
+    image: "/uploads/testimonials/user7.jpg",
+  },
+  {
+    name: "Ryan Mitchell",
+    role: "First-Time Client",
+    verified: true,
+    rating: 5.0,
+    text: "Incredible transformation! I came in with damaged hair and left with healthy, vibrant locks. The team's expertise in hair restoration is unmatched.",
+    ringColor: "from-red-400 to-red-600",
+    image: "/uploads/testimonials/user8.jpg",
+  },
+  {
+    name: "Isabella Garcia",
+    role: "Bridal Client",
+    verified: true,
+    rating: 5.0,
+    text: "They made me feel like a princess on my wedding day! The bridal styling was absolutely perfect, and it lasted all day and night.",
+    ringColor: "from-yellow-400 to-yellow-600",
+    image: "/uploads/testimonials/user9.jpg",
+  },
+  {
+    name: "Daniel Lee",
+    role: "Corporate Client",
+    verified: true,
+    rating: 4.8,
+    text: "As someone who values professionalism and quality, I'm impressed by Halo's consistency. Every appointment is punctual, every service is excellent.",
+    ringColor: "from-cyan-400 to-cyan-600",
+    image: "/uploads/testimonials/user10.jpg",
+  },
+];
+
+const faqs = [
+  {
+    question: "How do I book an appointment?",
+    answer:
+      "You can easily book an appointment through our online booking system available 24/7. Simply click the 'Book Appointment' button, select your preferred service, choose your stylist, and pick a convenient time slot. You'll receive instant confirmation via email.",
+  },
+  {
+    question: "What services do you offer?",
+    answer:
+      "We offer a comprehensive range of hair services including haircuts, coloring, styling, scalp treatments, chemical straightening, keratin treatments, and specialized hair loss treatments. Each service is performed by our expert stylists using premium products.",
+  },
+  {
+    question: "What is your cancellation policy?",
+    answer:
+      "We understand that plans change. You can cancel or reschedule your appointment up to 24 hours before your scheduled time without any charges. Cancellations made less than 24 hours in advance may incur a cancellation fee.",
+  },
+  {
+    question: "Do you use professional-grade products?",
+    answer:
+      "Yes, we exclusively use premium, professional-grade products from leading brands in the hair care industry. All our products are carefully selected to ensure the best results and maintain the health of your hair.",
+  },
+  {
+    question: "How long does a typical appointment take?",
+    answer:
+      "The duration varies depending on the service. A basic haircut takes about 45-60 minutes, while color services can take 2-3 hours. Complex treatments like keratin or chemical straightening may take 3-4 hours. We'll provide an estimated time when you book.",
+  },
+  {
+    question: "Do you offer consultations?",
+    answer:
+      "Absolutely! We offer complimentary consultations for all new clients and for any major style changes. During the consultation, our stylists will discuss your hair goals, assess your hair type, and recommend the best treatments and styles for you.",
+  },
+];
+
 export default function Home() {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [currentTestimonialIndex, setCurrentTestimonialIndex] = useState(0);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -71,6 +205,14 @@ export default function Home() {
     }, 6000);
 
     return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    const testimonialTimer = setInterval(() => {
+      setCurrentTestimonialIndex((prev) => (prev + 2) % testimonials.length);
+    }, 5000);
+
+    return () => clearInterval(testimonialTimer);
   }, []);
 
   const slide = heroSlides[currentSlide];
@@ -326,7 +468,7 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section className="pt-16 pb-32 bg-gradient-to-br from-primary-600 via-primary-700 to-primary-800 text-white relative overflow-hidden">
+      <section className="pt-12 pb-12 bg-gradient-to-br from-primary-600 via-primary-700 to-primary-800 text-white relative overflow-hidden">
         {/* Enhanced Background Effects */}
         <div className="absolute inset-0 opacity-20">
           <div className="absolute top-0 left-1/4 w-96 h-96 bg-white rounded-full blur-3xl animate-pulse-slow" />
@@ -366,10 +508,10 @@ export default function Home() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: 0.2 }}
-              className="inline-block mb-6 px-6 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/20 shadow-xl"
+              className="inline-block mb-4 px-4 py-1.5 bg-white/10 backdrop-blur-sm rounded-full border border-white/20 shadow-xl"
             >
-              <span className="text-sm font-semibold text-white uppercase tracking-wider flex items-center gap-2">
-                <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+              <span className="text-xs font-semibold text-white uppercase tracking-wider flex items-center gap-2">
+                <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse" />
                 Book Now & Get Started
               </span>
             </motion.div>
@@ -380,7 +522,7 @@ export default function Home() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.3 }}
-              className="text-4xl sm:text-5xl lg:text-6xl font-display font-bold mb-6 leading-tight"
+              className="text-3xl sm:text-4xl lg:text-5xl font-display font-bold mb-4 leading-tight"
             >
               <span className="inline-block bg-gradient-to-r from-white via-green-100 to-white bg-clip-text text-transparent drop-shadow-2xl">
                 Ready for Your
@@ -397,12 +539,9 @@ export default function Home() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.4 }}
-              className="text-lg sm:text-xl lg:text-2xl text-green-50 mb-12 max-w-3xl mx-auto leading-relaxed font-light"
+              className="text-base sm:text-lg lg:text-xl text-green-50 mb-8 max-w-3xl mx-auto leading-relaxed font-light"
             >
               Book your appointment today and experience the Halo difference
-              <span className="block mt-2 text-base text-green-100/80">
-                Premium styling • Expert care • Personalized service
-              </span>
             </motion.p>
 
             {/* Enhanced CTA Button */}
@@ -421,11 +560,11 @@ export default function Home() {
                 <Button
                   size="lg"
                   variant="secondary"
-                  className="group shadow-2xl hover:shadow-green-500/50 transition-all duration-300 text-lg px-10 py-6"
+                  className="group shadow-2xl hover:shadow-green-500/50 transition-all duration-300 text-base px-6 py-3"
                 >
-                  <Calendar className="w-6 h-6 mr-3 group-hover:scale-110 group-hover:rotate-12 transition-all duration-300" />
+                  <Calendar className="w-5 h-5 mr-2 group-hover:scale-110 group-hover:rotate-12 transition-all duration-300" />
                   Book Your Appointment
-                  <ArrowRight className="w-6 h-6 ml-3 group-hover:translate-x-2 transition-transform duration-300" />
+                  <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-2 transition-transform duration-300" />
                 </Button>
               </Link>
             </motion.div>
@@ -436,22 +575,249 @@ export default function Home() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.6 }}
-              className="mt-12 flex flex-wrap justify-center gap-8 text-green-100/80 text-sm"
+              className="mt-8 flex flex-wrap justify-center gap-6 text-green-100/80 text-sm"
             >
               <div className="flex items-center gap-2">
-                <span className="text-green-400 text-xl">✓</span>
+                <CheckCircle2 className="w-5 h-5 text-green-400" />
                 <span>Expert Stylists</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-green-400 text-xl">✓</span>
+                <CheckCircle2 className="w-5 h-5 text-green-400" />
                 <span>Premium Products</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-green-400 text-xl">✓</span>
+                <CheckCircle2 className="w-5 h-5 text-green-400" />
                 <span>Flexible Scheduling</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-5 h-5 text-green-400" />
+                <span>Premium Styling</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-5 h-5 text-green-400" />
+                <span>Expert Care</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-5 h-5 text-green-400" />
+                <span>Personalized Service</span>
               </div>
             </motion.div>
           </motion.div>
+        </div>
+      </section>
+
+      {/* Testimonials Section */}
+      <section className="py-20 bg-gradient-to-br from-gray-50 via-white to-gray-50 overflow-hidden">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Section Header */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-10"
+          >
+            <motion.div
+              initial={{ scale: 0 }}
+              whileInView={{ scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, type: "spring" }}
+              className="inline-block mb-3 px-3 py-1.5 bg-primary-500/10 backdrop-blur-sm rounded-full border border-primary-500/20"
+            >
+              <span className="text-xs font-semibold text-primary-600 uppercase tracking-wider">
+                Client Reviews
+              </span>
+            </motion.div>
+            <h2 className="text-3xl sm:text-4xl font-display font-bold text-gray-900 mb-3">
+              Trusted by Thousands
+            </h2>
+            <p className="text-base text-gray-600 max-w-2xl mx-auto">
+              Real stories from our satisfied clients
+            </p>
+          </motion.div>
+
+          {/* Carousel Testimonials */}
+          <div className="relative max-w-6xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <AnimatePresence mode="wait">
+                {[currentTestimonialIndex, currentTestimonialIndex + 1].map(
+                  (idx, position) => {
+                    const testimonial = testimonials[idx % testimonials.length];
+                    return (
+                      <motion.div
+                        key={`${idx}-${position}`}
+                        initial={{ opacity: 0, x: position === 0 ? -50 : 50 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: position === 0 ? -50 : 50 }}
+                        transition={{ duration: 0.5 }}
+                        className="bg-white rounded-2xl p-6 shadow-2xl hover:shadow-3xl transition-all duration-300 relative group"
+                        style={{
+                          boxShadow:
+                            "0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 10px 30px -5px rgba(0, 0, 0, 0.15)",
+                        }}
+                      >
+                        {/* Rating Badge - Top Right */}
+                        <div className="absolute top-4 right-4">
+                          <div
+                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r ${testimonial.ringColor} text-white shadow-lg`}
+                          >
+                            <Star className="w-3.5 h-3.5 fill-white" />
+                            <span className="text-sm font-bold">
+                              {testimonial.rating.toFixed(1)}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* User Info Section */}
+                        <div className="flex items-start gap-4 mb-4">
+                          {/* Profile Image with Colored Ring */}
+                          <div className="relative flex-shrink-0">
+                            <div
+                              className={`w-16 h-16 rounded-full bg-gradient-to-br ${testimonial.ringColor} p-0.5`}
+                            >
+                              <div className="w-full h-full rounded-full overflow-hidden bg-gray-100">
+                                <Image
+                                  src={testimonial.image}
+                                  alt={testimonial.name}
+                                  width={64}
+                                  height={64}
+                                  className="w-full h-full object-cover"
+                                  onError={(e) => {
+                                    // Fallback to initial letter if image fails
+                                    e.currentTarget.style.display = "none";
+                                    const parent =
+                                      e.currentTarget.parentElement;
+                                    if (parent) {
+                                      parent.innerHTML = `<div class="w-full h-full rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center text-white font-bold text-xl">${testimonial.name.charAt(
+                                        0
+                                      )}</div>`;
+                                    }
+                                  }}
+                                />
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Name and Role */}
+                          <div className="flex-1 pt-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <h4 className="font-bold text-gray-900 text-base">
+                                {testimonial.name}
+                              </h4>
+                              {testimonial.verified && (
+                                <CheckCircle className="w-5 h-5 text-blue-500" />
+                              )}
+                            </div>
+                            <p className="text-sm text-gray-600">
+                              {testimonial.role}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Stars */}
+                        <div className="flex gap-1 mb-4">
+                          {[...Array(5)].map((_, i) => (
+                            <Star
+                              key={i}
+                              className="w-5 h-5 fill-yellow-400 text-yellow-400"
+                            />
+                          ))}
+                        </div>
+
+                        {/* Testimonial Text */}
+                        <p className="text-gray-700 leading-relaxed text-sm">
+                          "{testimonial.text}"
+                        </p>
+                      </motion.div>
+                    );
+                  }
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* Dots Indicator */}
+            <div className="flex justify-center gap-2 mt-8">
+              {Array.from({ length: Math.ceil(testimonials.length / 2) }).map(
+                (_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentTestimonialIndex(index * 2)}
+                    className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                      currentTestimonialIndex === index * 2 ||
+                      currentTestimonialIndex === index * 2 + 1
+                        ? "bg-primary-600 w-8"
+                        : "bg-gray-300 hover:bg-gray-400"
+                    }`}
+                    aria-label={`Go to testimonial ${index + 1}`}
+                  />
+                )
+              )}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section className="py-20 bg-white">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl">
+          {/* Section Header */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-4xl sm:text-5xl font-display font-bold text-gray-900 mb-4">
+              Frequently Asked Questions
+            </h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Find answers to common questions about our services
+            </p>
+          </motion.div>
+
+          {/* FAQ Items */}
+          <div className="space-y-4">
+            {faqs.map((faq, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                className="bg-gray-50 rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300"
+              >
+                <button
+                  onClick={() => setOpenFaq(openFaq === index ? null : index)}
+                  className="w-full px-6 py-5 flex items-center justify-between text-left hover:bg-gray-100 transition-colors duration-200"
+                >
+                  <span className="font-semibold text-gray-900 pr-8">
+                    {faq.question}
+                  </span>
+                  <ChevronDown
+                    className={`w-5 h-5 text-primary-600 flex-shrink-0 transition-transform duration-300 ${
+                      openFaq === index ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
+                <AnimatePresence>
+                  {openFaq === index && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.3 }}
+                      className="overflow-hidden"
+                    >
+                      <div className="px-6 pb-5 text-gray-600 leading-relaxed">
+                        {faq.answer}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+            ))}
+          </div>
         </div>
       </section>
     </div>

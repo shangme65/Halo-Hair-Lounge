@@ -14,18 +14,21 @@ import {
 
 const footerLinks = {
   Services: [
-    { name: "Haircuts", href: "/services#haircuts" },
-    { name: "Coloring", href: "/services#coloring" },
-    { name: "Treatments", href: "/services#treatments" },
-    { name: "Extensions", href: "/services#extensions" },
+    { name: "Haircut", href: "/services#haircut" },
+    { name: "Color", href: "/services#color" },
+    { name: "Styling", href: "/services#styling" },
+    { name: "Scalp treatments", href: "/services#scalp_treatments" },
+    {
+      name: "Chemical straightening",
+      href: "/services#chemical_straightening",
+    },
+    { name: "Keratin treatments", href: "/services#keratin_treatments" },
+    { name: "Hair loss treatments", href: "/services#hair_loss_treatments" },
   ],
   Company: [
     { name: "About Us", href: "/about" },
     { name: "Contact", href: "/contact" },
     { name: "Careers", href: "/careers" },
-  ],
-  Support: [
-    { name: "FAQ", href: "/faq" },
     { name: "Privacy Policy", href: "/privacy" },
     { name: "Terms of Service", href: "/terms" },
   ],
@@ -56,8 +59,8 @@ export default function Footer() {
       {/* Top gradient border */}
       <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-green-500 to-transparent" />
 
-      <div className="relative container mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12">
+      <div className="relative container mx-auto px-4 sm:px-6 lg:px-8 pb-12 pt-4">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
           {/* Brand Section */}
           <div className="lg:col-span-2">
             <motion.div
@@ -65,9 +68,9 @@ export default function Footer() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
             >
-              <div className="relative h-24 w-64 mb-4 p-3 rounded-lg bg-gradient-to-br from-green-500/10 via-green-400/5 to-transparent">
+              <div className="relative h-24 w-64 mb-4">
                 <Image
-                  src="/Halologo1.png"
+                  src="/Halologo2.png"
                   alt="Halo Hair Lounge"
                   fill
                   className="object-contain"
@@ -84,35 +87,37 @@ export default function Footer() {
             </motion.div>
           </div>
 
-          {/* Links Sections */}
-          {Object.entries(footerLinks).map(([category, links], idx) => (
-            <motion.div
-              key={category}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: idx * 0.1 }}
-            >
-              <h4 className="text-lg font-semibold mb-4">{category}</h4>
-              <ul className="space-y-2">
-                {links.map((link) => (
-                  <li key={link.name}>
-                    <Link
-                      href={link.href}
-                      className="text-dark-300 hover:text-green-400 transition-colors inline-block"
-                    >
-                      <motion.span
-                        whileHover={{ x: 5 }}
-                        className="inline-block"
+          {/* Links Sections - Services and Company in same row */}
+          <div className="lg:col-span-3 grid grid-cols-2 gap-8">
+            {Object.entries(footerLinks).map(([category, links], idx) => (
+              <motion.div
+                key={category}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: idx * 0.1 }}
+              >
+                <h4 className="text-lg font-semibold mb-4">{category}</h4>
+                <ul className="space-y-2">
+                  {links.map((link) => (
+                    <li key={link.name}>
+                      <Link
+                        href={link.href}
+                        className="text-dark-300 hover:text-green-400 transition-colors inline-block"
                       >
-                        {link.name}
-                      </motion.span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </motion.div>
-          ))}
+                        <motion.span
+                          whileHover={{ x: 5 }}
+                          className="inline-block"
+                        >
+                          {link.name}
+                        </motion.span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </motion.div>
+            ))}
+          </div>
         </div>
 
         {/* Social Links & Copyright */}
