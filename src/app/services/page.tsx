@@ -20,10 +20,11 @@ const categories = [
   "All",
   "HAIRCUT",
   "COLOR",
-  "TREATMENT",
   "STYLING",
-  "EXTENSIONS",
-  "BRAIDING",
+  "SCALP_TREATMENTS",
+  "CHEMICAL_STRAIGHTENING",
+  "KERATIN_TREATMENTS",
+  "HAIR_LOSS_TREATMENTS",
 ];
 
 export default function ServicesPage() {

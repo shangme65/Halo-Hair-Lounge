@@ -78,7 +78,7 @@ export default function Navbar() {
   return (
     <>
       <motion.nav
-        className="fixed top-0 left-0 right-0 z-[100] backdrop-blur-md bg-gradient-to-b from-dark-900 to-dark-950 border-b border-dark-800/50"
+        className="fixed top-0 left-0 right-0 z-[100] backdrop-blur-md bg-gradient-to-b from-gray-50 to-white dark:from-dark-900 dark:to-dark-950 border-b border-gray-200 dark:border-dark-800/50 shadow-sm"
         initial={{ y: -100 }}
         animate={{ y: 0 }}
         transition={{ duration: 0.5 }}
@@ -100,10 +100,10 @@ export default function Navbar() {
                 }}
                 transition={{ duration: 0.8, ease: "easeOut" }}
                 whileHover={{ scale: 1.05 }}
-                className="relative h-16 w-48"
+                className="relative h-12 w-36 sm:h-16 sm:w-48 md:h-20 md:w-60"
               >
                 <Image
-                  src="/HaloLogo5.png"
+                  src="/Halologo1.png"
                   alt="Halo Hair Lounge"
                   fill
                   className="object-contain"

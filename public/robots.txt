@@ -4,4 +4,4 @@ Disallow: /api/
 Disallow: /halo-admin-portal-2024/
 Disallow: /auth/
 
-Sitemap: https://www.halohairlounge.com/sitemap.xml
+Sitemap: https://www.halohair-lounge.site/sitemap.xml
