@@ -58,11 +58,21 @@ const adminNavigation = [
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
   const { data: session } = useSession();
 
   useEffect(() => {
     setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   // Determine which navigation to show based on user role
@@ -78,29 +88,35 @@ export default function Navbar() {
   return (
     <>
       <motion.nav
-        className="fixed top-0 left-0 right-0 z-[100] backdrop-blur-md bg-gradient-to-b from-gray-50 to-white dark:from-dark-900 dark:to-dark-950 border-b border-gray-200 dark:border-dark-800/50 shadow-sm"
+        className="fixed top-0 left-0 right-0 z-[100] transition-all duration-300"
+        style={{
+          backgroundColor: scrolled ? "rgba(255, 255, 255, 1)" : "transparent",
+          backdropFilter: scrolled ? "blur(10px)" : "none",
+        }}
         initial={{ y: -100 }}
         animate={{ y: 0 }}
         transition={{ duration: 0.5 }}
       >
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-20">
+          <div className="flex items-center justify-between h-16">
             {/* Logo */}
             <Link href="/" className="flex items-center space-x-3">
               <motion.div
                 initial={{
                   x: -100,
                   opacity: 0,
-                  filter: "drop-shadow(0 0 20px rgba(34, 197, 94, 0.8))",
+                  filter:
+                    "drop-shadow(0 0 10px rgba(0, 0, 0, 0.4)) drop-shadow(0 2px 3px rgba(0, 0, 0, 0.3))",
                 }}
                 animate={{
                   x: 0,
                   opacity: 1,
-                  filter: "drop-shadow(0 0 12px rgba(34, 197, 94, 0.6))",
+                  filter:
+                    "drop-shadow(0 0 6px rgba(0, 0, 0, 0.4)) drop-shadow(0 2px 1px rgba(0, 0, 0, 0.2))",
                 }}
                 transition={{ duration: 0.8, ease: "easeOut" }}
                 whileHover={{ scale: 1.05 }}
-                className="relative h-12 w-36 sm:h-16 sm:w-48 md:h-20 md:w-60"
+                className="relative h-16 w-44 sm:h-24 sm:w-64 md:h-28 md:w-80"
               >
                 <Image
                   src="/Halologo1.png"
@@ -157,14 +173,14 @@ export default function Navbar() {
             </div>
             {/* Mobile Menu Button */}
             <button
-              className="lg:hidden p-2 rounded-xl hover:bg-primary-50 dark:hover:bg-primary-950 transition-colors"
+              className="lg:hidden p-2 rounded-xl hover:bg-green-50 dark:hover:bg-green-950 transition-colors"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               aria-label="Toggle mobile menu"
             >
               {mobileMenuOpen ? (
-                <X className="w-6 h-6 text-white" />
+                <X className="w-6 h-6 text-green-600" />
               ) : (
-                <Menu className="w-6 h-6 text-white" />
+                <Menu className="w-6 h-6 text-green-600" />
               )}
             </button>
           </div>

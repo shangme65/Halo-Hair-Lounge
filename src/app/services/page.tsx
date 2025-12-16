@@ -78,7 +78,8 @@ export default function ServicesPage() {
               size="sm"
               onClick={() => setSelectedCategory(category)}
             >
-              {category.charAt(0) + category.slice(1).toLowerCase()}
+              {category.charAt(0) +
+                category.slice(1).toLowerCase().replace(/_/g, " ")}
             </Button>
           ))}
         </div>
@@ -113,7 +114,10 @@ export default function ServicesPage() {
                         </h3>
                         <span className="inline-block px-3 py-1 bg-primary-100 dark:bg-primary-900/20 text-primary-700 dark:text-primary-400 text-xs font-medium rounded-full mb-3">
                           {service.category.charAt(0) +
-                            service.category.slice(1).toLowerCase()}
+                            service.category
+                              .slice(1)
+                              .toLowerCase()
+                              .replace(/_/g, " ")}
                         </span>
                       </div>
                       <Scissors className="w-8 h-8 text-primary-600" />

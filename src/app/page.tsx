@@ -78,7 +78,7 @@ export default function Home() {
   return (
     <div className="min-h-screen">
       {/* Hero Section with 3D Background */}
-      <section className="relative min-h-[85vh] flex items-center justify-center overflow-hidden">
+      <section className="relative min-h-[96vh] flex items-center justify-center overflow-hidden -mt-16">
         {/* Animated 3D Background */}
         <HeroScene colorScheme={slide.colorScheme} />
 
@@ -86,7 +86,7 @@ export default function Home() {
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-dark-900/50 to-dark-900/80 -z-10" />
 
         {/* Content */}
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-32 relative z-10">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-32 pt-40 relative z-10">
           <div className="text-center max-w-5xl mx-auto">
             <AnimatePresence mode="wait">
               <motion.div
