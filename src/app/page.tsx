@@ -467,6 +467,286 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Testimonials Section */}
+      <section className="py-20 bg-gradient-to-br from-gray-50 via-white to-gray-50 overflow-hidden">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Section Header */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-10"
+          >
+            <motion.div
+              initial={{ scale: 0 }}
+              whileInView={{ scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, type: "spring" }}
+              className="inline-block mb-3 px-3 py-1.5 bg-primary-500/10 backdrop-blur-sm rounded-full border border-primary-500/20"
+            >
+              <span className="text-xs font-semibold text-primary-600 uppercase tracking-wider">
+                Client Reviews
+              </span>
+            </motion.div>
+            <h2 className="text-3xl sm:text-4xl font-display font-bold text-gray-900 mb-3">
+              Our Client Reviews
+            </h2>
+            <p className="text-base text-gray-600 max-w-2xl mx-auto">
+              Real stories from our satisfied clients
+            </p>
+          </motion.div>
+
+          {/* Carousel Testimonials */}
+          <div className="relative max-w-6xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <AnimatePresence mode="wait">
+                {[currentTestimonialIndex, currentTestimonialIndex + 1].map(
+                  (idx, position) => {
+                    const testimonial = testimonials[idx % testimonials.length];
+                    return (
+                      <motion.div
+                        key={`${idx}-${position}`}
+                        initial={{ opacity: 0, x: position === 0 ? -50 : 50 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: position === 0 ? -50 : 50 }}
+                        transition={{ duration: 0.5 }}
+                        className="bg-white rounded-2xl p-6 shadow-2xl hover:shadow-3xl transition-all duration-300 relative group"
+                        style={{
+                          boxShadow:
+                            "0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 10px 30px -5px rgba(0, 0, 0, 0.15)",
+                        }}
+                      >
+                        {/* Rating Badge - Top Right */}
+                        <div className="absolute top-4 right-4">
+                          <div
+                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r ${testimonial.ringColor} text-white shadow-lg`}
+                          >
+                            <Star className="w-3.5 h-3.5 fill-white" />
+                            <span className="text-sm font-bold">
+                              {testimonial.rating.toFixed(1)}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* User Info Section */}
+                        <div className="flex items-start gap-4 mb-4">
+                          {/* Profile Image with Colored Ring */}
+                          <div className="relative flex-shrink-0">
+                            <div
+                              className={`w-16 h-16 rounded-full bg-gradient-to-br ${testimonial.ringColor} p-0.5`}
+                            >
+                              <div className="w-full h-full rounded-full overflow-hidden bg-gray-100">
+                                <Image
+                                  src={testimonial.image}
+                                  alt={testimonial.name}
+                                  width={64}
+                                  height={64}
+                                  className="w-full h-full object-cover"
+                                  onError={(e) => {
+                                    // Fallback to initial letter if image fails
+                                    e.currentTarget.style.display = "none";
+                                    const parent =
+                                      e.currentTarget.parentElement;
+                                    if (parent) {
+                                      parent.innerHTML = `<div class="w-full h-full rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center text-white font-bold text-xl">${testimonial.name.charAt(
+                                        0
+                                      )}</div>`;
+                                    }
+                                  }}
+                                />
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Name and Role */}
+                          <div className="flex-1 pt-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <h4 className="font-bold text-gray-900 text-base">
+                                {testimonial.name}
+                              </h4>
+                              {testimonial.verified && (
+                                <div className="relative">
+                                  <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center">
+                                    <svg
+                                      viewBox="0 0 16 16"
+                                      className="w-3 h-3 text-white fill-current"
+                                    >
+                                      <path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z" />
+                                    </svg>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                            <p className="text-sm text-gray-600">
+                              {testimonial.role}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Testimonial Text */}
+                        <p className="text-gray-700 leading-relaxed text-sm">
+                          "{testimonial.text}"
+                        </p>
+                      </motion.div>
+                    );
+                  }
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* Dots Indicator */}
+            <div className="flex justify-center gap-2 mt-8">
+              {Array.from({ length: Math.ceil(testimonials.length / 2) }).map(
+                (_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentTestimonialIndex(index * 2)}
+                    className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                      currentTestimonialIndex === index * 2 ||
+                      currentTestimonialIndex === index * 2 + 1
+                        ? "bg-primary-600 w-8"
+                        : "bg-gray-300 hover:bg-gray-400"
+                    }`}
+                    aria-label={`Go to testimonial ${index + 1}`}
+                  />
+                )
+              )}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section className="py-20 bg-gradient-to-b from-white to-gray-50">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl">
+          {/* Section Header */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-16"
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              whileInView={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="inline-block px-4 py-2 bg-green-100 text-green-600 rounded-full text-sm font-semibold mb-4"
+            >
+              Got Questions?
+            </motion.div>
+            <h2 className="text-4xl sm:text-5xl font-display font-bold mb-4 bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+              Frequently Asked Questions
+            </h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Everything you need to know about our services and booking process
+            </p>
+          </motion.div>
+
+          {/* FAQ Items */}
+          <div className="space-y-4">
+            {faqs.map((faq, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                className="group"
+              >
+                <div className="bg-white rounded-2xl overflow-hidden border-2 border-gray-100 hover:border-green-300 transition-all duration-300 hover:shadow-xl">
+                  <button
+                    onClick={() => setOpenFaq(openFaq === index ? null : index)}
+                    className="w-full px-6 py-5 flex items-start justify-between text-left hover:bg-gradient-to-r hover:from-green-50 hover:to-transparent transition-all duration-300"
+                  >
+                    <div className="flex items-start gap-4 flex-1">
+                      <div
+                        className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-300 ${
+                          openFaq === index
+                            ? "bg-green-500 text-white scale-110"
+                            : "bg-gray-100 text-gray-600 group-hover:bg-green-100 group-hover:text-green-600"
+                        }`}
+                      >
+                        {index + 1}
+                      </div>
+                      <span
+                        className={`font-semibold pr-8 transition-colors ${
+                          openFaq === index ? "text-green-600" : "text-gray-900"
+                        }`}
+                      >
+                        {faq.question}
+                      </span>
+                    </div>
+                    <ChevronDown
+                      className={`w-6 h-6 flex-shrink-0 ml-4 transition-all duration-300 ${
+                        openFaq === index
+                          ? "rotate-180 text-green-500"
+                          : "text-gray-400 group-hover:text-green-500"
+                      }`}
+                    />
+                  </button>
+                  <AnimatePresence>
+                    {openFaq === index && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.3, ease: "easeInOut" }}
+                        className="overflow-hidden"
+                      >
+                        <motion.div
+                          initial={{ y: -10 }}
+                          animate={{ y: 0 }}
+                          transition={{ duration: 0.3 }}
+                          className="px-6 pb-5 ml-12"
+                        >
+                          <div className="text-gray-600 leading-relaxed border-l-4 border-green-400 pl-4 bg-gradient-to-r from-green-50 to-transparent py-4 rounded-r-lg">
+                            {faq.answer}
+                          </div>
+                        </motion.div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+
+          {/* Help CTA */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.5 }}
+            viewport={{ once: true }}
+            className="text-center mt-12"
+          >
+            <p className="text-gray-600 mb-4">
+              Still have questions? We're here to help!
+            </p>
+            <a
+              href="/contact"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-green-500 text-white rounded-full hover:bg-green-600 transition-all duration-300 hover:scale-105 font-semibold shadow-lg hover:shadow-xl"
+            >
+              Contact Us
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M17 8l4 4m0 0l-4 4m4-4H3"
+                />
+              </svg>
+            </a>
+          </motion.div>
+        </div>
+      </section>
+
       {/* CTA Section */}
       <section className="pt-12 pb-12 bg-gradient-to-br from-primary-600 via-primary-700 to-primary-800 text-white relative overflow-hidden">
         {/* Enhanced Background Effects */}
@@ -603,221 +883,6 @@ export default function Home() {
               </div>
             </motion.div>
           </motion.div>
-        </div>
-      </section>
-
-      {/* Testimonials Section */}
-      <section className="py-20 bg-gradient-to-br from-gray-50 via-white to-gray-50 overflow-hidden">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Section Header */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="text-center mb-10"
-          >
-            <motion.div
-              initial={{ scale: 0 }}
-              whileInView={{ scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, type: "spring" }}
-              className="inline-block mb-3 px-3 py-1.5 bg-primary-500/10 backdrop-blur-sm rounded-full border border-primary-500/20"
-            >
-              <span className="text-xs font-semibold text-primary-600 uppercase tracking-wider">
-                Client Reviews
-              </span>
-            </motion.div>
-            <h2 className="text-3xl sm:text-4xl font-display font-bold text-gray-900 mb-3">
-              Trusted by Thousands
-            </h2>
-            <p className="text-base text-gray-600 max-w-2xl mx-auto">
-              Real stories from our satisfied clients
-            </p>
-          </motion.div>
-
-          {/* Carousel Testimonials */}
-          <div className="relative max-w-6xl mx-auto">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <AnimatePresence mode="wait">
-                {[currentTestimonialIndex, currentTestimonialIndex + 1].map(
-                  (idx, position) => {
-                    const testimonial = testimonials[idx % testimonials.length];
-                    return (
-                      <motion.div
-                        key={`${idx}-${position}`}
-                        initial={{ opacity: 0, x: position === 0 ? -50 : 50 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: position === 0 ? -50 : 50 }}
-                        transition={{ duration: 0.5 }}
-                        className="bg-white rounded-2xl p-6 shadow-2xl hover:shadow-3xl transition-all duration-300 relative group"
-                        style={{
-                          boxShadow:
-                            "0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 10px 30px -5px rgba(0, 0, 0, 0.15)",
-                        }}
-                      >
-                        {/* Rating Badge - Top Right */}
-                        <div className="absolute top-4 right-4">
-                          <div
-                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r ${testimonial.ringColor} text-white shadow-lg`}
-                          >
-                            <Star className="w-3.5 h-3.5 fill-white" />
-                            <span className="text-sm font-bold">
-                              {testimonial.rating.toFixed(1)}
-                            </span>
-                          </div>
-                        </div>
-
-                        {/* User Info Section */}
-                        <div className="flex items-start gap-4 mb-4">
-                          {/* Profile Image with Colored Ring */}
-                          <div className="relative flex-shrink-0">
-                            <div
-                              className={`w-16 h-16 rounded-full bg-gradient-to-br ${testimonial.ringColor} p-0.5`}
-                            >
-                              <div className="w-full h-full rounded-full overflow-hidden bg-gray-100">
-                                <Image
-                                  src={testimonial.image}
-                                  alt={testimonial.name}
-                                  width={64}
-                                  height={64}
-                                  className="w-full h-full object-cover"
-                                  onError={(e) => {
-                                    // Fallback to initial letter if image fails
-                                    e.currentTarget.style.display = "none";
-                                    const parent =
-                                      e.currentTarget.parentElement;
-                                    if (parent) {
-                                      parent.innerHTML = `<div class="w-full h-full rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center text-white font-bold text-xl">${testimonial.name.charAt(
-                                        0
-                                      )}</div>`;
-                                    }
-                                  }}
-                                />
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Name and Role */}
-                          <div className="flex-1 pt-1">
-                            <div className="flex items-center gap-2 mb-1">
-                              <h4 className="font-bold text-gray-900 text-base">
-                                {testimonial.name}
-                              </h4>
-                              {testimonial.verified && (
-                                <CheckCircle className="w-5 h-5 text-blue-500" />
-                              )}
-                            </div>
-                            <p className="text-sm text-gray-600">
-                              {testimonial.role}
-                            </p>
-                          </div>
-                        </div>
-
-                        {/* Stars */}
-                        <div className="flex gap-1 mb-4">
-                          {[...Array(5)].map((_, i) => (
-                            <Star
-                              key={i}
-                              className="w-5 h-5 fill-yellow-400 text-yellow-400"
-                            />
-                          ))}
-                        </div>
-
-                        {/* Testimonial Text */}
-                        <p className="text-gray-700 leading-relaxed text-sm">
-                          "{testimonial.text}"
-                        </p>
-                      </motion.div>
-                    );
-                  }
-                )}
-              </AnimatePresence>
-            </div>
-
-            {/* Dots Indicator */}
-            <div className="flex justify-center gap-2 mt-8">
-              {Array.from({ length: Math.ceil(testimonials.length / 2) }).map(
-                (_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setCurrentTestimonialIndex(index * 2)}
-                    className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                      currentTestimonialIndex === index * 2 ||
-                      currentTestimonialIndex === index * 2 + 1
-                        ? "bg-primary-600 w-8"
-                        : "bg-gray-300 hover:bg-gray-400"
-                    }`}
-                    aria-label={`Go to testimonial ${index + 1}`}
-                  />
-                )
-              )}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* FAQ Section */}
-      <section className="py-20 bg-white">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl">
-          {/* Section Header */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="text-center mb-16"
-          >
-            <h2 className="text-4xl sm:text-5xl font-display font-bold text-gray-900 mb-4">
-              Frequently Asked Questions
-            </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Find answers to common questions about our services
-            </p>
-          </motion.div>
-
-          {/* FAQ Items */}
-          <div className="space-y-4">
-            {faqs.map((faq, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                className="bg-gray-50 rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300"
-              >
-                <button
-                  onClick={() => setOpenFaq(openFaq === index ? null : index)}
-                  className="w-full px-6 py-5 flex items-center justify-between text-left hover:bg-gray-100 transition-colors duration-200"
-                >
-                  <span className="font-semibold text-gray-900 pr-8">
-                    {faq.question}
-                  </span>
-                  <ChevronDown
-                    className={`w-5 h-5 text-primary-600 flex-shrink-0 transition-transform duration-300 ${
-                      openFaq === index ? "rotate-180" : ""
-                    }`}
-                  />
-                </button>
-                <AnimatePresence>
-                  {openFaq === index && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.3 }}
-                      className="overflow-hidden"
-                    >
-                      <div className="px-6 pb-5 text-gray-600 leading-relaxed">
-                        {faq.answer}
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </motion.div>
-            ))}
-          </div>
         </div>
       </section>
     </div>
