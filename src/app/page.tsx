@@ -210,7 +210,7 @@ export default function Home() {
 
   useEffect(() => {
     if (isPaused) return;
-    
+
     const testimonialTimer = setInterval(() => {
       setCurrentTestimonialIndex((prev) => (prev + 2) % testimonials.length);
     }, 5000);
@@ -353,13 +353,16 @@ export default function Home() {
               transition={{ duration: 0.5, delay: 0.2 }}
               className="inline-block mb-4 px-6 py-2 bg-gradient-to-r from-green-100 to-primary-100 dark:from-green-950 dark:to-primary-950 rounded-full border border-green-200 dark:border-green-800 shadow-lg shadow-green-500/20"
             >
-              <span className="text-sm font-semibold text-green-700 dark:text-green-400 uppercase tracking-wider">
+              <span className="text-sm font-semibold text-green-700 dark:text-green-400 tracking-wider">
                 Our Commitment
               </span>
             </motion.div>
 
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-display font-bold mb-5 bg-gradient-to-r from-green-600 via-primary-600 to-green-700 bg-clip-text text-transparent leading-tight whitespace-nowrap">
-              Why Choose Halo Hair Lounge
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-display font-bold mb-5 leading-tight">
+              <span className="text-gray-900">Why Choose </span>
+              <span className="bg-gradient-to-r from-green-600 via-primary-600 to-green-700 bg-clip-text text-transparent">
+                Halo Hair Lounge
+              </span>
             </h2>
 
             <p className="text-lg sm:text-xl text-dark-600 dark:text-dark-400 leading-relaxed max-w-3xl mx-auto">
@@ -471,7 +474,7 @@ export default function Home() {
       </section>
 
       {/* Testimonials Section */}
-      <section className="py-20 bg-gradient-to-br from-gray-50 via-white to-gray-50 overflow-hidden">
+      <section className="pt-20 bg-gradient-to-br from-gray-50 via-white to-gray-50 overflow-hidden">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           {/* Section Header */}
           <motion.div
@@ -488,7 +491,8 @@ export default function Home() {
               transition={{ duration: 0.5, type: "spring" }}
               className="inline-block mb-3 px-3 py-1.5 bg-primary-500/10 backdrop-blur-sm rounded-full border border-primary-500/20 shadow-lg hover:shadow-xl transition-shadow duration-300"
               style={{
-                boxShadow: "0 4px 15px rgba(34, 197, 94, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.5)"
+                boxShadow:
+                  "0 4px 15px rgba(34, 197, 94, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.5)",
               }}
             >
               <span className="text-xs font-semibold text-primary-600 uppercase tracking-wider drop-shadow-sm">
@@ -499,7 +503,7 @@ export default function Home() {
               Our Client <span className="text-green-500">Reviews</span>
             </h2>
             <p className="text-base text-gray-600 max-w-2xl mx-auto">
-              Real stories from our satisfied clients
+              Feedbacks from our satisfied clients
             </p>
           </motion.div>
 
@@ -651,9 +655,13 @@ export default function Home() {
               initial={{ scale: 0.9, opacity: 0 }}
               whileInView={{ scale: 1, opacity: 1 }}
               transition={{ duration: 0.5, delay: 0.2 }}
-              className="inline-block px-4 py-2 bg-green-100 text-green-600 rounded-full text-sm font-semibold mb-3"
+              className="inline-block px-4 py-2 bg-green-100 text-green-600 rounded-full text-sm font-semibold mb-3 shadow-lg hover:shadow-xl transition-shadow duration-300"
+              style={{
+                boxShadow:
+                  "0 4px 15px rgba(34, 197, 94, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.5)",
+              }}
             >
-              Got Questions?
+              <span className="drop-shadow-sm">Got Questions?</span>
             </motion.div>
             <h2 className="text-2xl sm:text-3xl font-display font-bold mb-2 bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
               Frequently Asked <span className="text-green-500">Questions</span>
@@ -746,6 +754,10 @@ export default function Home() {
             <a
               href="/contact"
               className="inline-flex items-center gap-2 px-6 py-3 bg-green-500 text-white rounded-full hover:bg-green-600 transition-all duration-300 hover:scale-105 font-semibold shadow-lg hover:shadow-xl"
+              style={{
+                boxShadow:
+                  "0 4px 20px rgba(34, 197, 94, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2)",
+              }}
             >
               Contact Us
               <svg
