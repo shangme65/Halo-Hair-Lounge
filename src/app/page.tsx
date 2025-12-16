@@ -567,14 +567,24 @@ export default function Home() {
                               </h4>
                               {testimonial.verified && (
                                 <div className="relative">
-                                  <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center">
-                                    <svg
-                                      viewBox="0 0 16 16"
-                                      className="w-3 h-3 text-white fill-current"
-                                    >
-                                      <path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z" />
-                                    </svg>
-                                  </div>
+                                  <svg
+                                    viewBox="0 0 22 22"
+                                    className="w-4 h-4"
+                                    fill="none"
+                                  >
+                                    <path
+                                      d="M11 0L13.09 2.26L16.18 2.63L16.54 5.72L18.8 7.8L16.54 9.88L16.18 12.97L13.09 13.34L11 15.6L8.91 13.34L5.82 12.97L5.46 9.88L3.2 7.8L5.46 5.72L5.82 2.63L8.91 2.26L11 0Z"
+                                      fill="#22c55e"
+                                      transform="translate(0, 3.2) scale(1)"
+                                    />
+                                    <path
+                                      d="M8.5 11L10 12.5L13.5 9"
+                                      stroke="white"
+                                      strokeWidth="1.5"
+                                      strokeLinecap="square"
+                                      strokeLinejoin="miter"
+                                    />
+                                  </svg>
                                 </div>
                               )}
                             </div>
