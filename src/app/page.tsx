@@ -198,6 +198,7 @@ export default function Home() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [currentTestimonialIndex, setCurrentTestimonialIndex] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -208,12 +209,14 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
+    if (isPaused) return;
+    
     const testimonialTimer = setInterval(() => {
       setCurrentTestimonialIndex((prev) => (prev + 2) % testimonials.length);
     }, 5000);
 
     return () => clearInterval(testimonialTimer);
-  }, []);
+  }, [isPaused]);
 
   const slide = heroSlides[currentSlide];
 
@@ -483,14 +486,17 @@ export default function Home() {
               whileInView={{ scale: 1 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, type: "spring" }}
-              className="inline-block mb-3 px-3 py-1.5 bg-primary-500/10 backdrop-blur-sm rounded-full border border-primary-500/20"
+              className="inline-block mb-3 px-3 py-1.5 bg-primary-500/10 backdrop-blur-sm rounded-full border border-primary-500/20 shadow-lg hover:shadow-xl transition-shadow duration-300"
+              style={{
+                boxShadow: "0 4px 15px rgba(34, 197, 94, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.5)"
+              }}
             >
-              <span className="text-xs font-semibold text-primary-600 uppercase tracking-wider">
+              <span className="text-xs font-semibold text-primary-600 uppercase tracking-wider drop-shadow-sm">
                 Client Reviews
               </span>
             </motion.div>
             <h2 className="text-3xl sm:text-4xl font-display font-bold text-gray-900 mb-3">
-              Our Client Reviews
+              Our Client <span className="text-green-500">Reviews</span>
             </h2>
             <p className="text-base text-gray-600 max-w-2xl mx-auto">
               Real stories from our satisfied clients
@@ -511,11 +517,14 @@ export default function Home() {
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: position === 0 ? -50 : 50 }}
                         transition={{ duration: 0.5 }}
-                        className="bg-white rounded-2xl p-6 shadow-2xl hover:shadow-3xl transition-all duration-300 relative group"
+                        className="bg-white rounded-2xl p-6 shadow-2xl hover:shadow-3xl transition-all duration-300 relative group cursor-pointer"
                         style={{
                           boxShadow:
                             "0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 10px 30px -5px rgba(0, 0, 0, 0.15)",
                         }}
+                        onMouseEnter={() => setIsPaused(true)}
+                        onMouseLeave={() => setIsPaused(false)}
+                        onClick={() => setIsPaused(!isPaused)}
                       >
                         {/* Rating Badge - Top Right */}
                         <div className="absolute top-4 right-4">
@@ -569,7 +578,7 @@ export default function Home() {
                                 <div className="relative">
                                   <svg
                                     viewBox="0 0 22 22"
-                                    className="w-4 h-4"
+                                    className="w-5 h-5"
                                     fill="none"
                                   >
                                     <path
