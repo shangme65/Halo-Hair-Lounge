@@ -225,13 +225,15 @@ export default function Home() {
       {/* Hero Section with 3D Background */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16 dark:bg-dark-950">
         {/* Animated 3D Background */}
-        <HeroScene colorScheme={slide.colorScheme} />
+        <div className="absolute inset-0 z-0">
+          <HeroScene colorScheme={slide.colorScheme} />
+        </div>
 
         {/* Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-dark-900/50 to-dark-900/80 -z-10" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-dark-900/50 to-dark-900/80 dark:via-transparent dark:to-dark-900/30 z-10" />
 
         {/* Content */}
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-32 pt-40 relative z-10">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-32 pt-40 relative z-20">
           <div className="text-center max-w-5xl mx-auto">
             <AnimatePresence mode="wait">
               <motion.div
@@ -359,8 +361,8 @@ export default function Home() {
             </motion.div>
 
             <h2 className="text-2xl sm:text-3xl lg:text-4xl font-display font-bold mb-5 leading-tight">
-              <span className="text-gray-900">Why Choose </span>
-              <span className="bg-gradient-to-r from-green-600 via-primary-600 to-green-700 bg-clip-text text-transparent">
+              <span className="text-gray-900 dark:text-white">Why Choose </span>
+              <span className="bg-gradient-to-r from-green-600 via-primary-600 to-green-700 dark:from-green-400 dark:via-primary-400 dark:to-green-500 bg-clip-text text-transparent">
                 Halo Hair Lounge
               </span>
             </h2>
@@ -619,25 +621,6 @@ export default function Home() {
                   }
                 )}
               </AnimatePresence>
-            </div>
-
-            {/* Dots Indicator */}
-            <div className="flex justify-center gap-2 mt-8">
-              {Array.from({ length: Math.ceil(testimonials.length / 2) }).map(
-                (_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setCurrentTestimonialIndex(index * 2)}
-                    className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                      currentTestimonialIndex === index * 2 ||
-                      currentTestimonialIndex === index * 2 + 1
-                        ? "bg-primary-600 w-8"
-                        : "bg-gray-300 hover:bg-gray-400"
-                    }`}
-                    aria-label={`Go to testimonial ${index + 1}`}
-                  />
-                )
-              )}
             </div>
           </div>
         </div>

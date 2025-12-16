@@ -102,9 +102,10 @@ export default function HeroScene({ colorScheme = "purple" }: HeroSceneProps) {
   }, []);
 
   return (
-    <div className="absolute inset-0 -z-10">
+    <div className="absolute inset-0 z-0 pointer-events-none">
       <Canvas
         camera={{ position: [0, 0, isMobile ? 7 : 6], fov: isMobile ? 50 : 45 }}
+        className="!absolute !inset-0"
       >
         <ambientLight intensity={0.3} />
         <directionalLight position={[10, 10, 5]} intensity={1} />

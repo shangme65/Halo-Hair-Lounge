@@ -155,13 +155,23 @@ export default function AdminSetupPage() {
               Admin account has already been initialized. Only administrators
               can access this page.
             </p>
-            <Button
-              onClick={() => router.push("/")}
-              size="lg"
-              className="w-full"
-            >
-              Go to Home
-            </Button>
+            <div className="space-y-3">
+              <Button
+                onClick={() => router.push("/auth/signin")}
+                size="lg"
+                className="w-full"
+              >
+                Sign In as Admin
+              </Button>
+              <Button
+                onClick={() => router.push("/")}
+                size="lg"
+                variant="outline"
+                className="w-full"
+              >
+                Go to Home
+              </Button>
+            </div>
           </motion.div>
         </div>
       );
