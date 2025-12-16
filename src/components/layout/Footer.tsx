@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import {
   Facebook,
@@ -64,28 +65,22 @@ export default function Footer() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
             >
-              <h3 className="text-3xl font-display font-bold bg-gradient-to-r from-green-400 via-primary-500 to-green-600 bg-clip-text text-transparent mb-4">
-                Halo Hair Lounge
-              </h3>
+              <div className="relative h-24 w-64 mb-4 p-3 rounded-lg bg-gradient-to-br from-green-500/10 via-green-400/5 to-transparent">
+                <Image
+                  src="/Halologo1.png"
+                  alt="Halo Hair Lounge"
+                  fill
+                  className="object-contain"
+                  style={{
+                    filter:
+                      "drop-shadow(0 0 12px rgba(34, 197, 94, 0.5)) drop-shadow(0 0 20px rgba(134, 239, 172, 0.3)) brightness(1.15)",
+                  }}
+                />
+              </div>
               <p className="text-dark-300 mb-6 leading-relaxed">
                 Premium hair care and styling services. Experience luxury,
                 creativity, and personalized attention at our modern salon.
               </p>
-
-              <div className="space-y-3">
-                <div className="flex items-center space-x-3 text-dark-300 hover:text-white transition-colors">
-                  <MapPin className="w-5 h-5 text-green-500" />
-                  <span>123 Beauty Street, Style City, SC 12345</span>
-                </div>
-                <div className="flex items-center space-x-3 text-dark-300 hover:text-white transition-colors">
-                  <Phone className="w-5 h-5 text-green-500" />
-                  <span>(555) 123-4567</span>
-                </div>
-                <div className="flex items-center space-x-3 text-dark-300 hover:text-white transition-colors">
-                  <Mail className="w-5 h-5 text-green-500" />
-                  <span>hello@halohairlounge.com</span>
-                </div>
-              </div>
             </motion.div>
           </div>
 

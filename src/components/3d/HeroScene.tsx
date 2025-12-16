@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useEffect, useState } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { Sphere, MeshDistortMaterial } from "@react-three/drei";
 import * as THREE from "three";
@@ -17,9 +17,13 @@ const colorSchemes = {
   green: { main: "#22c55e", accent: "#16a34a" },
 };
 
-function AnimatedBlob({ colorScheme = "purple" }: HeroSceneProps) {
+function AnimatedBlob({
+  colorScheme = "purple",
+  isMobile,
+}: HeroSceneProps & { isMobile: boolean }) {
   const meshRef = useRef<THREE.Mesh>(null!);
   const colors = colorSchemes[colorScheme];
+  const scale = isMobile ? 2.2 : 3.0;
 
   useFrame((state) => {
     const time = state.clock.getElapsedTime();
@@ -30,7 +34,7 @@ function AnimatedBlob({ colorScheme = "purple" }: HeroSceneProps) {
   });
 
   return (
-    <Sphere ref={meshRef} args={[1, 100, 200]} scale={2.5}>
+    <Sphere ref={meshRef} args={[1, 100, 200]} scale={scale}>
       <MeshDistortMaterial
         color={colors.main}
         attach="material"
@@ -43,9 +47,14 @@ function AnimatedBlob({ colorScheme = "purple" }: HeroSceneProps) {
   );
 }
 
-function FloatingRings({ colorScheme = "purple" }: HeroSceneProps) {
+function FloatingRings({
+  colorScheme = "purple",
+  isMobile,
+}: HeroSceneProps & { isMobile: boolean }) {
   const group = useRef<THREE.Group>(null!);
   const colors = colorSchemes[colorScheme];
+  const ringSize = isMobile ? 1.9 : 2.5;
+  const ringThickness = isMobile ? 0.05 : 0.06;
 
   useFrame((state) => {
     const time = state.clock.getElapsedTime();
@@ -58,7 +67,7 @@ function FloatingRings({ colorScheme = "purple" }: HeroSceneProps) {
   return (
     <group ref={group}>
       <mesh rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[2, 0.05, 16, 100]} />
+        <torusGeometry args={[ringSize, ringThickness, 16, 100]} />
         <meshStandardMaterial
           color={colors.accent}
           metalness={0.8}
@@ -66,7 +75,7 @@ function FloatingRings({ colorScheme = "purple" }: HeroSceneProps) {
         />
       </mesh>
       <mesh rotation={[Math.PI / 2, Math.PI / 4, 0]} scale={1.2}>
-        <torusGeometry args={[2, 0.03, 16, 100]} />
+        <torusGeometry args={[ringSize, ringThickness * 0.6, 16, 100]} />
         <meshStandardMaterial
           color={colors.main}
           metalness={0.8}
@@ -80,15 +89,29 @@ function FloatingRings({ colorScheme = "purple" }: HeroSceneProps) {
 }
 
 export default function HeroScene({ colorScheme = "purple" }: HeroSceneProps) {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
   return (
     <div className="absolute inset-0 -z-10">
-      <Canvas camera={{ position: [0, 0, 6], fov: 45 }}>
+      <Canvas
+        camera={{ position: [0, 0, isMobile ? 7 : 6], fov: isMobile ? 50 : 45 }}
+      >
         <ambientLight intensity={0.3} />
         <directionalLight position={[10, 10, 5]} intensity={1} />
         <pointLight position={[-10, -10, -5]} intensity={0.5} color="#ffffff" />
 
-        <AnimatedBlob colorScheme={colorScheme} />
-        <FloatingRings colorScheme={colorScheme} />
+        <AnimatedBlob colorScheme={colorScheme} isMobile={isMobile} />
+        <FloatingRings colorScheme={colorScheme} isMobile={isMobile} />
       </Canvas>
     </div>
   );

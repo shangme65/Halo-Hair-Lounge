@@ -76,9 +76,9 @@ export default function Home() {
   const slide = heroSlides[currentSlide];
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen -mt-16">
       {/* Hero Section with 3D Background */}
-      <section className="relative min-h-[96vh] flex items-center justify-center overflow-hidden -mt-16">
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16">
         {/* Animated 3D Background */}
         <HeroScene colorScheme={slide.colorScheme} />
 
@@ -326,12 +326,29 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section className="pt-8 pb-24 bg-gradient-to-br from-primary-600 via-primary-700 to-primary-800 text-white relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
+      <section className="pt-16 pb-32 bg-gradient-to-br from-primary-600 via-primary-700 to-primary-800 text-white relative overflow-hidden">
+        {/* Enhanced Background Effects */}
+        <div className="absolute inset-0 opacity-20">
           <div className="absolute top-0 left-1/4 w-96 h-96 bg-white rounded-full blur-3xl animate-pulse-slow" />
           <div
             className="absolute bottom-0 right-1/4 w-96 h-96 bg-secondary-500 rounded-full blur-3xl animate-pulse-slow"
             style={{ animationDelay: "1s" }}
+          />
+          <div
+            className="absolute top-1/2 left-1/3 w-80 h-80 bg-green-400 rounded-full blur-3xl animate-pulse-slow"
+            style={{ animationDelay: "2s" }}
+          />
+        </div>
+
+        {/* Decorative Grid Pattern */}
+        <div className="absolute inset-0 opacity-5">
+          <div
+            className="h-full w-full"
+            style={{
+              backgroundImage:
+                "linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px)",
+              backgroundSize: "50px 50px",
+            }}
           />
         </div>
 
@@ -341,20 +358,99 @@ export default function Home() {
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
+            className="max-w-4xl mx-auto"
           >
-            <h2 className="text-4xl sm:text-5xl font-display font-bold mb-6">
-              Ready for Your Transformation?
-            </h2>
-            <p className="text-xl text-primary-100 mb-10 max-w-2xl mx-auto">
+            {/* Accent Badge */}
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="inline-block mb-6 px-6 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/20 shadow-xl"
+            >
+              <span className="text-sm font-semibold text-white uppercase tracking-wider flex items-center gap-2">
+                <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+                Book Now & Get Started
+              </span>
+            </motion.div>
+
+            {/* Main Heading with Enhanced Typography */}
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="text-4xl sm:text-5xl lg:text-6xl font-display font-bold mb-6 leading-tight"
+            >
+              <span className="inline-block bg-gradient-to-r from-white via-green-100 to-white bg-clip-text text-transparent drop-shadow-2xl">
+                Ready for Your
+              </span>
+              <br />
+              <span className="inline-block bg-gradient-to-r from-green-200 via-white to-green-200 bg-clip-text text-transparent drop-shadow-2xl">
+                Transformation?
+              </span>
+            </motion.h2>
+
+            {/* Subtitle with enhanced styling */}
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+              className="text-lg sm:text-xl lg:text-2xl text-green-50 mb-12 max-w-3xl mx-auto leading-relaxed font-light"
+            >
               Book your appointment today and experience the Halo difference
-            </p>
-            <Link href="/book">
-              <Button size="lg" variant="secondary" className="group">
-                <Calendar className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" />
-                Book Your Appointment
-                <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
-              </Button>
-            </Link>
+              <span className="block mt-2 text-base text-green-100/80">
+                Premium styling • Expert care • Personalized service
+              </span>
+            </motion.p>
+
+            {/* Enhanced CTA Button */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{
+                duration: 0.6,
+                delay: 0.5,
+                type: "spring",
+                stiffness: 200,
+              }}
+            >
+              <Link href="/book">
+                <Button
+                  size="lg"
+                  variant="secondary"
+                  className="group shadow-2xl hover:shadow-green-500/50 transition-all duration-300 text-lg px-10 py-6"
+                >
+                  <Calendar className="w-6 h-6 mr-3 group-hover:scale-110 group-hover:rotate-12 transition-all duration-300" />
+                  Book Your Appointment
+                  <ArrowRight className="w-6 h-6 ml-3 group-hover:translate-x-2 transition-transform duration-300" />
+                </Button>
+              </Link>
+            </motion.div>
+
+            {/* Trust Indicators */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.6 }}
+              className="mt-12 flex flex-wrap justify-center gap-8 text-green-100/80 text-sm"
+            >
+              <div className="flex items-center gap-2">
+                <span className="text-green-400 text-xl">✓</span>
+                <span>Expert Stylists</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-green-400 text-xl">✓</span>
+                <span>Premium Products</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-green-400 text-xl">✓</span>
+                <span>Flexible Scheduling</span>
+              </div>
+            </motion.div>
           </motion.div>
         </div>
       </section>

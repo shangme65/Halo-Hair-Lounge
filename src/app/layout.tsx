@@ -105,7 +105,7 @@ export default function RootLayout({
       >
         <Providers>
           <Navbar />
-          <main className="pt-20">{children}</main>
+          <main>{children}</main>
           <Footer />
           <Toaster
             position="top-right"
