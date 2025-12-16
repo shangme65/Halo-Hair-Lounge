@@ -221,9 +221,9 @@ export default function Home() {
   const slide = heroSlides[currentSlide];
 
   return (
-    <div className="min-h-screen -mt-16">
+    <div className="min-h-screen -mt-16 dark:bg-dark-950">
       {/* Hero Section with 3D Background */}
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16">
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16 dark:bg-dark-950">
         {/* Animated 3D Background */}
         <HeroScene colorScheme={slide.colorScheme} />
 
@@ -474,7 +474,7 @@ export default function Home() {
       </section>
 
       {/* Testimonials Section */}
-      <section className="pt-20 bg-gradient-to-br from-gray-50 via-white to-gray-50 overflow-hidden">
+      <section className="pt-20 bg-gradient-to-br from-gray-50 via-white to-gray-50 dark:from-dark-900 dark:via-dark-950 dark:to-dark-900 overflow-hidden">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           {/* Section Header */}
           <motion.div
@@ -489,7 +489,7 @@ export default function Home() {
               whileInView={{ scale: 1 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, type: "spring" }}
-              className="inline-block mb-3 px-3 py-1.5 bg-primary-500/10 backdrop-blur-sm rounded-full border border-primary-500/20 shadow-lg hover:shadow-xl transition-shadow duration-300"
+              className="inline-block mb-3 px-3 py-1.5 bg-primary-500/10 dark:bg-primary-500/20 backdrop-blur-sm rounded-full border border-primary-500/20 dark:border-primary-500/30 shadow-lg hover:shadow-xl transition-shadow duration-300"
               style={{
                 boxShadow:
                   "0 4px 15px rgba(34, 197, 94, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.5)",
@@ -499,10 +499,13 @@ export default function Home() {
                 Client Reviews
               </span>
             </motion.div>
-            <h2 className="text-3xl sm:text-4xl font-display font-bold text-gray-900 mb-3">
-              Our Client <span className="text-green-500">Reviews</span>
+            <h2 className="text-3xl sm:text-4xl font-display font-bold text-gray-900 dark:text-white mb-3">
+              Our Client{" "}
+              <span className="text-green-500 dark:text-green-400">
+                Reviews
+              </span>
             </h2>
-            <p className="text-base text-gray-600 max-w-2xl mx-auto">
+            <p className="text-base text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
               Feedbacks from our satisfied clients
             </p>
           </motion.div>
@@ -521,7 +524,7 @@ export default function Home() {
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: position === 0 ? -50 : 50 }}
                         transition={{ duration: 0.5 }}
-                        className="bg-white rounded-2xl p-6 shadow-2xl hover:shadow-3xl transition-all duration-300 relative group cursor-pointer"
+                        className="bg-white dark:bg-dark-800 rounded-2xl p-6 shadow-2xl hover:shadow-3xl transition-all duration-300 relative group cursor-pointer"
                         style={{
                           boxShadow:
                             "0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 10px 30px -5px rgba(0, 0, 0, 0.15)",
@@ -575,7 +578,7 @@ export default function Home() {
                           {/* Name and Role */}
                           <div className="flex-1 pt-1">
                             <div className="flex items-center gap-2 mb-1">
-                              <h4 className="font-bold text-gray-900 text-base">
+                              <h4 className="font-bold text-gray-900 dark:text-white text-base">
                                 {testimonial.name}
                               </h4>
                               {testimonial.verified && (
@@ -601,14 +604,14 @@ export default function Home() {
                                 </div>
                               )}
                             </div>
-                            <p className="text-sm text-gray-600">
+                            <p className="text-sm text-gray-600 dark:text-gray-400">
                               {testimonial.role}
                             </p>
                           </div>
                         </div>
 
                         {/* Testimonial Text */}
-                        <p className="text-gray-700 leading-relaxed text-sm">
+                        <p className="text-gray-700 dark:text-gray-300 leading-relaxed text-sm">
                           "{testimonial.text}"
                         </p>
                       </motion.div>
@@ -641,7 +644,7 @@ export default function Home() {
       </section>
 
       {/* FAQ Section */}
-      <section className="py-8 bg-gradient-to-b from-white to-gray-50">
+      <section className="py-8 bg-gradient-to-b from-white to-gray-50 dark:from-dark-950 dark:to-dark-900">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl">
           {/* Section Header */}
           <motion.div
@@ -655,7 +658,7 @@ export default function Home() {
               initial={{ scale: 0.9, opacity: 0 }}
               whileInView={{ scale: 1, opacity: 1 }}
               transition={{ duration: 0.5, delay: 0.2 }}
-              className="inline-block px-4 py-2 bg-green-100 text-green-600 rounded-full text-sm font-semibold mb-3 shadow-lg hover:shadow-xl transition-shadow duration-300"
+              className="inline-block px-4 py-2 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded-full text-sm font-semibold mb-3 shadow-lg hover:shadow-xl transition-shadow duration-300"
               style={{
                 boxShadow:
                   "0 4px 15px rgba(34, 197, 94, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.5)",
@@ -663,10 +666,15 @@ export default function Home() {
             >
               <span className="drop-shadow-sm">Got Questions?</span>
             </motion.div>
-            <h2 className="text-2xl sm:text-3xl font-display font-bold mb-2 bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
-              Frequently Asked <span className="text-green-500">Questions</span>
+            <h2 className="text-2xl sm:text-3xl font-display font-bold mb-2">
+              <span className="bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
+                Frequently Asked{" "}
+              </span>
+              <span className="text-green-500 dark:text-green-400">
+                Questions
+              </span>
             </h2>
-            <p className="text-base text-gray-600 max-w-2xl mx-auto">
+            <p className="text-base text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
               Everything you need to know about our services and booking process
             </p>
           </motion.div>
@@ -682,24 +690,26 @@ export default function Home() {
                 transition={{ duration: 0.5, delay: index * 0.1 }}
                 className="group"
               >
-                <div className="bg-white rounded-2xl overflow-hidden border-2 border-gray-100 hover:border-green-300 transition-all duration-300 hover:shadow-xl">
+                <div className="bg-white dark:bg-dark-800 rounded-2xl overflow-hidden border-2 border-gray-100 dark:border-dark-700 hover:border-green-300 dark:hover:border-green-500 transition-all duration-300 hover:shadow-xl">
                   <button
                     onClick={() => setOpenFaq(openFaq === index ? null : index)}
-                    className="w-full px-6 py-3 flex items-start justify-between text-left hover:bg-gradient-to-r hover:from-green-50 hover:to-transparent transition-all duration-300"
+                    className="w-full px-6 py-3 flex items-start justify-between text-left hover:bg-gradient-to-r hover:from-green-50 dark:hover:from-green-900/20 hover:to-transparent transition-all duration-300"
                   >
                     <div className="flex items-start gap-4 flex-1">
                       <div
                         className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-300 ${
                           openFaq === index
-                            ? "bg-green-500 text-white scale-110"
-                            : "bg-gray-100 text-gray-600 group-hover:bg-green-100 group-hover:text-green-600"
+                            ? "bg-green-500 dark:bg-green-600 text-white scale-110"
+                            : "bg-gray-100 dark:bg-dark-700 text-gray-600 dark:text-gray-400 group-hover:bg-green-100 dark:group-hover:bg-green-900/30 group-hover:text-green-600 dark:group-hover:text-green-400"
                         }`}
                       >
                         {index + 1}
                       </div>
                       <span
                         className={`font-semibold pr-8 transition-colors ${
-                          openFaq === index ? "text-green-600" : "text-gray-900"
+                          openFaq === index
+                            ? "text-green-600 dark:text-green-400"
+                            : "text-gray-900 dark:text-white"
                         }`}
                       >
                         {faq.question}
@@ -708,8 +718,8 @@ export default function Home() {
                     <ChevronDown
                       className={`w-6 h-6 flex-shrink-0 ml-4 transition-all duration-300 ${
                         openFaq === index
-                          ? "rotate-180 text-green-500"
-                          : "text-gray-400 group-hover:text-green-500"
+                          ? "rotate-180 text-green-500 dark:text-green-400"
+                          : "text-gray-400 dark:text-gray-600 group-hover:text-green-500 dark:group-hover:text-green-400"
                       }`}
                     />
                   </button>
@@ -728,7 +738,7 @@ export default function Home() {
                           transition={{ duration: 0.3 }}
                           className="px-6 pb-3 ml-12"
                         >
-                          <div className="text-gray-600 leading-relaxed border-l-4 border-green-400 pl-4 bg-gradient-to-r from-green-50 to-transparent py-2 rounded-r-lg">
+                          <div className="text-gray-600 dark:text-gray-400 leading-relaxed border-l-4 border-green-400 dark:border-green-500 pl-4 bg-gradient-to-r from-green-50 dark:from-green-900/20 to-transparent py-2 rounded-r-lg">
                             {faq.answer}
                           </div>
                         </motion.div>
@@ -748,7 +758,7 @@ export default function Home() {
             viewport={{ once: true }}
             className="text-center mt-6"
           >
-            <p className="text-gray-600 mb-4">
+            <p className="text-gray-600 dark:text-gray-400 mb-4">
               Still have questions? We're here to help!
             </p>
             <a
