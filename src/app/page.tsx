@@ -628,7 +628,7 @@ export default function Home() {
       </section>
 
       {/* FAQ Section */}
-      <section className="py-20 bg-gradient-to-b from-white to-gray-50">
+      <section className="py-8 bg-gradient-to-b from-white to-gray-50">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl">
           {/* Section Header */}
           <motion.div
@@ -636,26 +636,26 @@ export default function Home() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="text-center mb-16"
+            className="text-center mb-8"
           >
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               whileInView={{ scale: 1, opacity: 1 }}
               transition={{ duration: 0.5, delay: 0.2 }}
-              className="inline-block px-4 py-2 bg-green-100 text-green-600 rounded-full text-sm font-semibold mb-4"
+              className="inline-block px-4 py-2 bg-green-100 text-green-600 rounded-full text-sm font-semibold mb-3"
             >
               Got Questions?
             </motion.div>
-            <h2 className="text-4xl sm:text-5xl font-display font-bold mb-4 bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
-              Frequently Asked Questions
+            <h2 className="text-2xl sm:text-3xl font-display font-bold mb-2 bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+              Frequently Asked <span className="text-green-500">Questions</span>
             </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            <p className="text-base text-gray-600 max-w-2xl mx-auto">
               Everything you need to know about our services and booking process
             </p>
           </motion.div>
 
           {/* FAQ Items */}
-          <div className="space-y-4">
+          <div className="space-y-2">
             {faqs.map((faq, index) => (
               <motion.div
                 key={index}
@@ -668,7 +668,7 @@ export default function Home() {
                 <div className="bg-white rounded-2xl overflow-hidden border-2 border-gray-100 hover:border-green-300 transition-all duration-300 hover:shadow-xl">
                   <button
                     onClick={() => setOpenFaq(openFaq === index ? null : index)}
-                    className="w-full px-6 py-5 flex items-start justify-between text-left hover:bg-gradient-to-r hover:from-green-50 hover:to-transparent transition-all duration-300"
+                    className="w-full px-6 py-3 flex items-start justify-between text-left hover:bg-gradient-to-r hover:from-green-50 hover:to-transparent transition-all duration-300"
                   >
                     <div className="flex items-start gap-4 flex-1">
                       <div
@@ -709,9 +709,9 @@ export default function Home() {
                           initial={{ y: -10 }}
                           animate={{ y: 0 }}
                           transition={{ duration: 0.3 }}
-                          className="px-6 pb-5 ml-12"
+                          className="px-6 pb-3 ml-12"
                         >
-                          <div className="text-gray-600 leading-relaxed border-l-4 border-green-400 pl-4 bg-gradient-to-r from-green-50 to-transparent py-4 rounded-r-lg">
+                          <div className="text-gray-600 leading-relaxed border-l-4 border-green-400 pl-4 bg-gradient-to-r from-green-50 to-transparent py-2 rounded-r-lg">
                             {faq.answer}
                           </div>
                         </motion.div>
@@ -729,7 +729,7 @@ export default function Home() {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.5 }}
             viewport={{ once: true }}
-            className="text-center mt-12"
+            className="text-center mt-6"
           >
             <p className="text-gray-600 mb-4">
               Still have questions? We're here to help!
