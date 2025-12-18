@@ -32,6 +32,12 @@ const publicNavigation = [
 
 const adminNavigation = [
   {
+    name: "Home",
+    href: "/",
+    icon: Home,
+    roles: ["ADMIN", "STAFF"],
+  },
+  {
     name: "Overview",
     href: "/halo-admin-portal-2024",
     icon: LayoutDashboard,

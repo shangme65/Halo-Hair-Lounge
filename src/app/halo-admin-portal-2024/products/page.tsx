@@ -42,6 +42,8 @@ export default function AdminProductsPage() {
   const router = useRouter();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
@@ -188,6 +190,7 @@ export default function AdminProductsPage() {
 
   const resetForm = () => {
     setEditingProduct(null);
+    setImagePreview(null);
     setFormData({
       name: "",
       description: "",
@@ -201,6 +204,59 @@ export default function AdminProductsPage() {
       isFeatured: false,
       tags: "",
     });
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select an image file");
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("Image size must be less than 10MB");
+      return;
+    }
+
+    try {
+      setUploading(true);
+
+      const formDataUpload = new FormData();
+      formDataUpload.append("file", file);
+      formDataUpload.append("type", "product");
+
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formDataUpload,
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || "Upload failed");
+      }
+
+      const data = await res.json();
+
+      // Add uploaded image to existing images
+      const currentImages = formData.images
+        ? formData.images
+            .split(",")
+            .map((s) => s.trim())
+            .filter(Boolean)
+        : [];
+      currentImages.push(data.url);
+
+      setFormData((prev) => ({ ...prev, images: currentImages.join(", ") }));
+      setImagePreview(data.url);
+      toast.success("Image uploaded successfully!");
+    } catch (error: any) {
+      console.error("Upload error:", error);
+      toast.error(error.message || "Failed to upload image");
+    } finally {
+      setUploading(false);
+    }
   };
 
   const filteredProducts = products.filter((product) =>
@@ -373,246 +429,279 @@ export default function AdminProductsPage() {
       {/* Add/Edit Modal */}
       <AnimatePresence>
         {showModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 overflow-y-auto">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-white dark:bg-dark-800 rounded-2xl shadow-2xl max-w-3xl w-full my-8"
-            >
-              <div className="p-6 border-b border-dark-200 dark:border-dark-700 flex justify-between items-center">
-                <h2 className="text-2xl font-bold text-dark-900 dark:text-white">
-                  {editingProduct ? "Edit Product" : "Add New Product"}
-                </h2>
-                <button
-                  onClick={() => setShowModal(false)}
-                  className="p-2 hover:bg-dark-100 dark:hover:bg-dark-700 rounded-lg transition-colors"
-                >
-                  <X size={20} />
-                </button>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-white dark:bg-dark-900 overflow-y-auto"
+          >
+            <div className="sticky top-0 bg-white dark:bg-dark-900 z-10 px-4 py-3 border-b border-dark-200 dark:border-dark-700 flex justify-between items-center">
+              <h2 className="text-xl font-bold text-dark-900 dark:text-white">
+                {editingProduct ? "Edit Product" : "Add New Product"}
+              </h2>
+              <button
+                onClick={() => setShowModal(false)}
+                className="p-2 hover:bg-dark-100 dark:hover:bg-dark-700 rounded-lg transition-colors"
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmit} className="p-4 space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="col-span-2">
+                  <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
+                    Product Name *
+                  </label>
+                  <Input
+                    type="text"
+                    value={formData.name}
+                    onChange={(e) =>
+                      setFormData({ ...formData, name: e.target.value })
+                    }
+                    placeholder="e.g., Keratin Shampoo"
+                    required
+                  />
+                </div>
+
+                <div className="col-span-2">
+                  <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
+                    Description *
+                  </label>
+                  <textarea
+                    value={formData.description}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        description: e.target.value,
+                      })
+                    }
+                    placeholder="Describe the product..."
+                    rows={3}
+                    required
+                    className="w-full px-4 py-2 bg-dark-50 dark:bg-dark-700 border border-dark-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
+                    Price ($) *
+                  </label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={formData.price}
+                    onChange={(e) =>
+                      setFormData({ ...formData, price: e.target.value })
+                    }
+                    placeholder="0.00"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
+                    Compare at Price ($)
+                  </label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={formData.compareAtPrice}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        compareAtPrice: e.target.value,
+                      })
+                    }
+                    placeholder="0.00"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
+                    Stock Quantity *
+                  </label>
+                  <Input
+                    type="number"
+                    value={formData.stock}
+                    onChange={(e) =>
+                      setFormData({ ...formData, stock: e.target.value })
+                    }
+                    placeholder="0"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
+                    Brand *
+                  </label>
+                  <Input
+                    type="text"
+                    value={formData.brand}
+                    onChange={(e) =>
+                      setFormData({ ...formData, brand: e.target.value })
+                    }
+                    placeholder="e.g., L'Oreal"
+                    required
+                  />
+                </div>
+
+                <div className="col-span-2">
+                  <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
+                    Category *
+                  </label>
+                  <select
+                    value={formData.category}
+                    onChange={(e) =>
+                      setFormData({ ...formData, category: e.target.value })
+                    }
+                    className="w-full px-4 py-2 bg-dark-50 dark:bg-dark-700 border border-dark-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    required
+                  >
+                    <option value="SHAMPOO">Shampoo</option>
+                    <option value="CONDITIONER">Conditioner</option>
+                    <option value="STYLING">Styling</option>
+                    <option value="TREATMENT">Treatment</option>
+                    <option value="TOOLS">Tools</option>
+                    <option value="ACCESSORIES">Accessories</option>
+                  </select>
+                </div>
+
+                <div className="col-span-2">
+                  <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
+                    Image URLs (comma-separated)
+                  </label>
+                  <textarea
+                    value={formData.images}
+                    onChange={(e) =>
+                      setFormData({ ...formData, images: e.target.value })
+                    }
+                    placeholder="https://example.com/image1.jpg, https://example.com/image2.jpg"
+                    rows={2}
+                    className="w-full px-4 py-2 bg-dark-50 dark:bg-dark-700 border border-dark-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  />
+                </div>
+
+                <div className="col-span-2">
+                  <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
+                    Or Upload Image from Device
+                  </label>
+                  <div className="flex items-center gap-3">
+                    <label className="flex-1 cursor-pointer">
+                      <div className="w-full px-4 py-2 bg-dark-50 dark:bg-dark-700 border border-dark-300 dark:border-dark-600 rounded-lg hover:bg-dark-100 dark:hover:bg-dark-600 transition-colors text-center">
+                        {uploading ? (
+                          <div className="flex items-center justify-center gap-2">
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            <span className="text-sm">Uploading...</span>
+                          </div>
+                        ) : (
+                          <span className="text-sm text-dark-600 dark:text-dark-400">
+                            Choose file...
+                          </span>
+                        )}
+                      </div>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        disabled={uploading}
+                        className="hidden"
+                      />
+                    </label>
+                  </div>
+                  {imagePreview && (
+                    <div className="mt-2">
+                      <img
+                        src={imagePreview}
+                        alt="Preview"
+                        className="w-32 h-32 object-cover rounded-lg"
+                      />
+                    </div>
+                  )}
+                </div>
+
+                <div className="col-span-2">
+                  <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
+                    Tags (comma-separated)
+                  </label>
+                  <Input
+                    type="text"
+                    value={formData.tags}
+                    onChange={(e) =>
+                      setFormData({ ...formData, tags: e.target.value })
+                    }
+                    placeholder="moisturizing, sulfate-free, organic"
+                  />
+                </div>
+
+                <div className="col-span-2 flex gap-6">
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="checkbox"
+                      id="isActive"
+                      checked={formData.isActive}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          isActive: e.target.checked,
+                        })
+                      }
+                      className="w-4 h-4 text-primary-600 rounded focus:ring-2 focus:ring-primary-500"
+                    />
+                    <label
+                      htmlFor="isActive"
+                      className="text-sm font-medium text-dark-700 dark:text-dark-300"
+                    >
+                      Product is active
+                    </label>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="checkbox"
+                      id="isFeatured"
+                      checked={formData.isFeatured}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          isFeatured: e.target.checked,
+                        })
+                      }
+                      className="w-4 h-4 text-primary-600 rounded focus:ring-2 focus:ring-primary-500"
+                    />
+                    <label
+                      htmlFor="isFeatured"
+                      className="text-sm font-medium text-dark-700 dark:text-dark-300"
+                    >
+                      Feature this product
+                    </label>
+                  </div>
+                </div>
               </div>
 
-              <form
-                onSubmit={handleSubmit}
-                className="p-6 space-y-4 max-h-[70vh] overflow-y-auto"
-              >
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="col-span-2">
-                    <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
-                      Product Name *
-                    </label>
-                    <Input
-                      type="text"
-                      value={formData.name}
-                      onChange={(e) =>
-                        setFormData({ ...formData, name: e.target.value })
-                      }
-                      placeholder="e.g., Keratin Shampoo"
-                      required
-                    />
-                  </div>
-
-                  <div className="col-span-2">
-                    <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
-                      Description *
-                    </label>
-                    <textarea
-                      value={formData.description}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          description: e.target.value,
-                        })
-                      }
-                      placeholder="Describe the product..."
-                      rows={3}
-                      required
-                      className="w-full px-4 py-2 bg-dark-50 dark:bg-dark-700 border border-dark-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
-                      Price ($) *
-                    </label>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      value={formData.price}
-                      onChange={(e) =>
-                        setFormData({ ...formData, price: e.target.value })
-                      }
-                      placeholder="0.00"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
-                      Compare at Price ($)
-                    </label>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      value={formData.compareAtPrice}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          compareAtPrice: e.target.value,
-                        })
-                      }
-                      placeholder="0.00"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
-                      Stock Quantity *
-                    </label>
-                    <Input
-                      type="number"
-                      value={formData.stock}
-                      onChange={(e) =>
-                        setFormData({ ...formData, stock: e.target.value })
-                      }
-                      placeholder="0"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
-                      Brand *
-                    </label>
-                    <Input
-                      type="text"
-                      value={formData.brand}
-                      onChange={(e) =>
-                        setFormData({ ...formData, brand: e.target.value })
-                      }
-                      placeholder="e.g., L'Oreal"
-                      required
-                    />
-                  </div>
-
-                  <div className="col-span-2">
-                    <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
-                      Category *
-                    </label>
-                    <select
-                      value={formData.category}
-                      onChange={(e) =>
-                        setFormData({ ...formData, category: e.target.value })
-                      }
-                      className="w-full px-4 py-2 bg-dark-50 dark:bg-dark-700 border border-dark-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                      required
-                    >
-                      <option value="SHAMPOO">Shampoo</option>
-                      <option value="CONDITIONER">Conditioner</option>
-                      <option value="STYLING">Styling</option>
-                      <option value="TREATMENT">Treatment</option>
-                      <option value="TOOLS">Tools</option>
-                      <option value="ACCESSORIES">Accessories</option>
-                    </select>
-                  </div>
-
-                  <div className="col-span-2">
-                    <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
-                      Image URLs (comma-separated)
-                    </label>
-                    <textarea
-                      value={formData.images}
-                      onChange={(e) =>
-                        setFormData({ ...formData, images: e.target.value })
-                      }
-                      placeholder="https://example.com/image1.jpg, https://example.com/image2.jpg"
-                      rows={2}
-                      className="w-full px-4 py-2 bg-dark-50 dark:bg-dark-700 border border-dark-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                    />
-                  </div>
-
-                  <div className="col-span-2">
-                    <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
-                      Tags (comma-separated)
-                    </label>
-                    <Input
-                      type="text"
-                      value={formData.tags}
-                      onChange={(e) =>
-                        setFormData({ ...formData, tags: e.target.value })
-                      }
-                      placeholder="moisturizing, sulfate-free, organic"
-                    />
-                  </div>
-
-                  <div className="col-span-2 flex gap-6">
-                    <div className="flex items-center gap-3">
-                      <input
-                        type="checkbox"
-                        id="isActive"
-                        checked={formData.isActive}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            isActive: e.target.checked,
-                          })
-                        }
-                        className="w-4 h-4 text-primary-600 rounded focus:ring-2 focus:ring-primary-500"
-                      />
-                      <label
-                        htmlFor="isActive"
-                        className="text-sm font-medium text-dark-700 dark:text-dark-300"
-                      >
-                        Product is active
-                      </label>
-                    </div>
-
-                    <div className="flex items-center gap-3">
-                      <input
-                        type="checkbox"
-                        id="isFeatured"
-                        checked={formData.isFeatured}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            isFeatured: e.target.checked,
-                          })
-                        }
-                        className="w-4 h-4 text-primary-600 rounded focus:ring-2 focus:ring-primary-500"
-                      />
-                      <label
-                        htmlFor="isFeatured"
-                        className="text-sm font-medium text-dark-700 dark:text-dark-300"
-                      >
-                        Feature this product
-                      </label>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex gap-3 pt-4">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setShowModal(false)}
-                    className="flex-1"
-                  >
-                    Cancel
-                  </Button>
-                  <Button type="submit" disabled={loading} className="flex-1">
-                    {loading ? (
-                      <Loader2 className="w-5 h-5 animate-spin" />
-                    ) : (
-                      <span className="flex items-center gap-2">
-                        <Check size={20} />
-                        {editingProduct ? "Update Product" : "Create Product"}
-                      </span>
-                    )}
-                  </Button>
-                </div>
-              </form>
-            </motion.div>
-          </div>
+              <div className="sticky bottom-0 bg-white dark:bg-dark-900 border-t border-dark-200 dark:border-dark-700 p-4 flex gap-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setShowModal(false)}
+                  className="flex-1"
+                >
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={loading} className="flex-1">
+                  {loading ? (
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                  ) : (
+                    <span className="flex items-center gap-2">
+                      <Check size={20} />
+                      {editingProduct ? "Update Product" : "Create Product"}
+                    </span>
+                  )}
+                </Button>
+              </div>
+            </form>
+          </motion.div>
         )}
       </AnimatePresence>
     </div>

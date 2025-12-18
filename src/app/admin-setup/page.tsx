@@ -134,7 +134,7 @@ export default function AdminSetupPage() {
     // Only admins can access this page after initialization
     if (!session || session.user.role !== "ADMIN") {
       return (
-        <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <div className="min-h-screen flex items-center justify-center px-4">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -151,7 +151,7 @@ export default function AdminSetupPage() {
             <h1 className="text-3xl font-display font-bold mb-2 text-dark-800 dark:text-dark-200">
               Access Denied
             </h1>
-            <p className="text-dark-600 dark:text-dark-400 mb-8">
+            <p className="text-dark-600 dark:text-dark-400 mb-6">
               Admin account has already been initialized. Only administrators
               can access this page.
             </p>

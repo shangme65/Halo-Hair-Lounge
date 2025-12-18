@@ -18,14 +18,14 @@ export async function POST(req: NextRequest) {
 
     const formData = await req.formData();
     const file = formData.get("file") as File;
-    const type = formData.get("type") as string; // 'service' or 'product'
+    const type = formData.get("type") as string; // 'service', 'product', or 'testimonial'
     const enhanceHD = formData.get("enhanceHD") === "true";
 
     if (!file) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
     }
 
-    if (!type || !["service", "product"].includes(type)) {
+    if (!type || !["service", "product", "testimonial"].includes(type)) {
       return NextResponse.json({ error: "Invalid type" }, { status: 400 });
     }
 
@@ -61,7 +61,11 @@ export async function POST(req: NextRequest) {
       process.cwd(),
       "public",
       "uploads",
-      type === "service" ? "services" : "products"
+      type === "service"
+        ? "services"
+        : type === "product"
+        ? "products"
+        : "testimonials"
     );
 
     // Ensure directory exists
@@ -99,7 +103,11 @@ export async function POST(req: NextRequest) {
 
     // Return the public URL
     const publicUrl = `/uploads/${
-      type === "service" ? "services" : "products"
+      type === "service"
+        ? "services"
+        : type === "product"
+        ? "products"
+        : "testimonials"
     }/${fileName}`;
 
     return NextResponse.json({
