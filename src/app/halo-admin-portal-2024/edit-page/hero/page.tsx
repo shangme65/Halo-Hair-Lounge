@@ -142,29 +142,29 @@ export default function HeroEditor() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-dark-50 via-white to-primary-50 dark:from-dark-950 dark:via-dark-900 dark:to-dark-950">
-      <div className="pt-20 px-4 pb-8">
+    <div className="min-h-screen bg-gradient-to-br from-dark-50 via-white to-primary-50 dark:from-dark-950 dark:via-dark-900 dark:to-dark-950 pt-16 px-2 pb-4">
+      <div className="pb-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
         >
           {/* Header */}
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-4">
+          <div className="flex flex-col gap-2 mb-3">
+            <div className="flex items-center gap-2">
               <Button
                 onClick={() => router.push("/halo-admin-portal-2024/edit-page")}
-                className="flex items-center gap-2"
+                className="flex items-center gap-1 text-xs py-1.5 px-2"
                 variant="outline"
               >
-                <ArrowLeft size={18} />
+                <ArrowLeft size={14} />
                 Back
               </Button>
               <div>
-                <h1 className="text-2xl sm:text-3xl font-bold text-dark-900 dark:text-white">
-                  Hero Section Editor
+                <h1 className="text-lg sm:text-2xl font-bold text-dark-900 dark:text-white">
+                  Hero Editor
                 </h1>
-                <p className="text-sm text-dark-600 dark:text-dark-400">
-                  Click on any element to edit it
+                <p className="text-xs text-dark-600 dark:text-dark-400">
+                  Click to edit
                 </p>
               </div>
             </div>
@@ -172,25 +172,25 @@ export default function HeroEditor() {
             <Button
               onClick={handleSave}
               disabled={saving}
-              className="flex items-center gap-2 bg-gradient-to-r from-primary-600 to-primary-700"
+              className="flex items-center gap-1.5 text-xs py-1.5 px-2 bg-gradient-to-r from-primary-600 to-primary-700 w-full"
             >
               {saving ? (
                 <>
-                  <Loader2 size={18} className="animate-spin" />
+                  <Loader2 size={14} className="animate-spin" />
                   Saving...
                 </>
               ) : (
                 <>
-                  <Save size={18} />
-                  Save Changes
+                  <Save size={14} />
+                  Save
                 </>
               )}
             </Button>
           </div>
 
           {/* Preview Section */}
-          <Card className="mb-6 overflow-hidden">
-            <div className="relative min-h-[600px] flex items-center justify-center">
+          <Card className="mb-3 overflow-hidden">
+            <div className="relative min-h-[300px] sm:min-h-[400px] flex items-center justify-center">
               {/* 3D Background */}
               <div className="absolute inset-0 z-0">
                 <HeroScene colorScheme={slide.colorScheme} />

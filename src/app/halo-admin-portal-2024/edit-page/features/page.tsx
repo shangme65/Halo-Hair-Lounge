@@ -136,62 +136,62 @@ export default function FeaturesEditorPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50 dark:from-dark-950 dark:via-dark-900 dark:to-dark-950 p-3 sm:p-6">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50 dark:from-dark-950 dark:via-dark-900 dark:to-dark-950 pt-16 px-2 pb-4 sm:p-6">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="max-w-7xl mx-auto"
       >
         {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
+        <div className="flex flex-col gap-2 mb-3">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-              Edit Features Section
+            <h1 className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+              Edit Features
             </h1>
-            <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-1">
-              Click any text to edit inline
+            <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">
+              Click to edit
             </p>
           </div>
-          <div className="flex gap-2 w-full sm:w-auto">
+          <div className="flex gap-1.5 w-full">
             <Button
               onClick={addFeature}
-              className="flex-1 sm:flex-none gap-2 text-xs sm:text-sm py-2 px-3"
+              className="flex-1 gap-1.5 text-xs py-1.5 px-2"
             >
-              <Plus className="w-4 h-4" /> Add Feature
+              <Plus className="w-3.5 h-3.5" /> Add
             </Button>
             <Button
               onClick={handleSave}
               disabled={saving}
-              className="flex-1 sm:flex-none gap-2 text-xs sm:text-sm py-2 px-3 bg-gradient-to-r from-purple-600 to-pink-600"
+              className="flex-1 gap-1.5 text-xs py-1.5 px-2 bg-gradient-to-r from-purple-600 to-pink-600"
             >
-              <Save className="w-4 h-4" />
-              {saving ? "Saving..." : "Save Changes"}
+              <Save className="w-3.5 h-3.5" />
+              {saving ? "Saving..." : "Save"}
             </Button>
           </div>
         </div>
 
         {/* Features Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
           {features.map((feature, index) => {
             const IconComponent = getIconComponent(feature.icon);
 
             return (
               <Card
                 key={index}
-                className="p-4 hover:shadow-xl transition-all relative group"
+                className="p-2 hover:shadow-lg transition-all relative group"
               >
                 {/* Delete Button */}
                 <button
                   onClick={() => deleteFeature(index)}
-                  className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="absolute top-1 right-1 p-0.5 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-10"
                 >
-                  <Trash2 className="w-3 h-3" />
+                  <Trash2 className="w-2.5 h-2.5" />
                 </button>
 
-                <div className="space-y-3">
+                <div className="space-y-1.5">
                   {/* Icon Selector */}
                   <div>
-                    <label className="block text-xs font-medium mb-1.5 text-gray-700 dark:text-gray-300">
+                    <label className="block text-xs font-medium mb-0.5 text-gray-700 dark:text-gray-300">
                       Icon
                     </label>
                     <select
@@ -199,7 +199,7 @@ export default function FeaturesEditorPage() {
                       onChange={(e) =>
                         updateFeatureField(index, "icon", e.target.value)
                       }
-                      className="w-full px-2 py-1.5 text-sm rounded-lg border border-gray-300 dark:border-dark-700 bg-white dark:bg-dark-800 text-dark-900 dark:text-white"
+                      className="w-full px-1.5 py-0.5 text-xs rounded border border-gray-300 dark:border-dark-700 bg-white dark:bg-dark-800 text-dark-900 dark:text-white"
                     >
                       {iconOptions.map((opt) => (
                         <option key={opt.name} value={opt.name}>
@@ -211,14 +211,14 @@ export default function FeaturesEditorPage() {
 
                   {/* Icon Preview */}
                   <div className="flex justify-center">
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
-                      <IconComponent className="w-6 h-6 text-white" />
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+                      <IconComponent className="w-4 h-4 text-white" />
                     </div>
                   </div>
 
                   {/* Title */}
                   <div>
-                    <label className="block text-xs font-medium mb-1 text-gray-700 dark:text-gray-300">
+                    <label className="block text-xs font-medium mb-0.5 text-gray-700 dark:text-gray-300">
                       Title
                     </label>
                     {editMode === `title-${index}` ? (
@@ -230,12 +230,12 @@ export default function FeaturesEditorPage() {
                         }
                         onBlur={() => setEditMode(null)}
                         autoFocus
-                        className="w-full px-2 py-1.5 text-sm font-semibold rounded border border-purple-500 bg-white dark:bg-dark-800 text-dark-900 dark:text-white"
+                        className="w-full px-1.5 py-0.5 text-xs font-semibold rounded border border-purple-500 bg-white dark:bg-dark-800 text-dark-900 dark:text-white"
                       />
                     ) : (
                       <h3
                         onClick={() => setEditMode(`title-${index}`)}
-                        className="text-sm font-semibold text-dark-900 dark:text-white cursor-pointer hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
+                        className="text-xs font-semibold text-dark-900 dark:text-white cursor-pointer hover:text-purple-600 dark:hover:text-purple-400 transition-colors line-clamp-1"
                       >
                         {feature.title}
                       </h3>
@@ -244,8 +244,8 @@ export default function FeaturesEditorPage() {
 
                   {/* Description */}
                   <div>
-                    <label className="block text-xs font-medium mb-1 text-gray-700 dark:text-gray-300">
-                      Description
+                    <label className="block text-xs font-medium mb-0.5 text-gray-700 dark:text-gray-300">
+                      Desc
                     </label>
                     {editMode === `description-${index}` ? (
                       <textarea
@@ -259,13 +259,13 @@ export default function FeaturesEditorPage() {
                         }
                         onBlur={() => setEditMode(null)}
                         autoFocus
-                        rows={3}
-                        className="w-full px-2 py-1.5 text-xs rounded border border-purple-500 bg-white dark:bg-dark-800 text-gray-700 dark:text-gray-300 resize-none"
+                        rows={2}
+                        className="w-full px-1.5 py-0.5 text-xs rounded border border-purple-500 bg-white dark:bg-dark-800 text-gray-700 dark:text-gray-300 resize-none"
                       />
                     ) : (
                       <p
                         onClick={() => setEditMode(`description-${index}`)}
-                        className="text-xs text-gray-600 dark:text-gray-400 cursor-pointer hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
+                        className="text-xs text-gray-600 dark:text-gray-400 cursor-pointer hover:text-purple-600 dark:hover:text-purple-400 transition-colors line-clamp-2"
                       >
                         {feature.description}
                       </p>

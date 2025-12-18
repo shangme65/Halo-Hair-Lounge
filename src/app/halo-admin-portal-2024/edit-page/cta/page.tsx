@@ -89,34 +89,34 @@ export default function CtaEditorPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50 dark:from-dark-950 dark:via-dark-900 dark:to-dark-950 p-3 sm:p-6">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50 dark:from-dark-950 dark:via-dark-900 dark:to-dark-950 pt-16 px-2 pb-4">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="max-w-4xl mx-auto"
       >
         {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
+        <div className="flex flex-col gap-2 mb-3">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-              Edit Call-to-Action Section
+            <h1 className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+              Edit Call-to-Action
             </h1>
-            <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-1">
-              Click any text to edit inline
+            <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">
+              Click to edit
             </p>
           </div>
           <Button
             onClick={handleSave}
             disabled={saving}
-            className="w-full sm:w-auto gap-2 text-xs sm:text-sm py-2 px-3 bg-gradient-to-r from-purple-600 to-pink-600"
+            className="w-full gap-1.5 text-xs py-1.5 px-2 bg-gradient-to-r from-purple-600 to-pink-600"
           >
-            <Save className="w-4 h-4" />
-            {saving ? "Saving..." : "Save Changes"}
+            <Save className="w-3.5 h-3.5" />
+            {saving ? "Saving..." : "Save"}
           </Button>
         </div>
 
         {/* Preview Card */}
-        <Card className="p-6 sm:p-8 bg-gradient-to-br from-purple-500 to-pink-500 text-white">
+        <Card className="p-4 sm:p-6 bg-gradient-to-br from-purple-500 to-pink-500 text-white">
           <div className="text-center max-w-2xl mx-auto space-y-6">
             {/* Title */}
             <div>
@@ -225,7 +225,7 @@ export default function CtaEditorPage() {
         </Card>
 
         {/* Editor Fields */}
-        <Card className="mt-4 p-4">
+        <Card className="mt-3 p-2">
           <h3 className="text-base font-semibold mb-3 text-dark-900 dark:text-white">
             Quick Edit Fields
           </h3>
