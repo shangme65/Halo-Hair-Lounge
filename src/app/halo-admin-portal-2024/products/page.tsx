@@ -211,19 +211,19 @@ export default function AdminProductsPage() {
     <div className="min-h-screen bg-gradient-to-br from-dark-50 via-white to-primary-50 dark:from-dark-950 dark:via-dark-900 dark:to-dark-950">
       <AdminSidebar />
 
-      <div className="p-8">
+      <div className="pt-20 px-3 pb-4 sm:pt-24 sm:px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
         >
           {/* Header */}
-          <div className="flex justify-between items-center mb-8">
+          <div className="flex justify-between items-center mb-3">
             <div>
-              <h1 className="text-4xl font-bold text-dark-900 dark:text-white mb-2">
-                Products Management
+              <h1 className="text-xl font-bold text-dark-900 dark:text-white mb-0.5">
+                Products
               </h1>
-              <p className="text-dark-600 dark:text-dark-400">
-                Manage store inventory and pricing
+              <p className="text-xs text-dark-600 dark:text-dark-400">
+                Manage inventory
               </p>
             </div>
             <Button
@@ -231,26 +231,26 @@ export default function AdminProductsPage() {
                 resetForm();
                 setShowModal(true);
               }}
-              className="flex items-center gap-2"
+              className="flex items-center gap-1 px-2 py-1.5 text-xs"
             >
-              <Plus size={20} />
-              Add Product
+              <Plus size={16} />
+              Add
             </Button>
           </div>
 
           {/* Search */}
-          <Card className="p-4 mb-6">
+          <Card className="p-2.5 mb-3">
             <div className="relative">
               <Search
-                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-dark-400"
-                size={20}
+                className="absolute left-2 top-1/2 transform -translate-y-1/2 text-dark-400"
+                size={14}
               />
               <input
                 type="text"
                 placeholder="Search products..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 bg-dark-50 dark:bg-dark-800 border border-dark-200 dark:border-dark-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                className="w-full pl-8 pr-3 py-2 text-sm bg-dark-50 dark:bg-dark-800 border border-dark-200 dark:border-dark-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               />
             </div>
           </Card>
@@ -261,10 +261,13 @@ export default function AdminProductsPage() {
               <Loader2 className="w-8 h-8 animate-spin text-primary-600" />
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {filteredProducts.map((product) => (
-                <Card key={product.id} className="overflow-hidden group">
-                  <div className="aspect-square bg-dark-100 dark:bg-dark-800 relative">
+                <Card
+                  key={product.id}
+                  className="overflow-hidden hover:shadow-lg transition-shadow duration-300"
+                >
+                  <div className="aspect-[4/3] bg-dark-100 dark:bg-dark-800 relative">
                     {product.images[0] ? (
                       <Image
                         src={product.images[0]}
@@ -285,36 +288,36 @@ export default function AdminProductsPage() {
                     )}
                   </div>
 
-                  <div className="p-4">
-                    <h3 className="font-semibold text-dark-900 dark:text-white mb-1 line-clamp-1">
+                  <div className="p-3">
+                    <h3 className="text-sm font-bold text-dark-900 dark:text-white mb-1 line-clamp-1">
                       {product.name}
                     </h3>
-                    <p className="text-sm text-dark-600 dark:text-dark-400 mb-2 line-clamp-2">
+                    <p className="text-xs text-dark-600 dark:text-dark-400 mb-2 line-clamp-2">
                       {product.description}
                     </p>
 
                     <div className="flex items-center gap-2 mb-2">
-                      <span className="text-lg font-bold text-dark-900 dark:text-white">
+                      <span className="text-base font-bold text-dark-900 dark:text-white">
                         ${product.price}
                       </span>
                       {product.compareAtPrice && (
-                        <span className="text-sm text-dark-500 line-through">
+                        <span className="text-xs text-dark-500 line-through">
                           ${product.compareAtPrice}
                         </span>
                       )}
                     </div>
 
-                    <div className="flex items-center justify-between text-sm text-dark-600 dark:text-dark-400 mb-3">
+                    <div className="flex items-center justify-between text-xs text-dark-600 dark:text-dark-400 mb-2">
                       <span>Stock: {product.stock}</span>
-                      <span className="text-xs bg-dark-100 dark:bg-dark-700 px-2 py-1 rounded">
+                      <span className="text-[10px] bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400 px-2 py-0.5 rounded-full font-medium">
                         {product.category}
                       </span>
                     </div>
 
-                    <div className="flex items-center gap-2 mb-3">
+                    <div className="flex items-center gap-1.5 mb-2">
                       <button
                         onClick={() => toggleStatus(product, "isActive")}
-                        className={`flex-1 px-2 py-1 rounded text-xs font-medium ${
+                        className={`flex-1 px-2 py-0.5 rounded text-[10px] font-medium ${
                           product.isActive
                             ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400"
                             : "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400"
@@ -324,30 +327,30 @@ export default function AdminProductsPage() {
                       </button>
                       <button
                         onClick={() => toggleStatus(product, "isFeatured")}
-                        className={`flex-1 px-2 py-1 rounded text-xs font-medium ${
+                        className={`flex-1 px-2 py-0.5 rounded text-[10px] font-medium ${
                           product.isFeatured
                             ? "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400"
                             : "bg-dark-100 dark:bg-dark-700 text-dark-600 dark:text-dark-400"
                         }`}
                       >
-                        <Star size={12} className="inline mr-1" />
+                        <Star size={10} className="inline mr-0.5" />
                         {product.isFeatured ? "Featured" : "Feature"}
                       </button>
                     </div>
 
-                    <div className="flex gap-2">
+                    <div className="flex gap-1.5">
                       <button
                         onClick={() => handleEdit(product)}
-                        className="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400 rounded-lg hover:bg-primary-200 dark:hover:bg-primary-900/50 transition-colors"
+                        className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 text-xs bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400 rounded-lg hover:bg-primary-200 dark:hover:bg-primary-900/50 transition-colors"
                       >
-                        <Edit2 size={14} />
+                        <Edit2 size={12} />
                         Edit
                       </button>
                       <button
                         onClick={() => handleDelete(product.id)}
-                        className="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors"
+                        className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 text-xs bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors"
                       >
-                        <Trash2 size={14} />
+                        <Trash2 size={12} />
                         Delete
                       </button>
                     </div>

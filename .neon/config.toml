@@ -1,0 +1,18 @@
+[data_masking]
+# Disable anonymization warning by configuring data masking rules
+# This file tells Neon how to handle sensitive data
+
+# You can keep the warning disabled or configure specific masking rules
+# For development/testing, you can disable the warning:
+enabled = false
+
+# For production, you might want to enable masking for specific columns:
+# [[data_masking.rules]]
+# table = "users"
+# column = "email"
+# mask_type = "email"
+#
+# [[data_masking.rules]]
+# table = "users"  
+# column = "phone"
+# mask_type = "phone"

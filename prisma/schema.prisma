@@ -212,6 +212,63 @@ model Review {
   @@map("reviews")
 }
 
+model HeroContent {
+  id        String   @id @default(cuid())
+  slides    Json     // Array of hero slides with title, subtitle, description, colorScheme, cta
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("hero_content")
+}
+
+model FeaturesContent {
+  id        String   @id @default(cuid())
+  features  Json     // Array of features with icon, title, description
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("features_content")
+}
+
+model WhyChooseUsContent {
+  id        String   @id @default(cuid())
+  reasons   Json     // Array of reasons with icon, title, description
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("why_choose_us_content")
+}
+
+model TestimonialsContent {
+  id            String   @id @default(cuid())
+  testimonials  Json     // Array of testimonials with name, role, rating, text, image, ringColor
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("testimonials_content")
+}
+
+model FaqContent {
+  id        String   @id @default(cuid())
+  faqs      Json     // Array of FAQs with question, answer
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("faq_content")
+}
+
+model CtaContent {
+  id          String   @id @default(cuid())
+  title       String
+  description String   @db.Text
+  buttonText  String
+  buttonHref  String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("cta_content")
+}
+
 enum Role {
   USER
   STAFF

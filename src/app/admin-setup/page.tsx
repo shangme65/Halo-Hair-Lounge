@@ -292,15 +292,15 @@ export default function AdminSetupPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex items-center justify-center py-8 px-4 sm:px-6 lg:px-8">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="max-w-md w-full"
       >
-        <div className="text-center mb-8">
+        <div className="text-center mb-4">
           <motion.div
-            className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary-600 mb-4"
+            className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary-600 mb-3"
             whileHover={{ scale: 1.05, rotate: 5 }}
           >
             <Shield className="w-8 h-8 text-white" />
@@ -314,17 +314,17 @@ export default function AdminSetupPage() {
         </div>
 
         <Card>
-          <div className="space-y-6 text-center">
-            <div className="py-8">
-              <h2 className="text-xl font-semibold mb-4 text-dark-800 dark:text-dark-200">
+          <div className="space-y-4 text-center">
+            <div className="py-4">
+              <h2 className="text-xl font-semibold mb-3 text-dark-800 dark:text-dark-200">
                 Initialize Administrator Account
               </h2>
-              <p className="text-dark-600 dark:text-dark-400 mb-6">
+              <p className="text-dark-600 dark:text-dark-400 mb-4">
                 Click the button below to automatically create an admin account
                 using credentials from the environment configuration.
               </p>
 
-              <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-4 mb-6 text-left">
+              <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-3 mb-4 text-left">
                 <h3 className="text-sm font-semibold mb-2 text-green-800 dark:text-green-200">
                   Admin Credentials (from .env):
                 </h3>

@@ -21,30 +21,6 @@ import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import HeroScene from "@/components/3d/HeroScene";
 
-const heroSlides = [
-  {
-    title: "Transform Your Look",
-    subtitle: "Premium Hair Care Excellence",
-    description: "Experience luxury styling with our expert stylists",
-    colorScheme: "green" as const,
-    cta: { text: "Book Appointment", href: "/book" },
-  },
-  {
-    title: "Discover Beauty",
-    subtitle: "Innovative Hair Solutions",
-    description: "From classic cuts to bold transformations",
-    colorScheme: "green" as const,
-    cta: { text: "View Services", href: "/services" },
-  },
-  {
-    title: "Your Hair Journey",
-    subtitle: "Starts Here Today",
-    description: "Personalized consultations and expert care",
-    colorScheme: "green" as const,
-    cta: { text: "Get Started", href: "/about" },
-  },
-];
-
 const features = [
   {
     icon: Scissors,
@@ -199,6 +175,45 @@ export default function Home() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [currentTestimonialIndex, setCurrentTestimonialIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+  const [heroSlides, setHeroSlides] = useState([
+    {
+      title: "Transform Your Look",
+      subtitle: "Premium Hair Care Excellence",
+      description: "Experience luxury styling with our expert stylists",
+      colorScheme: "green" as const,
+      cta: { text: "Book Appointment", href: "/book" },
+    },
+    {
+      title: "Discover Beauty",
+      subtitle: "Innovative Hair Solutions",
+      description: "From classic cuts to bold transformations",
+      colorScheme: "green" as const,
+      cta: { text: "View Services", href: "/services" },
+    },
+    {
+      title: "Your Hair Journey",
+      subtitle: "Starts Here Today",
+      description: "Personalized consultations and expert care",
+      colorScheme: "green" as const,
+      cta: { text: "Get Started", href: "/about" },
+    },
+  ]);
+
+  useEffect(() => {
+    // Fetch hero content from database
+    const fetchHeroContent = async () => {
+      try {
+        const response = await fetch("/api/hero");
+        const data = await response.json();
+        if (data.heroContent && data.heroContent.slides) {
+          setHeroSlides(data.heroContent.slides);
+        }
+      } catch (error) {
+        console.error("Error loading hero content:", error);
+      }
+    };
+    fetchHeroContent();
+  }, []);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -206,7 +221,7 @@ export default function Home() {
     }, 6000);
 
     return () => clearInterval(timer);
-  }, []);
+  }, [heroSlides.length]);
 
   useEffect(() => {
     if (isPaused) return;
@@ -328,9 +343,9 @@ export default function Home() {
           animate={{ y: [0, 10, 0] }}
           transition={{ duration: 2, repeat: Infinity }}
         >
-          <div className="w-6 h-10 border-2 border-white/30 rounded-full p-1">
+          <div className="w-6 h-10 border-2 border-dark-900/30 dark:border-white/30 rounded-full p-1">
             <motion.div
-              className="w-1.5 h-1.5 bg-white rounded-full mx-auto"
+              className="w-1.5 h-1.5 bg-dark-900 dark:bg-white rounded-full mx-auto"
               animate={{ y: [0, 20, 0] }}
               transition={{ duration: 2, repeat: Infinity }}
             />
@@ -497,7 +512,7 @@ export default function Home() {
                   "0 4px 15px rgba(34, 197, 94, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.5)",
               }}
             >
-              <span className="text-xs font-semibold text-primary-600 uppercase tracking-wider drop-shadow-sm">
+              <span className="text-xs font-semibold text-primary-600 tracking-wider drop-shadow-sm">
                 Client Reviews
               </span>
             </motion.div>
@@ -526,7 +541,9 @@ export default function Home() {
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: position === 0 ? -50 : 50 }}
                         transition={{ duration: 0.5 }}
-                        className="bg-white dark:bg-dark-800 rounded-2xl p-6 shadow-2xl hover:shadow-3xl transition-all duration-300 relative group cursor-pointer"
+                        className={`bg-white dark:bg-dark-800 rounded-2xl p-6 shadow-2xl hover:shadow-3xl transition-all duration-300 relative group cursor-pointer ${
+                          position === 1 ? "mb-12" : ""
+                        }`}
                         style={{
                           boxShadow:
                             "0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 10px 30px -5px rgba(0, 0, 0, 0.15)",

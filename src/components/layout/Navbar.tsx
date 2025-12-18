@@ -16,6 +16,7 @@ import {
   Mail,
   LayoutDashboard,
   ShoppingBag,
+  FileEdit,
 } from "lucide-react";
 import { useSession, signOut } from "next-auth/react";
 import Button from "@/components/ui/Button";
@@ -24,6 +25,7 @@ const publicNavigation = [
   { name: "Home", href: "/", icon: Home },
   { name: "About", href: "/about", icon: Info },
   { name: "Services", href: "/services", icon: Scissors },
+  { name: "Products", href: "/products", icon: ShoppingBag },
   { name: "Book Now", href: "/book", icon: Calendar },
   { name: "Contact", href: "/contact", icon: Mail },
 ];
@@ -52,6 +54,12 @@ const adminNavigation = [
     href: "/halo-admin-portal-2024/appointments",
     icon: Calendar,
     roles: ["ADMIN", "STAFF"],
+  },
+  {
+    name: "Edit Page",
+    href: "/halo-admin-portal-2024/edit-page",
+    icon: FileEdit,
+    roles: ["ADMIN"],
   },
 ];
 
@@ -165,7 +173,13 @@ export default function Navbar() {
                       <span className="font-medium">{session.user.name}</span>
                     </motion.div>
                   </Link>
-                  <Button variant="outline" size="sm" onClick={() => signOut()}>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() =>
+                      signOut({ callbackUrl: "/admin-setup", redirect: true })
+                    }
+                  >
                     Sign Out
                   </Button>
                 </div>
@@ -261,8 +275,11 @@ export default function Navbar() {
                       variant="outline"
                       className="w-full"
                       onClick={() => {
-                        signOut();
                         setMobileMenuOpen(false);
+                        signOut({
+                          callbackUrl: "/admin-setup",
+                          redirect: true,
+                        });
                       }}
                     >
                       Sign Out

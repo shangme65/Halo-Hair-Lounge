@@ -1,5 +1,4 @@
 import { NextAuthOptions } from "next-auth";
-import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import FacebookProvider from "next-auth/providers/facebook";
@@ -7,7 +6,7 @@ import bcrypt from "bcrypt";
 import prisma from "./prisma";
 
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma),
+  // Don't use PrismaAdapter with JWT strategy and CredentialsProvider
   providers: [
     CredentialsProvider({
       name: "credentials",
@@ -28,8 +27,8 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Invalid credentials");
         }
 
-        // Check if email is verified
-        if (!user.emailVerified) {
+        // Check if email is verified (skip for admin accounts as they are auto-verified)
+        if (!user.emailVerified && user.role !== "ADMIN") {
           throw new Error("Please verify your email before signing in");
         }
 
@@ -74,6 +73,11 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.id = user.id;
         token.role = user.role;
+        console.log("JWT callback - User logged in:", {
+          id: user.id,
+          role: user.role,
+          email: user.email,
+        });
       }
 
       if (trigger === "update" && session) {
@@ -86,8 +90,20 @@ export const authOptions: NextAuthOptions = {
       if (session.user) {
         session.user.id = token.id as string;
         session.user.role = token.role as string;
+        console.log("Session callback - Session created:", {
+          id: session.user.id,
+          role: session.user.role,
+          email: session.user.email,
+        });
       }
       return session;
+    },
+    async redirect({ url, baseUrl }) {
+      // Allows relative callback URLs
+      if (url.startsWith("/")) return `${baseUrl}${url}`;
+      // Allows callback URLs on the same origin
+      else if (new URL(url).origin === baseUrl) return url;
+      return baseUrl;
     },
   },
   secret: process.env.NEXTAUTH_SECRET,
