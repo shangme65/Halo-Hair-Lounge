@@ -27,12 +27,15 @@ export default function ServiceFormPage() {
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [imagePreview, setImagePreview] = useState<string>("");
+  const [categories, setCategories] = useState<
+    { id: string; value: string; label: string }[]
+  >([]);
   const [formData, setFormData] = useState({
     name: "",
     description: "",
     price: "",
     duration: "",
-    category: "HAIRCUT",
+    category: "",
     image: "",
     isActive: true,
   });
@@ -44,10 +47,40 @@ export default function ServiceFormPage() {
       return;
     }
 
+    fetchCategories();
+
     if (isEdit) {
       fetchService();
     }
   }, [session, router, isEdit]);
+
+  const fetchCategories = async () => {
+    try {
+      const res = await fetch("/api/service-categories");
+      const data = await res.json();
+      setCategories(data);
+      // Set first category as default if not editing
+      if (data.length > 0 && !isEdit && !formData.category) {
+        setFormData((prev) => ({ ...prev, category: data[0].value }));
+      }
+    } catch (error) {
+      console.error("Failed to load categories");
+      // Set default categories if API fails
+      const defaultCategories = [
+        { id: "1", value: "HAIRCUT", label: "Haircut" },
+        { id: "2", value: "COLORING", label: "Coloring" },
+        { id: "3", value: "STYLING", label: "Styling" },
+        { id: "4", value: "TREATMENT", label: "Treatment" },
+      ];
+      setCategories(defaultCategories);
+      if (!isEdit && !formData.category) {
+        setFormData((prev) => ({
+          ...prev,
+          category: defaultCategories[0].value,
+        }));
+      }
+    }
+  };
 
   const fetchService = async () => {
     try {
@@ -97,14 +130,14 @@ export default function ServiceFormPage() {
     try {
       setUploading(true);
 
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("type", "service");
-      formData.append("enhanceHD", enhanceHD.toString());
+      const formDataUpload = new FormData();
+      formDataUpload.append("file", file);
+      formDataUpload.append("type", "service");
+      formDataUpload.append("enhanceHD", enhanceHD.toString());
 
       const res = await fetch("/api/upload", {
         method: "POST",
-        body: formData,
+        body: formDataUpload,
       });
 
       if (!res.ok) {
@@ -181,41 +214,41 @@ export default function ServiceFormPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-dark-950 via-dark-900 to-dark-950 dark:from-dark-950 dark:via-dark-900 dark:to-dark-950 bg-white">
+    <div className="min-h-screen bg-white dark:bg-gradient-to-br dark:from-dark-950 dark:via-dark-900 dark:to-dark-950">
       <AdminSidebar />
 
-      <div className="p-3 sm:p-4 lg:p-6">
+      <div className="pt-16 pb-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          {/* Header */}
-          <div className="mb-8">
-            <motion.div whileHover={{ x: -5 }} transition={{ duration: 0.2 }}>
+          {/* Header - Back Button and Title in Same Row */}
+          <div className="flex items-center justify-between gap-2 px-3 py-2 bg-primary-600">
+            <motion.div whileHover={{ x: -3 }} transition={{ duration: 0.2 }}>
               <Button
                 onClick={() => router.push("/halo-admin-portal-2024/services")}
-                className="mb-6 flex items-center gap-2 bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white shadow-lg shadow-primary-900/50 border-none"
+                className="flex items-center gap-1.5 text-xs px-2.5 py-1.5 bg-white/20 hover:bg-white/30 text-white border-none shadow-none"
               >
-                <ArrowLeft size={20} />
+                <ArrowLeft size={16} />
                 Back to Services
               </Button>
             </motion.div>
 
-            <div className="flex items-center gap-3 mb-3">
+            <div className="flex items-center gap-2">
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ type: "spring", stiffness: 200, delay: 0.2 }}
-                className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center shadow-lg"
+                className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center"
               >
-                <ImageIcon className="text-white" size={24} />
+                <ImageIcon className="text-white" size={16} />
               </motion.div>
               <div>
-                <h1 className="text-2xl sm:text-3xl font-bold text-dark-900 dark:text-white">
+                <h1 className="text-sm font-bold text-white">
                   {isEdit ? "Edit Service" : "Add New Service"}
                 </h1>
-                <p className="text-dark-600 dark:text-dark-400 mt-0.5 text-sm">
+                <p className="text-white/80 text-[10px] leading-none">
                   {isEdit
                     ? "Update service information"
                     : "Create a new service for your salon"}
@@ -225,16 +258,14 @@ export default function ServiceFormPage() {
           </div>
 
           {/* Form */}
-          <Card className="bg-white dark:bg-gradient-to-br dark:from-dark-900/95 dark:to-dark-800/95 backdrop-blur-xl border border-dark-200 dark:border-dark-700/50 shadow-lg max-w-4xl">
-            <form
-              onSubmit={handleSubmit}
-              className="space-y-4 sm:space-y-6 p-3 sm:p-6"
-            >
+          <Card className="bg-white dark:bg-gradient-to-br dark:from-dark-900/95 dark:to-dark-800/95 backdrop-blur-xl border-0 rounded-none shadow-none">
+            <form onSubmit={handleSubmit} className="space-y-3 py-2">
               {/* Service Name */}
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.1 }}
+                className="px-3"
               >
                 <label className="block text-dark-900 dark:text-white font-semibold mb-2 text-xs uppercase tracking-wide">
                   Service Name <span className="text-red-500">*</span>
@@ -259,6 +290,7 @@ export default function ServiceFormPage() {
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.2 }}
+                className="px-3"
               >
                 <label className="block text-dark-900 dark:text-white font-semibold mb-2 text-xs uppercase tracking-wide">
                   Description <span className="text-red-500">*</span>
@@ -282,7 +314,7 @@ export default function ServiceFormPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
-                className="grid grid-cols-1 md:grid-cols-2 gap-6"
+                className="grid grid-cols-1 md:grid-cols-2 gap-6 px-3"
               >
                 <div>
                   <label className="block text-dark-900 dark:text-white font-semibold mb-2 text-xs uppercase tracking-wide">
@@ -335,6 +367,7 @@ export default function ServiceFormPage() {
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.4 }}
+                className="px-3"
               >
                 <label className="block text-dark-900 dark:text-white font-semibold mb-2 text-xs uppercase tracking-wide">
                   Category <span className="text-red-500">*</span>
@@ -348,12 +381,11 @@ export default function ServiceFormPage() {
                     className="w-full px-3 py-2 bg-white dark:bg-dark-800/80 border-2 border-dark-300 dark:border-dark-600 text-dark-900 dark:text-white rounded-lg focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/30 appearance-none cursor-pointer text-sm transition-all duration-300"
                     required
                   >
-                    <option value="HAIRCUT">Haircut</option>
-                    <option value="COLORING">Coloring</option>
-                    <option value="STYLING">Styling</option>
-                    <option value="TREATMENT">Treatment</option>
-                    <option value="BRAIDING">Braiding</option>
-                    <option value="EXTENSION">Extension</option>
+                    {categories.map((cat) => (
+                      <option key={cat.id} value={cat.value}>
+                        {cat.label}
+                      </option>
+                    ))}
                   </select>
                   <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-primary-500">
                     <svg
@@ -379,6 +411,7 @@ export default function ServiceFormPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5 }}
+                className="px-3"
               >
                 <label className="block text-dark-900 dark:text-white font-semibold mb-2 text-xs uppercase tracking-wide">
                   Service Image
@@ -486,7 +519,7 @@ export default function ServiceFormPage() {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.6 }}
                 whileHover={{ scale: 1.01 }}
-                className="flex items-center gap-4 p-5 bg-gradient-to-r from-dark-800/60 to-dark-700/60 rounded-xl border border-dark-600/50"
+                className="flex items-center gap-4 p-5 bg-gradient-to-r from-dark-800/60 to-dark-700/60 rounded-xl border border-dark-600/50 mx-3"
               >
                 <input
                   type="checkbox"
@@ -519,7 +552,7 @@ export default function ServiceFormPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.7 }}
-                className="flex flex-col sm:flex-row gap-3 pt-4 sm:pt-6 border-t border-dark-200 dark:border-dark-700/50"
+                className="flex flex-col sm:flex-row gap-3 pt-4 sm:pt-6 border-t border-dark-200 dark:border-dark-700/50 px-3"
               >
                 <motion.div
                   whileHover={{ scale: 1.02 }}

@@ -18,41 +18,49 @@ interface Service {
   isActive?: boolean;
 }
 
-const categories = [
-  { value: "All", label: "All Services", icon: Sparkles },
-  { value: "HAIRCUT", label: "Haircut", icon: Scissors },
-  { value: "COLOR", label: "Color", icon: Sparkles },
-  { value: "STYLING", label: "Styling", icon: Star },
-  { value: "SCALP_TREATMENTS", label: "Scalp treatments", icon: Sparkles },
-  {
-    value: "CHEMICAL_STRAIGHTENING",
-    label: "Chemical straightening",
-    icon: Star,
-  },
-  { value: "KERATIN_TREATMENTS", label: "Keratin treatments", icon: Sparkles },
-  { value: "HAIR_LOSS_TREATMENTS", label: "Hair loss treatments", icon: Star },
-];
+interface ServiceCategory {
+  id: string;
+  value: string;
+  label: string;
+}
 
 export default function ServicesPage() {
   const [services, setServices] = useState<Service[]>([]);
+  const [categories, setCategories] = useState<ServiceCategory[]>([]);
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    fetchCategories();
     fetchServices();
   }, []);
+
+  const fetchCategories = async () => {
+    try {
+      const response = await fetch("/api/service-categories");
+      if (response.ok) {
+        const data = await response.json();
+        setCategories(data);
+      }
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+    }
+  };
 
   const fetchServices = async () => {
     try {
       const response = await fetch("/api/services");
       const data = await response.json();
       // Filter to show only active services to visitors
-      const activeServices = (data.services || []).filter(
-        (service: Service) => service.isActive !== false
-      );
+      const activeServices = Array.isArray(data)
+        ? data.filter((service: Service) => service.isActive !== false)
+        : (data.services || []).filter(
+            (service: Service) => service.isActive !== false
+          );
       setServices(activeServices);
     } catch (error) {
       console.error("Error fetching services:", error);
+      setServices([]);
     } finally {
       setIsLoading(false);
     }
@@ -167,37 +175,60 @@ export default function ServicesPage() {
           transition={{ delay: 0.3 }}
           className="flex flex-wrap justify-center gap-3 mb-16"
         >
-          {categories.map((category, index) => {
-            const Icon = category.icon;
-            return (
-              <motion.div
-                key={category.value}
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.1 * index }}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <Button
-                  variant={
-                    selectedCategory === category.value ? "primary" : "outline"
+          {/* All Services Button */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0 }}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <Button
+              variant={selectedCategory === "All" ? "primary" : "outline"}
+              size="sm"
+              onClick={() => setSelectedCategory("All")}
+              className={`
+                group relative overflow-hidden transition-all duration-300
+                ${
+                  selectedCategory === "All"
+                    ? "shadow-lg shadow-primary-500/50"
+                    : "hover:shadow-md"
+                }
+              `}
+            >
+              <span className="relative z-10">All Services</span>
+            </Button>
+          </motion.div>
+
+          {/* Dynamic Category Buttons */}
+          {categories.map((category, index) => (
+            <motion.div
+              key={category.value}
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.1 * (index + 1) }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Button
+                variant={
+                  selectedCategory === category.value ? "primary" : "outline"
+                }
+                size="sm"
+                onClick={() => setSelectedCategory(category.value)}
+                className={`
+                  group relative overflow-hidden transition-all duration-300
+                  ${
+                    selectedCategory === category.value
+                      ? "shadow-lg shadow-primary-500/50"
+                      : "hover:shadow-md"
                   }
-                  size="sm"
-                  onClick={() => setSelectedCategory(category.value)}
-                  className={`
-                    group relative overflow-hidden transition-all duration-300
-                    ${
-                      selectedCategory === category.value
-                        ? "shadow-lg shadow-primary-500/50"
-                        : "hover:shadow-md"
-                    }
-                  `}
-                >
-                  <span className="relative z-10">{category.label}</span>
-                </Button>
-              </motion.div>
-            );
-          })}
+                `}
+              >
+                <span className="relative z-10">{category.label}</span>
+              </Button>
+            </motion.div>
+          ))}
         </motion.div>
 
         {/* Services Grid */}

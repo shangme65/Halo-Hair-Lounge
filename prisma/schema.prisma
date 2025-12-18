@@ -82,7 +82,7 @@ model Service {
   price         Float
   duration      Int // in minutes
   image         String?
-  category      ServiceCategory
+  category      String
   isActive      Boolean       @default(true)
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
@@ -90,6 +90,16 @@ model Service {
   appointments  Appointment[]
 
   @@map("services")
+}
+
+model ServiceCategory {
+  id        String   @id @default(cuid())
+  value     String   @unique
+  label     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("service_categories")
 }
 
 model Appointment {
@@ -271,17 +281,8 @@ model CtaContent {
 
 enum Role {
   USER
-  STAFF
   ADMIN
-}
-
-enum ServiceCategory {
-  HAIRCUT
-  COLORING
-  TREATMENT
-  STYLING
-  EXTENSIONS
-  BRAIDING
+  STAFF
 }
 
 enum ProductCategory {

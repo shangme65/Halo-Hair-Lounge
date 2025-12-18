@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
 import {
   Facebook,
   Instagram,
@@ -12,19 +13,13 @@ import {
   MapPin,
 } from "lucide-react";
 
-const footerLinks = {
-  Services: [
-    { name: "Haircut", href: "/services#haircut" },
-    { name: "Color", href: "/services#color" },
-    { name: "Styling", href: "/services#styling" },
-    { name: "Scalp treatments", href: "/services#scalp_treatments" },
-    {
-      name: "Chemical straightening",
-      href: "/services#chemical_straightening",
-    },
-    { name: "Keratin treatments", href: "/services#keratin_treatments" },
-    { name: "Hair loss treatments", href: "/services#hair_loss_treatments" },
-  ],
+interface ServiceCategory {
+  id: string;
+  value: string;
+  label: string;
+}
+
+const staticFooterLinks = {
   Company: [
     { name: "About Us", href: "/about" },
     { name: "Contact", href: "/contact" },
@@ -41,6 +36,35 @@ const socialLinks = [
 ];
 
 export default function Footer() {
+  const [serviceCategories, setServiceCategories] = useState<ServiceCategory[]>(
+    []
+  );
+
+  useEffect(() => {
+    // Fetch dynamic service categories
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch("/api/service-categories");
+        if (response.ok) {
+          const categories = await response.json();
+          setServiceCategories(categories);
+        }
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+  // Build footer links dynamically
+  const footerLinks = {
+    Services: serviceCategories.map((category) => ({
+      name: category.label,
+      href: `/services#${category.value.toLowerCase()}`,
+    })),
+    ...staticFooterLinks,
+  };
   return (
     <footer className="relative bg-gradient-to-br from-dark-900 via-green-950 to-dark-950 text-white overflow-hidden">
       {/* Animated background with green gradient overlays */}
