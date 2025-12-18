@@ -1,0 +1,70 @@
+# Dependencies
+node_modules/
+npm-debug.log
+yarn-error.log
+.pnpm-debug.log
+
+# Build outputs
+.next/
+out/
+build/
+dist/
+
+# Development files
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Testing
+coverage/
+.nyc_output/
+*.test.ts
+*.test.tsx
+*.spec.ts
+*.spec.tsx
+__tests__/
+__mocks__/
+
+# IDE and Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Git
+.git/
+.gitignore
+.github/
+
+# Vercel
+.vercel/
+
+# Prisma
+prisma/migrations/
+
+# Documentation
+README.md
+CHANGELOG.md
+*.md
+
+# Unnecessary Next.js template
+nextjs/
+
+# Local development
+.env
+*.log
+logs/
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Other
+.cache/
+.temp/
+temp/
+tmp/
