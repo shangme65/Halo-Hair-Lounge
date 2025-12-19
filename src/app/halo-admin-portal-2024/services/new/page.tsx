@@ -35,7 +35,7 @@ export default function ServiceFormPage() {
     description: "",
     price: "",
     duration: "",
-    category: "",
+    categories: [] as string[],
     image: "",
     isActive: true,
   });
@@ -59,10 +59,6 @@ export default function ServiceFormPage() {
       const res = await fetch("/api/service-categories");
       const data = await res.json();
       setCategories(data);
-      // Set first category as default if not editing
-      if (data.length > 0 && !isEdit && !formData.category) {
-        setFormData((prev) => ({ ...prev, category: data[0].value }));
-      }
     } catch (error) {
       console.error("Failed to load categories");
       // Set default categories if API fails
@@ -73,12 +69,6 @@ export default function ServiceFormPage() {
         { id: "4", value: "TREATMENT", label: "Treatment" },
       ];
       setCategories(defaultCategories);
-      if (!isEdit && !formData.category) {
-        setFormData((prev) => ({
-          ...prev,
-          category: defaultCategories[0].value,
-        }));
-      }
     }
   };
 
@@ -95,7 +85,11 @@ export default function ServiceFormPage() {
           description: service.description,
           price: service.price.toString(),
           duration: service.duration.toString(),
-          category: service.category,
+          categories: Array.isArray(service.categories)
+            ? service.categories
+            : service.category
+            ? [service.category]
+            : [],
           image: service.image,
           isActive: service.isActive,
         });
@@ -164,9 +158,12 @@ export default function ServiceFormPage() {
       !formData.name ||
       !formData.description ||
       !formData.price ||
-      !formData.duration
+      !formData.duration ||
+      formData.categories.length === 0
     ) {
-      toast.error("Please fill in all required fields");
+      toast.error(
+        "Please fill in all required fields and select at least one category"
+      );
       return;
     }
 
@@ -362,7 +359,7 @@ export default function ServiceFormPage() {
                 </div>
               </motion.div>
 
-              {/* Category */}
+              {/* Categories - Multi-Select */}
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -370,40 +367,77 @@ export default function ServiceFormPage() {
                 className="px-3"
               >
                 <label className="block text-dark-900 dark:text-white font-semibold mb-2 text-xs uppercase tracking-wide">
-                  Category <span className="text-red-500">*</span>
+                  Categories <span className="text-red-500">*</span>
+                  <span className="ml-2 text-[10px] font-normal text-dark-500 dark:text-dark-400">
+                    (Select one or more)
+                  </span>
                 </label>
-                <div className="relative group">
-                  <select
-                    value={formData.category}
-                    onChange={(e) =>
-                      setFormData({ ...formData, category: e.target.value })
-                    }
-                    className="w-full px-3 py-2 bg-white dark:bg-dark-800/80 border-2 border-dark-300 dark:border-dark-600 text-dark-900 dark:text-white rounded-lg focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/30 appearance-none cursor-pointer text-sm transition-all duration-300"
-                    required
-                  >
-                    {categories.map((cat) => (
-                      <option key={cat.id} value={cat.value}>
-                        {cat.label}
-                      </option>
-                    ))}
-                  </select>
-                  <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-primary-500">
-                    <svg
-                      className="w-5 h-5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M19 9l-7 7-7-7"
-                      />
-                    </svg>
-                  </div>
-                  <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-primary-500/0 to-primary-600/0 group-hover:from-primary-500/10 group-hover:to-primary-600/10 pointer-events-none transition-all duration-300" />
+                <div className="space-y-2">
+                  {categories.map((cat) => {
+                    const isSelected = formData.categories.includes(cat.value);
+                    return (
+                      <motion.div
+                        key={cat.id}
+                        whileHover={{ scale: 1.01, x: 4 }}
+                        whileTap={{ scale: 0.99 }}
+                        onClick={() => {
+                          const newCategories = isSelected
+                            ? formData.categories.filter((c) => c !== cat.value)
+                            : [...formData.categories, cat.value];
+                          setFormData({
+                            ...formData,
+                            categories: newCategories,
+                          });
+                        }}
+                        className={`relative flex items-center gap-3 p-3 rounded-lg border-2 cursor-pointer transition-all duration-300 ${
+                          isSelected
+                            ? "bg-primary-50 dark:bg-primary-900/30 border-primary-500 shadow-md shadow-primary-500/20"
+                            : "bg-white dark:bg-dark-800/80 border-dark-300 dark:border-dark-600 hover:border-primary-400 dark:hover:border-primary-600"
+                        }`}
+                      >
+                        <div
+                          className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all duration-300 ${
+                            isSelected
+                              ? "bg-primary-500 border-primary-500"
+                              : "border-dark-400 dark:border-dark-600"
+                          }`}
+                        >
+                          {isSelected && (
+                            <motion.svg
+                              initial={{ scale: 0 }}
+                              animate={{ scale: 1 }}
+                              className="w-4 h-4 text-white"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={3}
+                                d="M5 13l4 4L19 7"
+                              />
+                            </motion.svg>
+                          )}
+                        </div>
+                        <span
+                          className={`text-sm font-medium transition-colors duration-300 ${
+                            isSelected
+                              ? "text-primary-700 dark:text-primary-400"
+                              : "text-dark-900 dark:text-white"
+                          }`}
+                        >
+                          {cat.label}
+                        </span>
+                      </motion.div>
+                    );
+                  })}
                 </div>
+                {formData.categories.length === 0 && (
+                  <p className="mt-2 text-xs text-red-500">
+                    Please select at least one category
+                  </p>
+                )}
               </motion.div>
 
               {/* Image Upload */}

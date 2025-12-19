@@ -25,7 +25,7 @@ interface Service {
   description: string;
   price: number;
   duration: number;
-  category: string;
+  categories: string[];
   image: string;
   isActive: boolean;
 }
@@ -220,8 +220,12 @@ export default function AdminServicesPage() {
   // Group services by category
   const servicesByCategory = categories.map((cat) => ({
     ...cat,
-    services: filteredServices.filter((s) => s.category === cat.value),
-    count: services.filter((s) => s.category === cat.value).length,
+    services: filteredServices.filter(
+      (s) => s.categories && s.categories.includes(cat.value)
+    ),
+    count: services.filter(
+      (s) => s.categories && s.categories.includes(cat.value)
+    ).length,
   }));
 
   return (
@@ -294,7 +298,10 @@ export default function AdminServicesPage() {
               </Card>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                 {filteredServices
-                  .filter((s) => s.category === selectedCategory)
+                  .filter(
+                    (s) =>
+                      s.categories && s.categories.includes(selectedCategory!)
+                  )
                   .map((service) => (
                     <Card
                       key={service.id}
@@ -329,13 +336,26 @@ export default function AdminServicesPage() {
                           </span>
                         </div>
 
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-[10px] bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400 px-2 py-0.5 rounded-full font-medium">
-                            {service.category}
-                          </span>
+                        <div className="flex items-center justify-between mb-2 gap-2">
+                          <div className="flex flex-wrap gap-1">
+                            {service.categories &&
+                              service.categories.map((cat) => {
+                                const catData = categories.find(
+                                  (c) => c.value === cat
+                                );
+                                return (
+                                  <span
+                                    key={cat}
+                                    className="text-[9px] bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400 px-1.5 py-0.5 rounded-full font-medium"
+                                  >
+                                    {catData?.label || cat}
+                                  </span>
+                                );
+                              })}
+                          </div>
                           <button
                             onClick={() => toggleStatus(service)}
-                            className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
+                            className={`text-[10px] px-2 py-0.5 rounded-full font-medium whitespace-nowrap ${
                               service.isActive
                                 ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400"
                                 : "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400"
@@ -365,8 +385,10 @@ export default function AdminServicesPage() {
                     </Card>
                   ))}
 
-                {filteredServices.filter((s) => s.category === selectedCategory)
-                  .length === 0 && (
+                {filteredServices.filter(
+                  (s) =>
+                    s.categories && s.categories.includes(selectedCategory!)
+                ).length === 0 && (
                   <div className="col-span-full text-center py-6">
                     <p className="text-dark-600 dark:text-dark-400 text-xs">
                       No services in this category

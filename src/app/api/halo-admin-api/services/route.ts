@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { name, description, price, duration, category, image, isActive } =
+    const { name, description, price, duration, categories, image, isActive } =
       body;
 
     if (
@@ -44,10 +44,12 @@ export async function POST(req: NextRequest) {
       !description ||
       price === undefined ||
       !duration ||
-      !category
+      !categories ||
+      !Array.isArray(categories) ||
+      categories.length === 0
     ) {
       return NextResponse.json(
-        { error: "Missing required fields" },
+        { error: "Missing required fields or invalid categories" },
         { status: 400 }
       );
     }
@@ -58,7 +60,7 @@ export async function POST(req: NextRequest) {
         description,
         price: parseFloat(price),
         duration: parseInt(duration),
-        category,
+        categories,
         image: image || "",
         isActive: isActive !== undefined ? isActive : true,
       },

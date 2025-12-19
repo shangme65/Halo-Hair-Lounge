@@ -16,16 +16,29 @@ export async function DELETE(
 
     const { id } = await params;
 
-    // Check if there are services using this category
-    const servicesCount = await prisma.service.count({
-      where: {
-        category: await prisma.serviceCategory
-          .findUnique({ where: { id } })
-          .then((cat) => cat?.value),
-      },
+    // Get the category to find its value
+    const category = await prisma.serviceCategory.findUnique({
+      where: { id },
     });
 
-    if (servicesCount > 0) {
+    if (!category) {
+      return NextResponse.json(
+        { error: "Category not found" },
+        { status: 404 }
+      );
+    }
+
+    // Check if there are services using this category
+    const servicesWithCategory = await prisma.service.findMany({
+      where: {
+        categories: {
+          has: category.value,
+        },
+      },
+      take: 1,
+    });
+
+    if (servicesWithCategory.length > 0) {
       return NextResponse.json(
         { error: "Cannot delete category with existing services" },
         { status: 400 }

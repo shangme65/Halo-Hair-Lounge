@@ -19,7 +19,7 @@ export async function PUT(
     }
 
     const body = await req.json();
-    const { name, description, price, duration, category, image, isActive } =
+    const { name, description, price, duration, categories, image, isActive } =
       body;
 
     const service = await prisma.service.update({
@@ -29,7 +29,9 @@ export async function PUT(
         ...(description && { description }),
         ...(price !== undefined && { price: parseFloat(price) }),
         ...(duration && { duration: parseInt(duration) }),
-        ...(category && { category }),
+        ...(categories &&
+          Array.isArray(categories) &&
+          categories.length > 0 && { categories }),
         ...(image !== undefined && { image }),
         ...(isActive !== undefined && { isActive }),
       },

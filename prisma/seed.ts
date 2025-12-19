@@ -62,7 +62,7 @@ async function main() {
         "Professional haircut with styling consultation. Includes wash and blow dry.",
       price: 65.0,
       duration: 60,
-      category: "haircut",
+      categories: ["haircut"],
       image: "https://images.unsplash.com/photo-1562322140-8baeececf3df?w=800",
     },
     {
@@ -71,7 +71,7 @@ async function main() {
         "Full color service with premium products. Includes toner and deep conditioning.",
       price: 180.0,
       duration: 180,
-      category: "coloring",
+      categories: ["coloring", "treatment"],
       image: "https://images.unsplash.com/photo-1560066984-138dadb4c035?w=800",
     },
     {
@@ -79,7 +79,7 @@ async function main() {
       description: "Hand-painted highlights for a natural, sun-kissed look.",
       price: 220.0,
       duration: 210,
-      category: "coloring",
+      categories: ["coloring"],
       image:
         "https://images.unsplash.com/photo-1522337660859-02fbefca4702?w=800",
     },
@@ -88,7 +88,7 @@ async function main() {
       description: "Intensive moisture therapy for damaged or dry hair.",
       price: 85.0,
       duration: 45,
-      category: "treatment",
+      categories: ["treatment"],
       image:
         "https://images.unsplash.com/photo-1519699047748-de8e457a634e?w=800",
     },
@@ -98,7 +98,7 @@ async function main() {
         "Elegant updo or styling for weddings and special occasions.",
       price: 120.0,
       duration: 90,
-      category: "styling",
+      categories: ["styling"],
       image:
         "https://images.unsplash.com/photo-1487412912498-0447578fcca8?w=800",
     },
@@ -108,7 +108,7 @@ async function main() {
         "Premium quality hair extensions with professional installation.",
       price: 450.0,
       duration: 240,
-      category: "extensions",
+      categories: ["extensions", "styling"],
       image:
         "https://images.unsplash.com/photo-1522338140262-f46f5913618a?w=800",
     },
@@ -117,7 +117,7 @@ async function main() {
       description: "Protective styling with premium synthetic or human hair.",
       price: 200.0,
       duration: 300,
-      category: "braiding",
+      categories: ["braiding", "styling"],
       image:
         "https://images.unsplash.com/photo-1605980676233-e14c31c797b3?w=800",
     },
@@ -126,7 +126,7 @@ async function main() {
       description: "Smoothing treatment that eliminates frizz and adds shine.",
       price: 300.0,
       duration: 180,
-      category: "treatment",
+      categories: ["treatment"],
       image:
         "https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?w=800",
     },

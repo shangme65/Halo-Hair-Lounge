@@ -13,7 +13,7 @@ interface Service {
   description: string;
   price: number;
   duration: number;
-  category: string;
+  categories: string[];
   image?: string;
   isActive?: boolean;
 }
@@ -69,7 +69,9 @@ export default function ServicesPage() {
   const filteredServices =
     selectedCategory === "All"
       ? services
-      : services.filter((s) => s.category === selectedCategory);
+      : services.filter(
+          (s) => s.categories && s.categories.includes(selectedCategory)
+        );
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -303,16 +305,23 @@ export default function ServicesPage() {
                             {service.name}
                           </motion.h3>
 
-                          <motion.span
-                            className="inline-block px-4 py-1.5 bg-gradient-to-r from-primary-100 to-primary-200 dark:from-primary-900/30 dark:to-primary-800/30 text-primary-700 dark:text-primary-400 text-xs font-semibold rounded-full shadow-sm"
-                            whileHover={{ scale: 1.05 }}
-                          >
-                            {service.category.charAt(0) +
-                              service.category
-                                .slice(1)
-                                .toLowerCase()
-                                .replace(/_/g, " ")}
-                          </motion.span>
+                          <div className="flex flex-wrap gap-2">
+                            {service.categories &&
+                              service.categories.map((cat) => {
+                                const catData = categories.find(
+                                  (c) => c.value === cat
+                                );
+                                return (
+                                  <motion.span
+                                    key={cat}
+                                    className="inline-block px-3 py-1 bg-gradient-to-r from-primary-100 to-primary-200 dark:from-primary-900/30 dark:to-primary-800/30 text-primary-700 dark:text-primary-400 text-xs font-semibold rounded-full shadow-sm"
+                                    whileHover={{ scale: 1.05 }}
+                                  >
+                                    {catData?.label || cat}
+                                  </motion.span>
+                                );
+                              })}
+                          </div>
                         </div>
 
                         <motion.div

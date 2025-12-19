@@ -15,7 +15,7 @@ interface Service {
   description: string;
   price: number;
   duration: number;
-  category: string;
+  categories: string[];
   image?: string;
 }
 
