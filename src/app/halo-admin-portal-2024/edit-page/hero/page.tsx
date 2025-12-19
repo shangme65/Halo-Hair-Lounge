@@ -402,9 +402,9 @@ export default function HeroEditor() {
             </div>
           </Card>
 
-          {/* Slides Management */}
+          {/* All Slides Editor */}
           <Card className="p-6">
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-bold text-dark-900 dark:text-white">
                 Manage Slides ({slides.length})
               </h2>
@@ -418,35 +418,200 @@ export default function HeroEditor() {
               </Button>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            <div className="space-y-6">
               {slides.map((s, index) => (
                 <motion.div
                   key={index}
-                  whileHover={{ scale: 1.05 }}
-                  className={`relative p-4 rounded-lg border-2 cursor-pointer transition-all ${
-                    currentSlide === index
-                      ? "border-primary-500 bg-primary-50 dark:bg-primary-900/20"
-                      : "border-dark-200 dark:border-dark-700 hover:border-primary-300"
-                  }`}
-                  onClick={() => setCurrentSlide(index)}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                  className="p-6 rounded-xl border-2 border-dark-200 dark:border-dark-700 hover:border-primary-400 transition-all bg-white dark:bg-dark-800"
                 >
-                  <div className="text-sm font-medium text-dark-900 dark:text-white mb-1 truncate">
-                    Slide {index + 1}
+                  {/* Slide Header */}
+                  <div className="flex items-center justify-between mb-4 pb-3 border-b border-dark-200 dark:border-dark-700">
+                    <div className="flex items-center gap-3">
+                      <div className="px-3 py-1 bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 rounded-full text-sm font-semibold">
+                        Slide {index + 1}
+                      </div>
+                      <h3 className="text-lg font-semibold text-dark-900 dark:text-white truncate max-w-md">
+                        {s.title}
+                      </h3>
+                    </div>
+                    {slides.length > 1 && (
+                      <Button
+                        onClick={() => deleteSlide(index)}
+                        size="sm"
+                        variant="outline"
+                        className="text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-900/20"
+                      >
+                        <Trash2 size={16} className="mr-1" />
+                        Delete
+                      </Button>
+                    )}
                   </div>
-                  <div className="text-xs text-dark-600 dark:text-dark-400 truncate">
-                    {s.title}
-                  </div>
-                  {slides.length > 1 && (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        deleteSlide(index);
-                      }}
-                      className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
+
+                  {/* Slide Content Editor */}
+                  <div className="grid gap-4">
+                    {/* Subtitle */}
+                    <div>
+                      <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
+                        Subtitle
+                      </label>
+                      <input
+                        type="text"
+                        value={s.subtitle}
+                        onChange={(e) =>
+                          updateSlideField(index, "subtitle", e.target.value)
+                        }
+                        placeholder="e.g., Premium Hair Care Excellence"
+                        className="w-full px-4 py-3 rounded-lg border border-dark-300 dark:border-dark-600 bg-white dark:bg-dark-900 text-dark-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all"
+                      />
+                    </div>
+
+                    {/* Title */}
+                    <div>
+                      <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
+                        Title
+                      </label>
+                      <input
+                        type="text"
+                        value={s.title}
+                        onChange={(e) =>
+                          updateSlideField(index, "title", e.target.value)
+                        }
+                        placeholder="e.g., Transform Your Look"
+                        className="w-full px-4 py-3 rounded-lg border border-dark-300 dark:border-dark-600 bg-white dark:bg-dark-900 text-dark-900 dark:text-white text-lg font-semibold focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all"
+                      />
+                    </div>
+
+                    {/* Description */}
+                    <div>
+                      <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
+                        Description
+                      </label>
+                      <textarea
+                        value={s.description}
+                        onChange={(e) =>
+                          updateSlideField(index, "description", e.target.value)
+                        }
+                        placeholder="e.g., Experience luxury styling with our expert stylists"
+                        rows={3}
+                        className="w-full px-4 py-3 rounded-lg border border-dark-300 dark:border-dark-600 bg-white dark:bg-dark-900 text-dark-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all resize-none"
+                      />
+                    </div>
+
+                    {/* Primary CTA Button */}
+                    <div className="grid sm:grid-cols-2 gap-4 p-4 bg-primary-50 dark:bg-primary-900/10 rounded-lg border border-primary-200 dark:border-primary-800">
+                      <div>
+                        <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
+                          Primary Button Text
+                        </label>
+                        <input
+                          type="text"
+                          value={s.cta.text}
+                          onChange={(e) =>
+                            updateSlideField(index, "cta.text", e.target.value)
+                          }
+                          placeholder="e.g., Book Appointment"
+                          className="w-full px-4 py-2 rounded-lg border border-dark-300 dark:border-dark-600 bg-white dark:bg-dark-900 text-dark-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
+                          Primary Button Link
+                        </label>
+                        <input
+                          type="text"
+                          value={s.cta.href}
+                          onChange={(e) =>
+                            updateSlideField(index, "cta.href", e.target.value)
+                          }
+                          placeholder="e.g., /book"
+                          className="w-full px-4 py-2 rounded-lg border border-dark-300 dark:border-dark-600 bg-white dark:bg-dark-900 text-dark-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Secondary Button (Fixed to Explore Services) */}
+                    <div className="p-4 bg-dark-50 dark:bg-dark-900/50 rounded-lg border border-dark-200 dark:border-dark-700">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-1">
+                            Secondary Button (Fixed)
+                          </label>
+                          <p className="text-xs text-dark-500 dark:text-dark-400">
+                            This button always links to /services
+                          </p>
+                        </div>
+                        <div className="px-4 py-2 bg-white dark:bg-dark-800 border border-dark-300 dark:border-dark-600 rounded-lg text-sm text-dark-700 dark:text-dark-300">
+                          Explore Services → /services
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Color Scheme Selector */}
+                    <div>
+                      <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-3">
+                        Color Scheme
+                      </label>
+                      <div className="flex gap-3 flex-wrap">
+                        {(
+                          [
+                            { name: "purple", label: "Purple" },
+                            { name: "gold", label: "Gold" },
+                            { name: "teal", label: "Teal" },
+                            { name: "rose", label: "Rose" },
+                            { name: "green", label: "Green" },
+                          ] as const
+                        ).map((color) => (
+                          <button
+                            key={color.name}
+                            onClick={() =>
+                              updateSlideField(index, "colorScheme", color.name)
+                            }
+                            className={`flex items-center gap-2 px-4 py-2 rounded-lg border-2 transition-all ${
+                              s.colorScheme === color.name
+                                ? "border-primary-500 bg-primary-50 dark:bg-primary-900/20 scale-105"
+                                : "border-dark-300 dark:border-dark-600 hover:border-primary-300"
+                            }`}
+                          >
+                            <div
+                              className="w-6 h-6 rounded-full"
+                              style={{
+                                background:
+                                  color.name === "purple"
+                                    ? "linear-gradient(135deg, #a855f7 0%, #7c3aed 100%)"
+                                    : color.name === "gold"
+                                    ? "linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)"
+                                    : color.name === "teal"
+                                    ? "linear-gradient(135deg, #14b8a6 0%, #0d9488 100%)"
+                                    : color.name === "rose"
+                                    ? "linear-gradient(135deg, #fb7185 0%, #f43f5e 100%)"
+                                    : "linear-gradient(135deg, #22c55e 0%, #16a34a 100%)",
+                              }}
+                            />
+                            <span className="text-sm font-medium text-dark-700 dark:text-dark-300">
+                              {color.label}
+                            </span>
+                            {s.colorScheme === color.name && (
+                              <CheckCircle className="w-4 h-4 text-primary-600" />
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Preview Button */}
+                    <Button
+                      onClick={() => setCurrentSlide(index)}
+                      size="sm"
+                      variant="outline"
+                      className="w-full flex items-center justify-center gap-2"
                     >
-                      <Trash2 size={12} />
-                    </button>
-                  )}
+                      <Eye size={16} />
+                      Preview This Slide
+                    </Button>
+                  </div>
                 </motion.div>
               ))}
             </div>
