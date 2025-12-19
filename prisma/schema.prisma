@@ -29,9 +29,6 @@ model User {
   accounts      Account[]
   sessions      Session[]
   appointments  Appointment[]
-  orders        Order[]
-  cartItems     CartItem[]
-  reviews       Review[]
 
   @@map("users")
 }
@@ -138,90 +135,13 @@ model Product {
   tags        String[]
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
-  
-  orderItems  OrderItem[]
-  cartItems   CartItem[]
-  reviews     Review[]
 
   @@index([category])
   @@index([isFeatured])
   @@map("products")
 }
 
-model CartItem {
-  id        String   @id @default(cuid())
-  userId    String
-  productId String
-  quantity  Int      @default(1)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, productId])
-  @@map("cart_items")
-}
-
-model Order {
-  id              String      @id @default(cuid())
-  userId          String
-  orderNumber     String      @unique
-  total           Float
-  subtotal        Float
-  tax             Float       @default(0)
-  shipping        Float       @default(0)
-  status          OrderStatus @default(PENDING)
-  paymentStatus   PaymentStatus @default(PENDING)
-  paymentMethod   String?
-  shippingAddress Json
-  billingAddress  Json?
-  trackingNumber  String?
-  notes           String?     @db.Text
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
-  
-  user            User        @relation(fields: [userId], references: [id])
-  items           OrderItem[]
-
-  @@index([userId])
-  @@index([orderNumber])
-  @@index([status])
-  @@map("orders")
-}
-
-model OrderItem {
-  id        String   @id @default(cuid())
-  orderId   String
-  productId String
-  quantity  Int
-  price     Float
-  createdAt DateTime @default(now())
-  
-  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  product   Product  @relation(fields: [productId], references: [id])
-
-  @@map("order_items")
-}
-
-model Review {
-  id        String   @id @default(cuid())
-  userId    String
-  productId String
-  rating    Int // 1-5
-  comment   String?  @db.Text
-  isApproved Boolean @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, productId])
-  @@index([productId])
-  @@map("reviews")
-}
-
+// Content Management Models
 model HeroContent {
   id        String   @id @default(cuid())
   slides    Json     // Array of hero slides with title, subtitle, description, colorScheme, cta
@@ -301,20 +221,4 @@ enum AppointmentStatus {
   COMPLETED
   CANCELLED
   NO_SHOW
-}
-
-enum OrderStatus {
-  PENDING
-  PROCESSING
-  SHIPPED
-  DELIVERED
-  CANCELLED
-  REFUNDED
-}
-
-enum PaymentStatus {
-  PENDING
-  PAID
-  FAILED
-  REFUNDED
 }
