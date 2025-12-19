@@ -13,7 +13,32 @@ import {
   Loader2,
   Sparkles,
   CheckCircle,
+  GripVertical,
+  Calendar,
+  Link as LinkIcon,
+  Type,
+  AlignLeft,
+  Palette,
+  MousePointer,
 } from "lucide-react";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { HexColorPicker } from "react-colorful";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import HeroScene from "@/components/3d/HeroScene";
@@ -28,6 +53,247 @@ interface HeroSlide {
     text: string;
     href: string;
   };
+}
+
+interface SortableSlideProps {
+  slide: HeroSlide;
+  index: number;
+  currentSlide: number;
+  updateSlideField: (index: number, field: string, value: any) => void;
+  deleteSlide: (index: number) => void;
+  setCurrentSlide: (index: number) => void;
+  slidesLength: number;
+}
+
+function SortableSlide({
+  slide,
+  index,
+  currentSlide,
+  updateSlideField,
+  deleteSlide,
+  setCurrentSlide,
+  slidesLength,
+}: SortableSlideProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: index.toString() });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="p-6 rounded-xl border-2 border-dark-200 dark:border-dark-700 hover:border-primary-400 transition-all bg-white dark:bg-dark-800"
+    >
+      {/* Slide Header */}
+      <div className="flex items-center justify-between mb-4 pb-3 border-b border-dark-200 dark:border-dark-700">
+        <div className="flex items-center gap-3">
+          <div
+            {...attributes}
+            {...listeners}
+            className="cursor-grab active:cursor-grabbing p-2 hover:bg-dark-100 dark:hover:bg-dark-700 rounded-lg transition-colors"
+          >
+            <GripVertical size={20} className="text-dark-400" />
+          </div>
+          <div className="px-3 py-1 bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 rounded-full text-sm font-semibold">
+            Slide {index + 1}
+          </div>
+          <h3 className="text-lg font-semibold text-dark-900 dark:text-white truncate max-w-md">
+            {slide.title}
+          </h3>
+        </div>
+        {slidesLength > 1 && (
+          <Button
+            onClick={() => deleteSlide(index)}
+            size="sm"
+            variant="outline"
+            className="text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-900/20"
+          >
+            <Trash2 size={16} className="mr-1" />
+            Delete
+          </Button>
+        )}
+      </div>
+
+      {/* Slide Content Editor */}
+      <div className="grid gap-4">
+        {/* Subtitle */}
+        <div>
+          <label className="flex items-center gap-2 text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
+            <Sparkles size={16} className="text-primary-500" />
+            Subtitle
+          </label>
+          <input
+            type="text"
+            value={slide.subtitle}
+            onChange={(e) =>
+              updateSlideField(index, "subtitle", e.target.value)
+            }
+            placeholder="e.g., Premium Hair Care Excellence"
+            className="w-full px-4 py-3 rounded-lg border border-dark-300 dark:border-dark-600 bg-white dark:bg-dark-900 text-dark-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all"
+          />
+        </div>
+
+        {/* Title */}
+        <div>
+          <label className="flex items-center gap-2 text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
+            <Type size={16} className="text-primary-500" />
+            Title
+          </label>
+          <input
+            type="text"
+            value={slide.title}
+            onChange={(e) => updateSlideField(index, "title", e.target.value)}
+            placeholder="e.g., Transform Your Look"
+            className="w-full px-4 py-3 rounded-lg border border-dark-300 dark:border-dark-600 bg-white dark:bg-dark-900 text-dark-900 dark:text-white text-lg font-semibold focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all"
+          />
+        </div>
+
+        {/* Description */}
+        <div>
+          <label className="flex items-center gap-2 text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
+            <AlignLeft size={16} className="text-primary-500" />
+            Description
+          </label>
+          <textarea
+            value={slide.description}
+            onChange={(e) =>
+              updateSlideField(index, "description", e.target.value)
+            }
+            placeholder="e.g., Experience luxury styling with our expert stylists"
+            rows={3}
+            className="w-full px-4 py-3 rounded-lg border border-dark-300 dark:border-dark-600 bg-white dark:bg-dark-900 text-dark-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all resize-none"
+          />
+        </div>
+
+        {/* Primary CTA Button */}
+        <div className="grid sm:grid-cols-2 gap-4 p-4 bg-primary-50 dark:bg-primary-900/10 rounded-lg border border-primary-200 dark:border-primary-800">
+          <div>
+            <label className="flex items-center gap-2 text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
+              <MousePointer size={16} className="text-primary-600" />
+              Primary Button Text
+            </label>
+            <input
+              type="text"
+              value={slide.cta.text}
+              onChange={(e) =>
+                updateSlideField(index, "cta.text", e.target.value)
+              }
+              placeholder="e.g., Book Appointment"
+              className="w-full px-4 py-2 rounded-lg border border-dark-300 dark:border-dark-600 bg-white dark:bg-dark-900 text-dark-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
+            />
+          </div>
+          <div>
+            <label className="flex items-center gap-2 text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
+              <LinkIcon size={16} className="text-primary-600" />
+              Primary Button Link
+            </label>
+            <input
+              type="text"
+              value={slide.cta.href}
+              onChange={(e) =>
+                updateSlideField(index, "cta.href", e.target.value)
+              }
+              placeholder="e.g., /book"
+              className="w-full px-4 py-2 rounded-lg border border-dark-300 dark:border-dark-600 bg-white dark:bg-dark-900 text-dark-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
+            />
+          </div>
+        </div>
+
+        {/* Secondary Button (Fixed to Explore Services) */}
+        <div className="p-4 bg-dark-50 dark:bg-dark-900/50 rounded-lg border border-dark-200 dark:border-dark-700">
+          <div className="flex items-center justify-between">
+            <div>
+              <label className="flex items-center gap-2 text-sm font-medium text-dark-700 dark:text-dark-300 mb-1">
+                <Sparkles size={16} className="text-dark-500" />
+                Secondary Button (Fixed)
+              </label>
+              <p className="text-xs text-dark-500 dark:text-dark-400">
+                This button always links to /services
+              </p>
+            </div>
+            <div className="px-4 py-2 bg-white dark:bg-dark-800 border border-dark-300 dark:border-dark-600 rounded-lg text-sm text-dark-700 dark:text-dark-300">
+              Explore Services → /services
+            </div>
+          </div>
+        </div>
+
+        {/* Color Scheme Selector */}
+        <div>
+          <label className="flex items-center gap-2 text-sm font-medium text-dark-700 dark:text-dark-300 mb-3">
+            <Palette size={16} className="text-primary-500" />
+            Color Scheme
+          </label>
+          <div className="flex gap-3 flex-wrap">
+            {(
+              [
+                { name: "purple", label: "Purple" },
+                { name: "gold", label: "Gold" },
+                { name: "teal", label: "Teal" },
+                { name: "rose", label: "Rose" },
+                { name: "green", label: "Green" },
+              ] as const
+            ).map((color) => (
+              <button
+                key={color.name}
+                onClick={() =>
+                  updateSlideField(index, "colorScheme", color.name)
+                }
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg border-2 transition-all ${
+                  slide.colorScheme === color.name
+                    ? "border-primary-500 bg-primary-50 dark:bg-primary-900/20 scale-105"
+                    : "border-dark-300 dark:border-dark-600 hover:border-primary-300"
+                }`}
+              >
+                <div
+                  className="w-6 h-6 rounded-full"
+                  style={{
+                    background:
+                      color.name === "purple"
+                        ? "linear-gradient(135deg, #a855f7 0%, #7c3aed 100%)"
+                        : color.name === "gold"
+                        ? "linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)"
+                        : color.name === "teal"
+                        ? "linear-gradient(135deg, #14b8a6 0%, #0d9488 100%)"
+                        : color.name === "rose"
+                        ? "linear-gradient(135deg, #fb7185 0%, #f43f5e 100%)"
+                        : "linear-gradient(135deg, #22c55e 0%, #16a34a 100%)",
+                  }}
+                />
+                <span className="text-sm font-medium text-dark-700 dark:text-dark-300">
+                  {color.label}
+                </span>
+                {slide.colorScheme === color.name && (
+                  <CheckCircle className="w-4 h-4 text-primary-600" />
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Preview Button */}
+        <Button
+          onClick={() => setCurrentSlide(index)}
+          size="sm"
+          variant="outline"
+          className="w-full flex items-center justify-center gap-2"
+        >
+          <Eye size={16} />
+          Preview This Slide
+        </Button>
+      </div>
+    </div>
+  );
 }
 
 export default function HeroEditor() {
@@ -45,6 +311,13 @@ export default function HeroEditor() {
   ]);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [editMode, setEditMode] = useState<string | null>(null);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   useEffect(() => {
     fetchHeroContent();
@@ -128,6 +401,26 @@ export default function HeroEditor() {
     setSlides(newSlides);
     if (currentSlide >= newSlides.length) {
       setCurrentSlide(newSlides.length - 1);
+    }
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      const oldIndex = parseInt(active.id as string);
+      const newIndex = parseInt(over.id as string);
+
+      setSlides((items) => arrayMove(items, oldIndex, newIndex));
+
+      // Update current slide if it was moved
+      if (currentSlide === oldIndex) {
+        setCurrentSlide(newIndex);
+      } else if (currentSlide === newIndex) {
+        setCurrentSlide(oldIndex > newIndex ? newIndex + 1 : newIndex - 1);
+      }
+
+      toast.success("Slide reordered!");
     }
   };
 
@@ -405,9 +698,15 @@ export default function HeroEditor() {
           {/* All Slides Editor */}
           <Card className="p-6">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-dark-900 dark:text-white">
-                Manage Slides ({slides.length})
-              </h2>
+              <div>
+                <h2 className="text-xl font-bold text-dark-900 dark:text-white">
+                  Manage Slides ({slides.length})
+                </h2>
+                <p className="text-sm text-dark-600 dark:text-dark-400 mt-1">
+                  <GripVertical size={14} className="inline mr-1" />
+                  Drag to reorder slides
+                </p>
+              </div>
               <Button
                 onClick={addSlide}
                 size="sm"
@@ -418,203 +717,31 @@ export default function HeroEditor() {
               </Button>
             </div>
 
-            <div className="space-y-6">
-              {slides.map((s, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                  className="p-6 rounded-xl border-2 border-dark-200 dark:border-dark-700 hover:border-primary-400 transition-all bg-white dark:bg-dark-800"
-                >
-                  {/* Slide Header */}
-                  <div className="flex items-center justify-between mb-4 pb-3 border-b border-dark-200 dark:border-dark-700">
-                    <div className="flex items-center gap-3">
-                      <div className="px-3 py-1 bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 rounded-full text-sm font-semibold">
-                        Slide {index + 1}
-                      </div>
-                      <h3 className="text-lg font-semibold text-dark-900 dark:text-white truncate max-w-md">
-                        {s.title}
-                      </h3>
-                    </div>
-                    {slides.length > 1 && (
-                      <Button
-                        onClick={() => deleteSlide(index)}
-                        size="sm"
-                        variant="outline"
-                        className="text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-900/20"
-                      >
-                        <Trash2 size={16} className="mr-1" />
-                        Delete
-                      </Button>
-                    )}
-                  </div>
-
-                  {/* Slide Content Editor */}
-                  <div className="grid gap-4">
-                    {/* Subtitle */}
-                    <div>
-                      <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
-                        Subtitle
-                      </label>
-                      <input
-                        type="text"
-                        value={s.subtitle}
-                        onChange={(e) =>
-                          updateSlideField(index, "subtitle", e.target.value)
-                        }
-                        placeholder="e.g., Premium Hair Care Excellence"
-                        className="w-full px-4 py-3 rounded-lg border border-dark-300 dark:border-dark-600 bg-white dark:bg-dark-900 text-dark-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all"
-                      />
-                    </div>
-
-                    {/* Title */}
-                    <div>
-                      <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
-                        Title
-                      </label>
-                      <input
-                        type="text"
-                        value={s.title}
-                        onChange={(e) =>
-                          updateSlideField(index, "title", e.target.value)
-                        }
-                        placeholder="e.g., Transform Your Look"
-                        className="w-full px-4 py-3 rounded-lg border border-dark-300 dark:border-dark-600 bg-white dark:bg-dark-900 text-dark-900 dark:text-white text-lg font-semibold focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all"
-                      />
-                    </div>
-
-                    {/* Description */}
-                    <div>
-                      <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
-                        Description
-                      </label>
-                      <textarea
-                        value={s.description}
-                        onChange={(e) =>
-                          updateSlideField(index, "description", e.target.value)
-                        }
-                        placeholder="e.g., Experience luxury styling with our expert stylists"
-                        rows={3}
-                        className="w-full px-4 py-3 rounded-lg border border-dark-300 dark:border-dark-600 bg-white dark:bg-dark-900 text-dark-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all resize-none"
-                      />
-                    </div>
-
-                    {/* Primary CTA Button */}
-                    <div className="grid sm:grid-cols-2 gap-4 p-4 bg-primary-50 dark:bg-primary-900/10 rounded-lg border border-primary-200 dark:border-primary-800">
-                      <div>
-                        <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
-                          Primary Button Text
-                        </label>
-                        <input
-                          type="text"
-                          value={s.cta.text}
-                          onChange={(e) =>
-                            updateSlideField(index, "cta.text", e.target.value)
-                          }
-                          placeholder="e.g., Book Appointment"
-                          className="w-full px-4 py-2 rounded-lg border border-dark-300 dark:border-dark-600 bg-white dark:bg-dark-900 text-dark-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
-                          Primary Button Link
-                        </label>
-                        <input
-                          type="text"
-                          value={s.cta.href}
-                          onChange={(e) =>
-                            updateSlideField(index, "cta.href", e.target.value)
-                          }
-                          placeholder="e.g., /book"
-                          className="w-full px-4 py-2 rounded-lg border border-dark-300 dark:border-dark-600 bg-white dark:bg-dark-900 text-dark-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
-                        />
-                      </div>
-                    </div>
-
-                    {/* Secondary Button (Fixed to Explore Services) */}
-                    <div className="p-4 bg-dark-50 dark:bg-dark-900/50 rounded-lg border border-dark-200 dark:border-dark-700">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-1">
-                            Secondary Button (Fixed)
-                          </label>
-                          <p className="text-xs text-dark-500 dark:text-dark-400">
-                            This button always links to /services
-                          </p>
-                        </div>
-                        <div className="px-4 py-2 bg-white dark:bg-dark-800 border border-dark-300 dark:border-dark-600 rounded-lg text-sm text-dark-700 dark:text-dark-300">
-                          Explore Services → /services
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Color Scheme Selector */}
-                    <div>
-                      <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-3">
-                        Color Scheme
-                      </label>
-                      <div className="flex gap-3 flex-wrap">
-                        {(
-                          [
-                            { name: "purple", label: "Purple" },
-                            { name: "gold", label: "Gold" },
-                            { name: "teal", label: "Teal" },
-                            { name: "rose", label: "Rose" },
-                            { name: "green", label: "Green" },
-                          ] as const
-                        ).map((color) => (
-                          <button
-                            key={color.name}
-                            onClick={() =>
-                              updateSlideField(index, "colorScheme", color.name)
-                            }
-                            className={`flex items-center gap-2 px-4 py-2 rounded-lg border-2 transition-all ${
-                              s.colorScheme === color.name
-                                ? "border-primary-500 bg-primary-50 dark:bg-primary-900/20 scale-105"
-                                : "border-dark-300 dark:border-dark-600 hover:border-primary-300"
-                            }`}
-                          >
-                            <div
-                              className="w-6 h-6 rounded-full"
-                              style={{
-                                background:
-                                  color.name === "purple"
-                                    ? "linear-gradient(135deg, #a855f7 0%, #7c3aed 100%)"
-                                    : color.name === "gold"
-                                    ? "linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)"
-                                    : color.name === "teal"
-                                    ? "linear-gradient(135deg, #14b8a6 0%, #0d9488 100%)"
-                                    : color.name === "rose"
-                                    ? "linear-gradient(135deg, #fb7185 0%, #f43f5e 100%)"
-                                    : "linear-gradient(135deg, #22c55e 0%, #16a34a 100%)",
-                              }}
-                            />
-                            <span className="text-sm font-medium text-dark-700 dark:text-dark-300">
-                              {color.label}
-                            </span>
-                            {s.colorScheme === color.name && (
-                              <CheckCircle className="w-4 h-4 text-primary-600" />
-                            )}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Preview Button */}
-                    <Button
-                      onClick={() => setCurrentSlide(index)}
-                      size="sm"
-                      variant="outline"
-                      className="w-full flex items-center justify-center gap-2"
-                    >
-                      <Eye size={16} />
-                      Preview This Slide
-                    </Button>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
+            >
+              <SortableContext
+                items={slides.map((_, i) => i.toString())}
+                strategy={verticalListSortingStrategy}
+              >
+                <div className="space-y-6">
+                  {slides.map((s, index) => (
+                    <SortableSlide
+                      key={index}
+                      slide={s}
+                      index={index}
+                      currentSlide={currentSlide}
+                      updateSlideField={updateSlideField}
+                      deleteSlide={deleteSlide}
+                      setCurrentSlide={setCurrentSlide}
+                      slidesLength={slides.length}
+                    />
+                  ))}
+                </div>
+              </SortableContext>
+            </DndContext>
           </Card>
         </motion.div>
       </div>
