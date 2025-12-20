@@ -66,11 +66,12 @@ export default function AdminServicesPage() {
 
   const fetchServices = async () => {
     try {
-      const res = await fetch("/api/services");
+      const res = await fetch("/api/halo-admin-api/services");
       const data = await res.json();
-      setServices(data);
+      setServices(Array.isArray(data) ? data : []);
     } catch (error) {
       toast.error("Failed to load services");
+      setServices([]);
     } finally {
       setLoading(false);
     }
