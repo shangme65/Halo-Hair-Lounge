@@ -51,13 +51,8 @@ export default function ServicesPage() {
     try {
       const response = await fetch("/api/services");
       const data = await response.json();
-      // Filter to show only active services to visitors
-      const activeServices = Array.isArray(data)
-        ? data.filter((service: Service) => service.isActive !== false)
-        : (data.services || []).filter(
-            (service: Service) => service.isActive !== false
-          );
-      setServices(activeServices);
+      // API already filters for active services only
+      setServices(data.services || []);
     } catch (error) {
       console.error("Error fetching services:", error);
       setServices([]);

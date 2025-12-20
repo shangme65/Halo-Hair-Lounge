@@ -38,11 +38,8 @@ export default function ProductsPage() {
     try {
       const response = await fetch("/api/products");
       const data = await response.json();
-      // Filter to show only active products to visitors
-      const activeProducts = (data.products || []).filter(
-        (product: Product) => product.stock > 0
-      );
-      setProducts(activeProducts);
+      // API already filters for active products only
+      setProducts(data.products || []);
     } catch (error) {
       console.error("Error fetching products:", error);
     } finally {

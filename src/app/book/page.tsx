@@ -3,7 +3,14 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Calendar as CalendarIcon, Clock, Scissors, User } from "lucide-react";
+import {
+  Calendar as CalendarIcon,
+  Clock,
+  Scissors,
+  User,
+  ShoppingBag,
+  Package,
+} from "lucide-react";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
@@ -17,6 +24,20 @@ interface Service {
   duration: number;
   categories: string[];
   image?: string;
+}
+
+interface Product {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  compareAtPrice?: number;
+  images: string[];
+  category: string;
+  brand?: string;
+  stock: number;
+  isActive: boolean;
+  isFeatured: boolean;
 }
 
 const timeSlots = [
@@ -44,7 +65,9 @@ export default function BookingPage() {
   const router = useRouter();
 
   const [services, setServices] = useState<Service[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [selectedService, setSelectedService] = useState<string>("");
+  const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
   const [notes, setNotes] = useState("");
@@ -53,9 +76,11 @@ export default function BookingPage() {
   const [customerPhone, setCustomerPhone] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingServices, setIsLoadingServices] = useState(true);
+  const [isLoadingProducts, setIsLoadingProducts] = useState(true);
 
   useEffect(() => {
     fetchServices();
+    fetchProducts();
   }, []);
 
   const fetchServices = async () => {
@@ -68,6 +93,26 @@ export default function BookingPage() {
     } finally {
       setIsLoadingServices(false);
     }
+  };
+
+  const fetchProducts = async () => {
+    try {
+      const response = await fetch("/api/products");
+      const data = await response.json();
+      setProducts(data.products || []);
+    } catch (error) {
+      console.error("Error fetching products:", error);
+    } finally {
+      setIsLoadingProducts(false);
+    }
+  };
+
+  const toggleProductSelection = (productId: string) => {
+    setSelectedProducts((prev) =>
+      prev.includes(productId)
+        ? prev.filter((id) => id !== productId)
+        : [...prev, productId]
+    );
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -93,6 +138,7 @@ export default function BookingPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           serviceId: selectedService,
+          productIds: selectedProducts,
           date: selectedDate,
           startTime: selectedTime,
           notes,
@@ -113,6 +159,7 @@ export default function BookingPage() {
       );
       // Reset form
       setSelectedService("");
+      setSelectedProducts([]);
       setSelectedDate("");
       setSelectedTime("");
       setNotes("");
@@ -127,6 +174,18 @@ export default function BookingPage() {
   };
 
   const selectedServiceData = services.find((s) => s.id === selectedService);
+  const selectedProductsData = products.filter((p) =>
+    selectedProducts.includes(p.id)
+  );
+
+  const calculateTotal = () => {
+    const servicePrice = selectedServiceData?.price || 0;
+    const productsPrice = selectedProductsData.reduce(
+      (sum, product) => sum + product.price,
+      0
+    );
+    return servicePrice + productsPrice;
+  };
 
   return (
     <div className="min-h-screen py-12">
@@ -229,6 +288,78 @@ export default function BookingPage() {
               )}
             </div>
 
+            {/* Product Selection */}
+            <div>
+              <label className="block text-lg font-semibold mb-4 flex items-center">
+                <ShoppingBag className="w-5 h-5 mr-2 text-primary-600" />
+                Select Products (Optional)
+              </label>
+              <p className="text-sm text-dark-600 dark:text-dark-400 mb-4">
+                Add professional products to your appointment for use during or
+                after your service
+              </p>
+              {isLoadingProducts ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {[1, 2, 3, 4].map((i) => (
+                    <div
+                      key={i}
+                      className="h-32 bg-dark-100 dark:bg-dark-800 rounded-xl animate-pulse"
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-h-96 overflow-y-auto pr-2">
+                  {products.map((product) => (
+                    <motion.div
+                      key={product.id}
+                      className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                        selectedProducts.includes(product.id)
+                          ? "border-primary-600 bg-primary-50 dark:bg-primary-950"
+                          : "border-dark-200 dark:border-dark-700 hover:border-primary-400"
+                      }`}
+                      onClick={() => toggleProductSelection(product.id)}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      <div className="flex items-start gap-3">
+                        {product.images && product.images.length > 0 ? (
+                          <img
+                            src={product.images[0]}
+                            alt={product.name}
+                            className="w-16 h-16 object-cover rounded-lg"
+                          />
+                        ) : (
+                          <div className="w-16 h-16 bg-dark-200 dark:bg-dark-700 rounded-lg flex items-center justify-center">
+                            <Package className="w-8 h-8 text-dark-400" />
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-semibold text-sm mb-1 truncate">
+                            {product.name}
+                          </h3>
+                          {product.brand && (
+                            <p className="text-xs text-dark-500 dark:text-dark-500 mb-1">
+                              {product.brand}
+                            </p>
+                          )}
+                          <div className="flex items-center justify-between">
+                            <span className="font-semibold text-primary-600">
+                              ${product.price.toFixed(2)}
+                            </span>
+                            {selectedProducts.includes(product.id) && (
+                              <span className="text-xs bg-primary-600 text-white px-2 py-1 rounded-full">
+                                Selected
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              )}
+            </div>
+
             {/* Date Selection */}
             <div>
               <label className="block text-lg font-semibold mb-4 flex items-center">
@@ -296,12 +427,42 @@ export default function BookingPage() {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-dark-600 dark:text-dark-400">
+                      Service Price:
+                    </span>
+                    <span className="font-semibold">
+                      ${selectedServiceData.price.toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-dark-600 dark:text-dark-400">
                       Duration:
                     </span>
                     <span className="font-semibold">
                       {selectedServiceData.duration} minutes
                     </span>
                   </div>
+                  {selectedProductsData.length > 0 && (
+                    <>
+                      <div className="border-t border-primary-200 dark:border-primary-800 pt-2 mt-2">
+                        <span className="text-dark-600 dark:text-dark-400 font-medium">
+                          Selected Products:
+                        </span>
+                      </div>
+                      {selectedProductsData.map((product) => (
+                        <div
+                          key={product.id}
+                          className="flex justify-between pl-4"
+                        >
+                          <span className="text-dark-600 dark:text-dark-400 text-xs">
+                            {product.name}
+                          </span>
+                          <span className="font-semibold text-xs">
+                            ${product.price.toFixed(2)}
+                          </span>
+                        </div>
+                      ))}
+                    </>
+                  )}
                   {selectedDate && (
                     <div className="flex justify-between">
                       <span className="text-dark-600 dark:text-dark-400">
@@ -330,7 +491,7 @@ export default function BookingPage() {
                       Total:
                     </span>
                     <span className="font-bold text-lg text-primary-600">
-                      ${selectedServiceData.price.toFixed(2)}
+                      ${calculateTotal().toFixed(2)}
                     </span>
                   </div>
                 </div>

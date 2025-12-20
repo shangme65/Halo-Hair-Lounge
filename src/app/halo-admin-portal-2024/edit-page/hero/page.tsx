@@ -308,6 +308,20 @@ export default function HeroEditor() {
       colorScheme: "green",
       cta: { text: "Book Appointment", href: "/book" },
     },
+    {
+      title: "Discover Beauty",
+      subtitle: "Innovative Hair Solutions",
+      description: "From classic cuts to bold transformations",
+      colorScheme: "green",
+      cta: { text: "View Services", href: "/services" },
+    },
+    {
+      title: "Your Hair Journey",
+      subtitle: "Starts Here Today",
+      description: "Personalized consultations and expert care",
+      colorScheme: "green",
+      cta: { text: "Get Started", href: "/about" },
+    },
   ]);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [editMode, setEditMode] = useState<string | null>(null);
@@ -329,8 +343,12 @@ export default function HeroEditor() {
       const response = await fetch("/api/hero");
       const data = await response.json();
 
+      console.log("Hero content fetched:", data);
+      console.log("Slides:", data.heroContent?.slides);
+
       if (data.heroContent && data.heroContent.slides) {
         setSlides(data.heroContent.slides);
+        console.log("Slides set to:", data.heroContent.slides);
       }
     } catch (error) {
       console.error("Error fetching hero content:", error);
@@ -704,7 +722,8 @@ export default function HeroEditor() {
                 </h2>
                 <p className="text-sm text-dark-600 dark:text-dark-400 mt-1">
                   <GripVertical size={14} className="inline mr-1" />
-                  Drag to reorder slides
+                  Drag to reorder slides • {slides.length} slide
+                  {slides.length !== 1 ? "s" : ""} loaded
                 </p>
               </div>
               <Button
@@ -717,31 +736,37 @@ export default function HeroEditor() {
               </Button>
             </div>
 
-            <DndContext
-              sensors={sensors}
-              collisionDetection={closestCenter}
-              onDragEnd={handleDragEnd}
-            >
-              <SortableContext
-                items={slides.map((_, i) => i.toString())}
-                strategy={verticalListSortingStrategy}
+            {slides.length === 0 ? (
+              <div className="text-center py-8 text-dark-500 dark:text-dark-400">
+                No slides found. Click "Add Slide" to create your first slide.
+              </div>
+            ) : (
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
               >
-                <div className="space-y-6">
-                  {slides.map((s, index) => (
-                    <SortableSlide
-                      key={index}
-                      slide={s}
-                      index={index}
-                      currentSlide={currentSlide}
-                      updateSlideField={updateSlideField}
-                      deleteSlide={deleteSlide}
-                      setCurrentSlide={setCurrentSlide}
-                      slidesLength={slides.length}
-                    />
-                  ))}
-                </div>
-              </SortableContext>
-            </DndContext>
+                <SortableContext
+                  items={slides.map((_, i) => i.toString())}
+                  strategy={verticalListSortingStrategy}
+                >
+                  <div className="space-y-6">
+                    {slides.map((s, index) => (
+                      <SortableSlide
+                        key={index}
+                        slide={s}
+                        index={index}
+                        currentSlide={currentSlide}
+                        updateSlideField={updateSlideField}
+                        deleteSlide={deleteSlide}
+                        setCurrentSlide={setCurrentSlide}
+                        slidesLength={slides.length}
+                      />
+                    ))}
+                  </div>
+                </SortableContext>
+              </DndContext>
+            )}
           </Card>
         </motion.div>
       </div>

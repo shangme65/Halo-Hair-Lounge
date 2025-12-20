@@ -6,6 +6,7 @@ import { z } from "zod";
 
 const appointmentSchema = z.object({
   serviceId: z.string(),
+  productIds: z.array(z.string()).optional(),
   date: z.string(),
   startTime: z.string(),
   notes: z.string().optional(),
@@ -26,6 +27,11 @@ export async function GET(req: NextRequest) {
       where: { userId: session.user.id },
       include: {
         service: true,
+        products: {
+          include: {
+            product: true,
+          },
+        },
       },
       orderBy: { date: "desc" },
     });
@@ -102,8 +108,42 @@ export async function POST(req: NextRequest) {
       data: appointmentData,
       include: {
         service: true,
+        products: {
+          include: {
+            product: true,
+          },
+        },
       },
     });
+
+    // If product IDs were provided, create the associations
+    if (validatedData.productIds && validatedData.productIds.length > 0) {
+      await prisma.appointmentProduct.createMany({
+        data: validatedData.productIds.map((productId) => ({
+          appointmentId: appointment.id,
+          productId: productId,
+          quantity: 1,
+        })),
+      });
+
+      // Fetch the appointment again with products included
+      const updatedAppointment = await prisma.appointment.findUnique({
+        where: { id: appointment.id },
+        include: {
+          service: true,
+          products: {
+            include: {
+              product: true,
+            },
+          },
+        },
+      });
+
+      return NextResponse.json(
+        { appointment: updatedAppointment },
+        { status: 201 }
+      );
+    }
 
     return NextResponse.json({ appointment }, { status: 201 });
   } catch (error: any) {
