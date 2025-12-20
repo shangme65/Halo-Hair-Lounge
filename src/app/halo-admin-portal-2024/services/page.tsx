@@ -12,6 +12,12 @@ import {
   Loader2,
   Image as ImageIcon,
   Scissors,
+  Sparkles,
+  Palette,
+  Wand2,
+  Heart,
+  ArrowLeft,
+  FolderOpen,
 } from "lucide-react";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import Card from "@/components/ui/Card";
@@ -238,22 +244,24 @@ export default function AdminServicesPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
         >
-          {/* Header Card */}
-          <Card className="p-3 mb-6">
-            <h1 className="text-xl sm:text-2xl font-bold text-dark-900 dark:text-white mb-0">
-              Services Management
-            </h1>
-            <p className="text-xs text-dark-600 dark:text-dark-400 mb-2">
-              Manage all salon services
-            </p>
-            <div className="flex gap-1.5">
+          {/* Header */}
+          <div className="flex justify-between items-start mb-6">
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold text-dark-900 dark:text-white mb-1">
+                Services Management
+              </h1>
+              <p className="text-sm text-dark-600 dark:text-dark-400">
+                Organize and manage salon services by category
+              </p>
+            </div>
+            <div className="flex gap-2">
               {!selectedCategory && (
                 <Button
                   onClick={() => setShowAddCategory(true)}
                   variant="outline"
-                  className="flex items-center gap-1 text-[10px] px-2 py-1 h-7"
+                  className="flex items-center gap-2 text-sm px-4 py-2"
                 >
-                  <Plus size={12} />
+                  <Plus size={16} />
                   Add Category
                 </Button>
               )}
@@ -261,13 +269,13 @@ export default function AdminServicesPage() {
                 onClick={() =>
                   router.push("/halo-admin-portal-2024/services/new")
                 }
-                className="flex items-center gap-1 text-[10px] px-2 py-1 h-7"
+                className="flex items-center gap-2 text-sm px-4 py-2"
               >
-                <Plus size={12} />
+                <Plus size={16} />
                 Add Service
               </Button>
             </div>
-          </Card>
+          </div>
 
           {/* Categories or Services View */}
           {loading ? (
@@ -277,26 +285,36 @@ export default function AdminServicesPage() {
           ) : selectedCategory ? (
             // Show services in selected category
             <div>
-              <Card className="p-4 mb-4 bg-primary-50 dark:bg-primary-900/20 border-primary-200 dark:border-primary-800">
-                <div className="flex items-center justify-between gap-4">
-                  <h2 className="text-base font-bold text-dark-900 dark:text-white">
+              <div className="flex items-center gap-4 mb-6">
+                <Button
+                  onClick={() => {
+                    setSelectedCategory(null);
+                  }}
+                  variant="outline"
+                  className="flex items-center gap-2 text-sm px-4 py-2"
+                >
+                  <ArrowLeft size={16} />
+                  Back
+                </Button>
+                <div>
+                  <h2 className="text-xl font-bold text-dark-900 dark:text-white">
                     {
                       categories.find((c) => c.value === selectedCategory)
                         ?.label
                     }
                   </h2>
-                  <Button
-                    onClick={() => {
-                      console.log("Back button clicked");
-                      setSelectedCategory(null);
-                    }}
-                    variant="outline"
-                    className="text-sm px-4 h-9 font-medium whitespace-nowrap flex items-center justify-center"
-                  >
-                    Back
-                  </Button>
+                  <p className="text-sm text-dark-600 dark:text-dark-400">
+                    {
+                      filteredServices.filter(
+                        (s) =>
+                          s.categories &&
+                          s.categories.includes(selectedCategory!)
+                      ).length
+                    }{" "}
+                    services in this category
+                  </p>
                 </div>
-              </Card>
+              </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                 {filteredServices
                   .filter(
@@ -400,47 +418,103 @@ export default function AdminServicesPage() {
             </div>
           ) : (
             // Show categories
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 mb-8">
-              {servicesByCategory.map((category) => (
-                <motion.div
-                  key={category.value}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  <Card className="py-0.5 pr-1 pl-0 cursor-pointer hover:shadow-lg transition-all duration-300 bg-gradient-to-br from-primary-50 to-primary-100 dark:from-primary-900/20 dark:to-primary-800/20 border-2 border-transparent hover:border-primary-500 relative group">
-                    <div
-                      className="flex items-center gap-1.5"
-                      onClick={() => setSelectedCategory(category.value)}
-                    >
-                      <div className="w-6 h-6 rounded-full bg-primary-500 flex items-center justify-center flex-shrink-0">
-                        <Scissors className="w-3 h-3 text-white" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+              {servicesByCategory.map((category, index) => {
+                const icons = [
+                  Scissors,
+                  Sparkles,
+                  Palette,
+                  Wand2,
+                  Heart,
+                  FolderOpen,
+                ];
+                const CategoryIcon = icons[index % icons.length];
+                const gradients = [
+                  "from-blue-500 to-purple-600",
+                  "from-pink-500 to-rose-600",
+                  "from-orange-500 to-red-600",
+                  "from-green-500 to-emerald-600",
+                  "from-cyan-500 to-blue-600",
+                  "from-violet-500 to-purple-600",
+                ];
+                const bgGradient = gradients[index % gradients.length];
+
+                return (
+                  <motion.div
+                    key={category.value}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                    whileHover={{ y: -4 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => setSelectedCategory(category.value)}
+                    className="cursor-pointer"
+                  >
+                    <Card className="relative overflow-hidden hover:shadow-2xl transition-all duration-300 group border-0">
+                      {/* Gradient Background */}
+                      <div
+                        className={`absolute inset-0 bg-gradient-to-br ${bgGradient} opacity-10 group-hover:opacity-20 transition-opacity`}
+                      />
+
+                      {/* Delete Button */}
+                      {category.count === 0 && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteCategory(category.id, category.label);
+                          }}
+                          className="absolute top-3 right-3 z-10 p-1.5 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-all hover:bg-red-600 hover:scale-110"
+                          title="Delete category"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      )}
+
+                      {/* Content */}
+                      <div className="relative p-6">
+                        {/* Icon */}
+                        <div
+                          className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${bgGradient} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}
+                        >
+                          <CategoryIcon className="w-7 h-7 text-white" />
+                        </div>
+
+                        {/* Category Info */}
+                        <div>
+                          <h3 className="text-lg font-bold text-dark-900 dark:text-white mb-1 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
+                            {category.label}
+                          </h3>
+                          <div className="flex items-center gap-2">
+                            <span className="text-2xl font-bold text-dark-900 dark:text-white">
+                              {category.count}
+                            </span>
+                            <span className="text-sm text-dark-600 dark:text-dark-400">
+                              {category.count === 1 ? "service" : "services"}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Arrow indicator */}
+                        <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <svg
+                            className="w-6 h-6 text-primary-600 dark:text-primary-400"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M9 5l7 7-7 7"
+                            />
+                          </svg>
+                        </div>
                       </div>
-                      <div className="flex-1 min-w-0 pr-1">
-                        <h3 className="text-[11px] font-bold text-dark-900 dark:text-white truncate leading-tight">
-                          {category.label}
-                        </h3>
-                        <p className="text-[9px] text-dark-600 dark:text-dark-400 leading-tight">
-                          {category.count}{" "}
-                          {category.count === 1 ? "service" : "services"}
-                        </p>
-                      </div>
-                    </div>
-                    {/* Delete button - only show on hover and if no services */}
-                    {category.count === 0 && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDeleteCategory(category.id, category.label);
-                        }}
-                        className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
-                        title="Delete category"
-                      >
-                        <Trash2 size={10} />
-                      </button>
-                    )}
-                  </Card>
-                </motion.div>
-              ))}
+                    </Card>
+                  </motion.div>
+                );
+              })}
 
               {servicesByCategory.every((cat) => cat.count === 0) && (
                 <div className="col-span-full text-center py-6">
