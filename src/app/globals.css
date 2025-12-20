@@ -83,9 +83,10 @@
   }
 }
 
-/* Custom scrollbar */
+/* Custom scrollbar - hidden by default */
 ::-webkit-scrollbar {
-  width: 10px;
+  width: 0px;
+  display: none;
 }
 
 ::-webkit-scrollbar-track {
@@ -98,6 +99,11 @@
 
 ::-webkit-scrollbar-thumb:hover {
   @apply bg-primary-700;
+}
+
+/* Also hide for Firefox */
+* {
+  scrollbar-width: none;
 }
 
 /* Selection */

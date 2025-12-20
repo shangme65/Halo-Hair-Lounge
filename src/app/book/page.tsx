@@ -125,9 +125,7 @@ export default function BookingPage() {
       }));
 
       setProductCategories(categories);
-      if (categories.length > 0) {
-        setActiveProductCategory(categories[0].value);
-      }
+      setActiveProductCategory("ALL");
     } finally {
       setIsLoadingProducts(false);
     }
@@ -142,7 +140,7 @@ export default function BookingPage() {
   };
 
   const openProductModal = (categoryValue: string) => {
-    setActiveProductCategory(categoryValue);
+    setActiveProductCategory(categoryValue === "ALL" ? "ALL" : categoryValue);
     setShowProductModal(true);
   };
 
@@ -150,9 +148,10 @@ export default function BookingPage() {
     setShowProductModal(false);
   };
 
-  const filteredProducts = products.filter(
-    (p) => p.category === activeProductCategory
-  );
+  const filteredProducts =
+    activeProductCategory === "ALL"
+      ? products
+      : products.filter((p) => p.category === activeProductCategory);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -172,6 +171,28 @@ export default function BookingPage() {
     setIsLoading(true);
 
     try {
+      const response = await fetch("/api/appointments", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          customerName,
+          customerEmail,
+          customerPhone,
+          serviceCategory: selectedCategory,
+          productIds: selectedProducts,
+          date: selectedDate,
+          time: selectedTime,
+          notes,
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Failed to book appointment");
+      }
+
       toast.success(
         "Appointment request received! We'll contact you to confirm."
       );
@@ -205,7 +226,7 @@ export default function BookingPage() {
   };
 
   return (
-    <div className="min-h-screen py-6 bg-gradient-to-br from-primary-50/30 via-white to-primary-50/20 dark:from-dark-900 dark:via-dark-950 dark:to-dark-900">
+    <div className="min-h-screen py-6 pt-32 bg-gradient-to-br from-primary-50/30 via-white to-primary-50/20 dark:from-dark-900 dark:via-dark-950 dark:to-dark-900">
       <div className="container mx-auto px-4 max-w-2xl">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -536,6 +557,19 @@ export default function BookingPage() {
 
               {/* Category Tabs */}
               <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
+                <button
+                  onClick={() => setActiveProductCategory("ALL")}
+                  className={`px-4 py-2 rounded-lg font-medium text-sm whitespace-nowrap transition-all flex-shrink-0 ${
+                    activeProductCategory === "ALL"
+                      ? "bg-primary-600 text-white shadow-md"
+                      : "bg-dark-100 dark:bg-dark-800 text-dark-700 dark:text-dark-300 hover:bg-dark-200 dark:hover:bg-dark-700"
+                  }`}
+                >
+                  View All
+                  <span className="ml-1.5 text-xs opacity-75">
+                    ({products.length})
+                  </span>
+                </button>
                 {productCategories.map((category) => (
                   <button
                     key={category.value}
