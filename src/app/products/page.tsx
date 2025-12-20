@@ -12,16 +12,23 @@ interface Product {
   name: string;
   description: string;
   price: number;
+  compareAtPrice?: number;
   stock: number;
   category: string;
-  image?: string;
+  brand?: string;
+  images: string[];
+  isFeatured: boolean;
+  isActive: boolean;
 }
 
 const categories = [
   { value: "All", label: "All Products" },
-  { value: "HAIR_CARE", label: "Hair Care" },
-  { value: "STYLING", label: "Styling" },
+  { value: "SHAMPOO", label: "Shampoo" },
+  { value: "CONDITIONER", label: "Conditioner" },
   { value: "TREATMENT", label: "Treatment" },
+  { value: "STYLING", label: "Styling" },
+  { value: "COLORING", label: "Coloring" },
+  { value: "TOOLS", label: "Tools" },
   { value: "ACCESSORIES", label: "Accessories" },
 ];
 
@@ -220,67 +227,124 @@ export default function ProductsPage() {
                     />
 
                     <div className="relative z-10 flex-1 p-6">
-                      {/* Product Image Placeholder */}
-                      <div className="relative w-full aspect-square mb-4 rounded-xl overflow-hidden bg-gradient-to-br from-primary-100 to-primary-200 dark:from-primary-900/30 dark:to-primary-800/30">
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <ShoppingBag className="w-16 h-16 text-primary-600/50" />
-                        </div>
+                      {/* Product Image */}
+                      <div className="relative w-full aspect-square mb-4 rounded-xl overflow-hidden bg-gradient-to-br from-dark-100 to-dark-200 dark:from-dark-800 dark:to-dark-900">
+                        {product.images && product.images.length > 0 ? (
+                          <motion.img
+                            src={product.images[0]}
+                            alt={product.name}
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                            whileHover={{ scale: 1.1 }}
+                          />
+                        ) : (
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <Package className="w-20 h-20 text-dark-400 dark:text-dark-600" />
+                          </div>
+                        )}
+
+                        {/* Featured Badge */}
+                        {product.isFeatured && (
+                          <motion.div
+                            initial={{ scale: 0, rotate: -180 }}
+                            animate={{ scale: 1, rotate: 0 }}
+                            className="absolute top-3 right-3 bg-gradient-to-r from-amber-400 to-amber-600 text-white px-3 py-1.5 rounded-full text-xs font-bold shadow-lg"
+                          >
+                            ⭐ Featured
+                          </motion.div>
+                        )}
+
+                        {/* Discount Badge */}
+                        {product.compareAtPrice &&
+                          product.compareAtPrice > product.price && (
+                            <motion.div
+                              initial={{ scale: 0 }}
+                              animate={{ scale: 1 }}
+                              className="absolute top-3 left-3 bg-gradient-to-r from-red-500 to-red-600 text-white px-3 py-1.5 rounded-full text-xs font-bold shadow-lg"
+                            >
+                              {Math.round(
+                                ((product.compareAtPrice - product.price) /
+                                  product.compareAtPrice) *
+                                  100
+                              )}
+                              % OFF
+                            </motion.div>
+                          )}
                       </div>
 
                       {/* Header with badge */}
                       <div className="mb-4">
                         <motion.h3
-                          className="text-2xl font-bold mb-3 group-hover:text-primary-600 transition-colors duration-300"
+                          className="text-xl font-bold mb-2 group-hover:text-primary-600 transition-colors duration-300 line-clamp-2"
                           whileHover={{ scale: 1.02 }}
                         >
                           {product.name}
                         </motion.h3>
 
+                        {product.brand && (
+                          <p className="text-sm text-dark-500 dark:text-dark-500 mb-2 font-medium">
+                            by {product.brand}
+                          </p>
+                        )}
+
                         <motion.span
-                          className="inline-block px-4 py-1.5 bg-gradient-to-r from-primary-100 to-primary-200 dark:from-primary-900/30 dark:to-primary-800/30 text-primary-700 dark:text-primary-400 text-xs font-semibold rounded-full shadow-sm"
+                          className="inline-block px-3 py-1 bg-gradient-to-r from-primary-100 to-primary-200 dark:from-primary-900/30 dark:to-primary-800/30 text-primary-700 dark:text-primary-400 text-xs font-semibold rounded-full shadow-sm"
                           whileHover={{ scale: 1.05 }}
                         >
-                          {product.category.charAt(0) +
-                            product.category
-                              .slice(1)
-                              .toLowerCase()
-                              .replace(/_/g, " ")}
+                          {product.category.replace(/_/g, " ")}
                         </motion.span>
                       </div>
 
-                      <p className="text-dark-600 dark:text-dark-400 mb-6 leading-relaxed">
+                      <p className="text-dark-600 dark:text-dark-400 mb-4 leading-relaxed text-sm line-clamp-3">
                         {product.description}
                       </p>
 
                       {/* Product details */}
-                      <div className="space-y-4 mb-6">
+                      <div className="space-y-3 mb-6">
                         <motion.div
-                          className="flex items-center justify-between p-3 rounded-lg bg-dark-50 dark:bg-dark-800/50 group-hover:bg-primary-50/50 dark:group-hover:bg-primary-900/10 transition-colors duration-300"
+                          className="flex items-center justify-between p-2.5 rounded-lg bg-dark-50 dark:bg-dark-800/50 group-hover:bg-primary-50/50 dark:group-hover:bg-primary-900/10 transition-colors duration-300"
                           whileHover={{ x: 5 }}
                         >
-                          <span className="flex items-center text-dark-700 dark:text-dark-300 font-medium">
-                            <Package className="w-5 h-5 mr-3 text-primary-600" />
+                          <span className="flex items-center text-dark-700 dark:text-dark-300 font-medium text-sm">
+                            <Package className="w-4 h-4 mr-2 text-primary-600" />
                             Stock
                           </span>
-                          <span className="font-bold text-dark-900 dark:text-white">
-                            {product.stock} units
+                          <span
+                            className={`font-bold text-sm ${
+                              product.stock > 10
+                                ? "text-green-600"
+                                : product.stock > 0
+                                ? "text-amber-600"
+                                : "text-red-600"
+                            }`}
+                          >
+                            {product.stock > 0
+                              ? `${product.stock} units`
+                              : "Out of stock"}
                           </span>
                         </motion.div>
 
                         <motion.div
-                          className="flex items-center justify-between p-3 rounded-lg bg-dark-50 dark:bg-dark-800/50 group-hover:bg-primary-50/50 dark:group-hover:bg-primary-900/10 transition-colors duration-300"
+                          className="flex items-center justify-between p-2.5 rounded-lg bg-gradient-to-r from-primary-50 to-primary-100 dark:from-primary-900/20 dark:to-primary-800/20 group-hover:shadow-md transition-all duration-300"
                           whileHover={{ x: 5 }}
                         >
-                          <span className="flex items-center text-dark-700 dark:text-dark-300 font-medium">
-                            <DollarSign className="w-5 h-5 mr-3 text-primary-600" />
+                          <span className="flex items-center text-dark-700 dark:text-dark-300 font-medium text-sm">
+                            <DollarSign className="w-4 h-4 mr-2 text-primary-600" />
                             Price
                           </span>
-                          <motion.span
-                            className="font-bold text-2xl bg-gradient-to-r from-primary-600 to-primary-800 bg-clip-text text-transparent"
-                            whileHover={{ scale: 1.1 }}
-                          >
-                            ${product.price.toFixed(2)}
-                          </motion.span>
+                          <div className="flex flex-col items-end">
+                            {product.compareAtPrice &&
+                              product.compareAtPrice > product.price && (
+                                <span className="text-xs text-dark-500 line-through">
+                                  ${product.compareAtPrice.toFixed(2)}
+                                </span>
+                              )}
+                            <motion.span
+                              className="font-bold text-xl bg-gradient-to-r from-primary-600 to-primary-800 bg-clip-text text-transparent"
+                              whileHover={{ scale: 1.1 }}
+                            >
+                              ${product.price.toFixed(2)}
+                            </motion.span>
+                          </div>
                         </motion.div>
                       </div>
 
@@ -291,9 +355,14 @@ export default function ProductsPage() {
                       >
                         <Button
                           className="w-full relative overflow-hidden group/btn shadow-lg hover:shadow-xl transition-shadow duration-300"
-                          onClick={() => (window.location.href = "/contact")}
+                          onClick={() => {
+                            window.location.href = "/contact";
+                          }}
                         >
-                          <span className="relative z-10">Contact Us</span>
+                          <span className="relative z-10 flex items-center justify-center gap-2">
+                            <ShoppingBag className="w-4 h-4" />
+                            Contact Us
+                          </span>
                           <motion.div
                             className="absolute inset-0 bg-gradient-to-r from-primary-700 to-primary-800 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300"
                             initial={false}
