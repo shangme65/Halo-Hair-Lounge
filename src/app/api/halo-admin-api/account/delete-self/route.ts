@@ -17,36 +17,44 @@ export async function DELETE(req: NextRequest) {
     const userId = session.user.id;
 
     // Delete all data when admin account is deleted
-    // This uses a transaction to ensure everything is deleted atomically
-    await prisma.$transaction(async (tx) => {
-      // Delete all products
-      await tx.product.deleteMany({});
-      
-      // Delete all product categories
-      await tx.productCategoryModel.deleteMany({});
-      
-      // Delete all services
-      await tx.service.deleteMany({});
-      
-      // Delete all service categories
-      await tx.serviceCategory.deleteMany({});
-      
-      // Delete all appointments
-      await tx.appointment.deleteMany({});
-      
-      // Delete all page content sections
-      await tx.heroSection.deleteMany({});
-      await tx.cTASection.deleteMany({});
-      await tx.feature.deleteMany({});
-      await tx.fAQ.deleteMany({});
-      await tx.testimonial.deleteMany({});
-      await tx.whyChooseUs.deleteMany({});
-      
+    // Delete items in correct order to avoid foreign key constraint errors
+    try {
+      // Delete appointments first (they reference users)
+      await prisma.appointment.deleteMany({});
+
+      // Delete all page content sections (no foreign keys)
+      await prisma.heroSection.deleteMany({});
+      await prisma.cTASection.deleteMany({});
+      await prisma.feature.deleteMany({});
+      await prisma.fAQ.deleteMany({});
+      await prisma.testimonial.deleteMany({});
+      await prisma.whyChooseUs.deleteMany({});
+
+      // Delete all products (before categories)
+      await prisma.product.deleteMany({});
+
+      // Delete all services (before categories)
+      await prisma.service.deleteMany({});
+
+      // Now delete categories (no more dependencies)
+      await prisma.productCategoryModel.deleteMany({});
+      await prisma.serviceCategory.deleteMany({});
+
+      // Delete all other users except the current admin
+      await prisma.user.deleteMany({
+        where: {
+          id: { not: userId },
+        },
+      });
+
       // Finally, delete the admin user
-      await tx.user.delete({
+      await prisma.user.delete({
         where: { id: userId },
       });
-    });
+    } catch (error) {
+      console.error("Detailed deletion error:", error);
+      throw error;
+    }
 
     return NextResponse.json(
       {

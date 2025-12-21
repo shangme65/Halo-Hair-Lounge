@@ -70,11 +70,19 @@ export default function Footer() {
     };
   }, []);
 
-  // Build footer links dynamically
+  // Build footer links dynamically - remove duplicates based on value
+  const uniqueCategories = serviceCategories.reduce((acc, category) => {
+    if (!acc.find((c) => c.value === category.value)) {
+      acc.push(category);
+    }
+    return acc;
+  }, [] as ServiceCategory[]);
+
   const footerLinks = {
-    Services: serviceCategories.map((category) => ({
+    Services: uniqueCategories.map((category) => ({
       name: category.label,
       href: `/services#${category.value.toLowerCase()}`,
+      key: category.id || category.value, // Use ID or value as unique key
     })),
     ...staticFooterLinks,
   };
@@ -137,7 +145,7 @@ export default function Footer() {
                 <h4 className="text-lg font-semibold mb-4">{category}</h4>
                 <ul className="space-y-2">
                   {links.map((link) => (
-                    <li key={link.name}>
+                    <li key={link.key || link.name}>
                       <Link
                         href={link.href}
                         className="text-dark-300 hover:text-green-400 transition-colors inline-block"

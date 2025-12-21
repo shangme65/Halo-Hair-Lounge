@@ -102,41 +102,49 @@ export async function POST(req: NextRequest) {
         {
           id: "balayage-color",
           name: "Balayage Color",
-          description: "Hand-painted highlights for a natural, sun-kissed look. Includes toner and styling.",
+          description:
+            "Hand-painted highlights for a natural, sun-kissed look. Includes toner and styling.",
           price: 220.0,
           duration: 180,
           categories: ["hair-coloring"],
-          image: "https://images.unsplash.com/photo-1560066984-138dadb4c035?w=800",
+          image:
+            "https://images.unsplash.com/photo-1560066984-138dadb4c035?w=800",
           isActive: true,
         },
         {
           id: "full-color-treatment",
           name: "Full Color Treatment",
-          description: "Complete color transformation with premium products. Includes deep conditioning.",
+          description:
+            "Complete color transformation with premium products. Includes deep conditioning.",
           price: 180.0,
           duration: 150,
           categories: ["hair-coloring"],
-          image: "https://images.unsplash.com/photo-1522337660859-02fbefca4702?w=800",
+          image:
+            "https://images.unsplash.com/photo-1522337660859-02fbefca4702?w=800",
           isActive: true,
         },
         {
           id: "classic-haircut-style",
           name: "Classic Haircut & Style",
-          description: "Professional haircut with styling consultation. Includes wash and blow dry.",
+          description:
+            "Professional haircut with styling consultation. Includes wash and blow dry.",
           price: 65.0,
           duration: 60,
           categories: ["haircut-styling"],
-          image: "https://images.unsplash.com/photo-1562322140-8baeececf3df?w=800",
+          image:
+            "https://images.unsplash.com/photo-1562322140-8baeececf3df?w=800",
           isActive: true,
         },
         {
           id: "keratin-smoothing-treatment",
           name: "Keratin Smoothing Treatment",
-          description: "Professional keratin treatment that eliminates frizz and adds brilliant shine for up to 3 months.",
+          description:
+            "Professional keratin treatment that eliminates frizz and adds brilliant shine for up to 3 months.",
           price: 300.0,
           duration: 180,
           categories: ["keratin-treatments"],
-          image: "https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?w=800",
+          image:
+            "https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?w=800",
           isActive: true,
         },
       ];
@@ -150,10 +158,13 @@ export async function POST(req: NextRequest) {
         {
           id: "hydrating-shampoo",
           name: "Hydrating Shampoo",
-          description: "Gentle cleansing shampoo infused with argan oil and vitamin E.",
+          description:
+            "Gentle cleansing shampoo infused with argan oil and vitamin E.",
           price: 32.0,
           compareAtPrice: 40.0,
-          images: ["https://images.unsplash.com/photo-1571875257727-256c39da42af?w=800"],
+          images: [
+            "https://images.unsplash.com/photo-1571875257727-256c39da42af?w=800",
+          ],
           categories: ["SHAMPOO"],
           brand: "Halo Signature",
           stock: 50,
@@ -164,10 +175,13 @@ export async function POST(req: NextRequest) {
         {
           id: "repair-conditioner",
           name: "Repair Conditioner",
-          description: "Intensive repair conditioner with keratin and collagen.",
+          description:
+            "Intensive repair conditioner with keratin and collagen.",
           price: 35.0,
           compareAtPrice: 45.0,
-          images: ["https://images.unsplash.com/photo-1556228720-195a672e8a03?w=800"],
+          images: [
+            "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=800",
+          ],
           categories: ["CONDITIONER", "TREATMENT"],
           brand: "Halo Signature",
           stock: 45,
@@ -180,7 +194,9 @@ export async function POST(req: NextRequest) {
           name: "Volumizing Mousse",
           description: "Lightweight mousse that adds body and hold.",
           price: 28.0,
-          images: ["https://images.unsplash.com/photo-1629198688000-71f23e745b6e?w=800"],
+          images: [
+            "https://images.unsplash.com/photo-1629198688000-71f23e745b6e?w=800",
+          ],
           categories: ["STYLING"],
           brand: "Halo Style",
           stock: 40,
