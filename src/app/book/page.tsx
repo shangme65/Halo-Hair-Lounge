@@ -273,11 +273,11 @@ export default function BookingPage() {
           className="text-center mb-8"
         >
           <div className="inline-flex items-center gap-2 mb-3">
-            <Sparkles className="w-6 h-6 text-primary-600 animate-pulse" />
-            <h1 className="text-3xl sm:text-4xl font-display font-bold bg-gradient-to-r from-primary-600 via-green-600 to-primary-700 bg-clip-text text-transparent">
+            <Sparkles className="w-5 h-5 text-primary-600 animate-pulse" />
+            <h1 className="text-2xl sm:text-3xl font-display font-bold bg-gradient-to-r from-primary-600 via-green-600 to-primary-700 bg-clip-text text-transparent whitespace-nowrap">
               Book Your Appointment
             </h1>
-            <Sparkles className="w-6 h-6 text-primary-600 animate-pulse" />
+            <Sparkles className="w-5 h-5 text-primary-600 animate-pulse" />
           </div>
           <p className="text-base text-dark-600 dark:text-dark-400 font-medium">
             Experience luxury hair care in just a few steps
@@ -289,11 +289,11 @@ export default function BookingPage() {
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.2 }}
-          className="mb-8 backdrop-blur-xl bg-white/70 dark:bg-dark-800/70 rounded-2xl p-6 shadow-2xl border border-white/20 dark:border-dark-700/50"
+          className="mb-6 backdrop-blur-xl bg-white/70 dark:bg-dark-800/70 rounded-xl p-4 shadow-xl border border-white/20 dark:border-dark-700/50"
         >
           <div className="flex items-center justify-between relative">
             {/* Progress line */}
-            <div className="absolute top-6 left-0 right-0 h-1 bg-dark-200 dark:bg-dark-700 -z-10">
+            <div className="absolute top-4 left-0 right-0 h-0.5 bg-dark-200 dark:bg-dark-700 -z-10">
               <motion.div
                 className="h-full bg-gradient-to-r from-primary-600 to-green-600 rounded-full"
                 initial={{ width: "0%" }}
@@ -319,12 +319,12 @@ export default function BookingPage() {
                   className="flex flex-col items-center relative z-10"
                 >
                   <motion.div
-                    className={`w-12 h-12 rounded-full flex items-center justify-center mb-2 transition-all duration-300 ${
+                    className={`w-8 h-8 rounded-full flex items-center justify-center mb-1 transition-all duration-300 ${
                       isComplete
-                        ? "bg-gradient-to-br from-primary-600 to-green-600 shadow-lg shadow-primary-500/50"
+                        ? "bg-gradient-to-br from-primary-600 to-green-600 shadow-md shadow-primary-500/30"
                         : isCurrent
-                        ? "bg-white dark:bg-dark-700 border-2 border-primary-600 shadow-lg"
-                        : "bg-dark-100 dark:bg-dark-800 border-2 border-dark-300 dark:border-dark-600"
+                        ? "bg-white dark:bg-dark-700 border-2 border-primary-600 shadow-md"
+                        : "bg-dark-100 dark:bg-dark-800 border border-dark-300 dark:border-dark-600"
                     }`}
                     whileHover={{ scale: 1.1 }}
                     animate={isCurrent ? { scale: [1, 1.05, 1] } : {}}
@@ -333,10 +333,10 @@ export default function BookingPage() {
                     }
                   >
                     {isComplete ? (
-                      <Check className="w-6 h-6 text-white" />
+                      <Check className="w-4 h-4 text-white" />
                     ) : (
                       <StepIcon
-                        className={`w-6 h-6 ${
+                        className={`w-4 h-4 ${
                           isCurrent
                             ? "text-primary-600"
                             : "text-dark-400 dark:text-dark-500"
@@ -448,66 +448,53 @@ export default function BookingPage() {
                 </div>
               </div>
               {isLoadingCategories ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="flex flex-wrap gap-2">
                   {[1, 2, 3, 4].map((i) => (
                     <div
                       key={i}
-                      className="h-20 bg-gradient-to-br from-dark-100 to-dark-200 dark:from-dark-800 dark:to-dark-700 rounded-xl animate-pulse"
+                      className="h-10 w-32 bg-gradient-to-br from-dark-100 to-dark-200 dark:from-dark-800 dark:to-dark-700 rounded-lg animate-pulse"
                     />
                   ))}
                 </div>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="flex flex-wrap gap-2">
                   {categories.map((category, idx) => (
                     <motion.div
                       key={category.id}
-                      initial={{ opacity: 0, y: 20 }}
+                      initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.4 + idx * 0.05 }}
-                      className={`group relative p-4 rounded-xl cursor-pointer transition-all duration-300 overflow-hidden ${
+                      transition={{ delay: 0.4 + idx * 0.03 }}
+                      className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-lg cursor-pointer transition-all duration-200 ${
                         selectedCategory === category.id
-                          ? "bg-gradient-to-br from-primary-600 to-green-600 shadow-lg shadow-primary-500/50 scale-105"
-                          : "bg-gradient-to-br from-white to-primary-50/50 dark:from-dark-700 dark:to-dark-600 hover:shadow-lg hover:scale-102 border-2 border-dark-200 dark:border-dark-600"
+                          ? "bg-gradient-to-r from-primary-600 to-green-600 shadow-md shadow-primary-500/30"
+                          : "bg-white dark:bg-dark-700 hover:bg-primary-50 dark:hover:bg-dark-600 border border-dark-200 dark:border-dark-600 hover:border-primary-400"
                       }`}
                       onClick={() => {
                         setSelectedCategory(category.id);
                         setCurrentStep(3);
                       }}
-                      whileHover={{ y: -4 }}
+                      whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                     >
-                      {/* Animated background */}
-                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
-
-                      <div className="relative flex items-center gap-3">
-                        <Tag
-                          className={`w-5 h-5 flex-shrink-0 transition-colors ${
-                            selectedCategory === category.id
-                              ? "text-white"
-                              : "text-primary-600"
-                          }`}
-                        />
-                        <div className="flex-1">
-                          <h3
-                            className={`font-bold text-sm transition-colors ${
-                              selectedCategory === category.id
-                                ? "text-white"
-                                : "text-dark-900 dark:text-white"
-                            }`}
-                          >
-                            {category.label}
-                          </h3>
-                        </div>
-                        {selectedCategory === category.id && (
-                          <motion.div
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
-                            className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center"
-                          >
-                            <Check className="w-4 h-4 text-white" />
-                          </motion.div>
-                        )}
-                      </div>
+                      <Tag
+                        className={`w-4 h-4 flex-shrink-0 ${
+                          selectedCategory === category.id
+                            ? "text-white"
+                            : "text-primary-600"
+                        }`}
+                      />
+                      <span
+                        className={`font-medium text-sm whitespace-nowrap ${
+                          selectedCategory === category.id
+                            ? "text-white"
+                            : "text-dark-900 dark:text-white"
+                        }`}
+                      >
+                        {category.label}
+                      </span>
+                      {selectedCategory === category.id && (
+                        <Check className="w-4 h-4 text-white" />
+                      )}
                     </motion.div>
                   ))}
                 </div>
