@@ -38,7 +38,7 @@ export default function ServicesPage() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [mounted, setMounted] = useState(false);
-  
+
   // Lightbox state
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxImages, setLightboxImages] = useState<string[]>([]);
@@ -100,7 +100,10 @@ export default function ServicesPage() {
   const openLightbox = (service: Service) => {
     // Service can have single image or comma-separated images
     const images = service.image
-      ? service.image.split(",").map((img) => img.trim()).filter(Boolean)
+      ? service.image
+          .split(",")
+          .map((img) => img.trim())
+          .filter(Boolean)
       : [];
     if (images.length > 0) {
       setLightboxImages(images);
@@ -217,22 +220,31 @@ export default function ServicesPage() {
                                   key={service.id}
                                   className="overflow-hidden border border-dark-200 dark:border-dark-700 rounded-lg bg-white dark:bg-dark-800 hover:shadow-lg transition-shadow duration-300"
                                 >
-                                  <div 
+                                  <div
                                     className="aspect-[4/3] bg-dark-100 dark:bg-dark-800 relative cursor-pointer group"
                                     onClick={() => openLightbox(service)}
                                   >
                                     {service.image ? (
                                       <>
                                         <Image
-                                          src={service.image.split(",")[0].trim()}
+                                          src={service.image
+                                            .split(",")[0]
+                                            .trim()}
                                           alt={service.name}
                                           fill
                                           className="object-cover group-hover:scale-105 transition-transform duration-300"
                                         />
                                         {/* Show image count badge if multiple images */}
-                                        {service.image.split(",").filter(Boolean).length > 1 && (
+                                        {service.image
+                                          .split(",")
+                                          .filter(Boolean).length > 1 && (
                                           <div className="absolute top-2 right-2 bg-black/60 text-white px-2 py-1 rounded-full text-xs font-medium">
-                                            {service.image.split(",").filter(Boolean).length} photos
+                                            {
+                                              service.image
+                                                .split(",")
+                                                .filter(Boolean).length
+                                            }{" "}
+                                            photos
                                           </div>
                                         )}
                                         {/* Hover overlay */}

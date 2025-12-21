@@ -38,7 +38,7 @@ export default function ProductsPage() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [mounted, setMounted] = useState(false);
-  
+
   // Lightbox state
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxImages, setLightboxImages] = useState<string[]>([]);
@@ -217,9 +217,14 @@ export default function ProductsPage() {
                                   key={product.id}
                                   className="overflow-hidden border border-dark-200 dark:border-dark-700 rounded-lg bg-white dark:bg-dark-800 hover:shadow-lg transition-shadow duration-300"
                                 >
-                                  <div 
+                                  <div
                                     className="aspect-[4/3] bg-dark-100 dark:bg-dark-800 relative group cursor-pointer"
-                                    onClick={() => openLightbox(product, currentImageIndex[product.id] || 0)}
+                                    onClick={() =>
+                                      openLightbox(
+                                        product,
+                                        currentImageIndex[product.id] || 0
+                                      )
+                                    }
                                   >
                                     {product.images.length > 0 ? (
                                       <>
