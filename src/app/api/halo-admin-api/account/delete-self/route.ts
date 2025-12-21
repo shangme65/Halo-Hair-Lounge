@@ -16,14 +16,41 @@ export async function DELETE(req: NextRequest) {
 
     const userId = session.user.id;
 
-    // Delete the admin user from database
-    await prisma.user.delete({
-      where: { id: userId },
+    // Delete all data when admin account is deleted
+    // This uses a transaction to ensure everything is deleted atomically
+    await prisma.$transaction(async (tx) => {
+      // Delete all products
+      await tx.product.deleteMany({});
+      
+      // Delete all product categories
+      await tx.productCategoryModel.deleteMany({});
+      
+      // Delete all services
+      await tx.service.deleteMany({});
+      
+      // Delete all service categories
+      await tx.serviceCategory.deleteMany({});
+      
+      // Delete all appointments
+      await tx.appointment.deleteMany({});
+      
+      // Delete all page content sections
+      await tx.heroSection.deleteMany({});
+      await tx.cTASection.deleteMany({});
+      await tx.feature.deleteMany({});
+      await tx.fAQ.deleteMany({});
+      await tx.testimonial.deleteMany({});
+      await tx.whyChooseUs.deleteMany({});
+      
+      // Finally, delete the admin user
+      await tx.user.delete({
+        where: { id: userId },
+      });
     });
 
     return NextResponse.json(
       {
-        message: "Account deleted successfully",
+        message: "Account and all associated data deleted successfully",
       },
       { status: 200 }
     );
