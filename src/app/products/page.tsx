@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Search, Loader2, ChevronDown, ChevronRight, Star } from "lucide-react";
 import Card from "@/components/ui/Card";
 import Image from "next/image";
+import ImageLightbox from "@/components/ui/ImageLightbox";
 
 interface Product {
   id: string;
@@ -37,6 +38,12 @@ export default function ProductsPage() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [mounted, setMounted] = useState(false);
+  
+  // Lightbox state
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxImages, setLightboxImages] = useState<string[]>([]);
+  const [lightboxTitle, setLightboxTitle] = useState("");
+  const [lightboxIndex, setLightboxIndex] = useState(0);
 
   useEffect(() => {
     setMounted(true);
@@ -92,6 +99,16 @@ export default function ProductsPage() {
         return acc;
       }, {} as Record<string, Product[]>)
     : {};
+
+  // Function to open lightbox
+  const openLightbox = (product: Product, imageIndex: number = 0) => {
+    if (product.images && product.images.length > 0) {
+      setLightboxImages(product.images);
+      setLightboxTitle(product.name);
+      setLightboxIndex(imageIndex);
+      setLightboxOpen(true);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-dark-50 via-white to-primary-50 dark:from-dark-950 dark:via-dark-900 dark:to-dark-950">
@@ -200,7 +217,10 @@ export default function ProductsPage() {
                                   key={product.id}
                                   className="overflow-hidden border border-dark-200 dark:border-dark-700 rounded-lg bg-white dark:bg-dark-800 hover:shadow-lg transition-shadow duration-300"
                                 >
-                                  <div className="aspect-[4/3] bg-dark-100 dark:bg-dark-800 relative group">
+                                  <div 
+                                    className="aspect-[4/3] bg-dark-100 dark:bg-dark-800 relative group cursor-pointer"
+                                    onClick={() => openLightbox(product, currentImageIndex[product.id] || 0)}
+                                  >
                                     {product.images.length > 0 ? (
                                       <>
                                         <Image
@@ -211,7 +231,7 @@ export default function ProductsPage() {
                                           }
                                           alt={product.name}
                                           fill
-                                          className="object-cover"
+                                          className="object-cover group-hover:scale-105 transition-transform duration-300"
                                         />
                                         {product.images.length > 1 && (
                                           <>
@@ -231,7 +251,7 @@ export default function ProductsPage() {
                                                   [product.id]: newIndex,
                                                 });
                                               }}
-                                              className="absolute left-1 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-all"
+                                              className="absolute left-1 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-all z-10"
                                             >
                                               <ChevronRight
                                                 size={16}
@@ -255,11 +275,11 @@ export default function ProductsPage() {
                                                   [product.id]: newIndex,
                                                 });
                                               }}
-                                              className="absolute right-1 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-all"
+                                              className="absolute right-1 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-all z-10"
                                             >
                                               <ChevronRight size={16} />
                                             </button>
-                                            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
+                                            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1 z-10">
                                               {product.images.map((_, idx) => (
                                                 <div
                                                   key={idx}
@@ -274,8 +294,18 @@ export default function ProductsPage() {
                                                 />
                                               ))}
                                             </div>
+                                            {/* Photo count badge */}
+                                            <div className="absolute top-2 left-2 bg-black/60 text-white px-2 py-1 rounded-full text-xs font-medium z-10">
+                                              {product.images.length} photos
+                                            </div>
                                           </>
                                         )}
+                                        {/* Hover overlay */}
+                                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center pointer-events-none">
+                                          <span className="text-white opacity-0 group-hover:opacity-100 transition-opacity text-sm font-medium drop-shadow-lg">
+                                            Click to view fullscreen
+                                          </span>
+                                        </div>
                                       </>
                                     ) : (
                                       <div className="flex items-center justify-center h-full text-dark-400">
@@ -390,6 +420,15 @@ export default function ProductsPage() {
           </motion.div>
         )}
       </div>
+
+      {/* Image Lightbox */}
+      <ImageLightbox
+        images={lightboxImages}
+        initialIndex={lightboxIndex}
+        isOpen={lightboxOpen}
+        onClose={() => setLightboxOpen(false)}
+        title={lightboxTitle}
+      />
     </div>
   );
 }

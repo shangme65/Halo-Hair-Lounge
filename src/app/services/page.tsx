@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import Card from "@/components/ui/Card";
 import Image from "next/image";
+import ImageLightbox from "@/components/ui/ImageLightbox";
 
 interface Service {
   id: string;
@@ -37,6 +38,12 @@ export default function ServicesPage() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [mounted, setMounted] = useState(false);
+  
+  // Lightbox state
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxImages, setLightboxImages] = useState<string[]>([]);
+  const [lightboxTitle, setLightboxTitle] = useState("");
+  const [lightboxIndex, setLightboxIndex] = useState(0);
 
   useEffect(() => {
     setMounted(true);
@@ -88,6 +95,20 @@ export default function ServicesPage() {
         return acc;
       }, {} as Record<string, Service[]>)
     : {};
+
+  // Function to open lightbox
+  const openLightbox = (service: Service) => {
+    // Service can have single image or comma-separated images
+    const images = service.image
+      ? service.image.split(",").map((img) => img.trim()).filter(Boolean)
+      : [];
+    if (images.length > 0) {
+      setLightboxImages(images);
+      setLightboxTitle(service.name);
+      setLightboxIndex(0);
+      setLightboxOpen(true);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-dark-50 via-white to-primary-50 dark:from-dark-950 dark:via-dark-900 dark:to-dark-950">
@@ -196,14 +217,31 @@ export default function ServicesPage() {
                                   key={service.id}
                                   className="overflow-hidden border border-dark-200 dark:border-dark-700 rounded-lg bg-white dark:bg-dark-800 hover:shadow-lg transition-shadow duration-300"
                                 >
-                                  <div className="aspect-[4/3] bg-dark-100 dark:bg-dark-800 relative">
+                                  <div 
+                                    className="aspect-[4/3] bg-dark-100 dark:bg-dark-800 relative cursor-pointer group"
+                                    onClick={() => openLightbox(service)}
+                                  >
                                     {service.image ? (
-                                      <Image
-                                        src={service.image}
-                                        alt={service.name}
-                                        fill
-                                        className="object-cover"
-                                      />
+                                      <>
+                                        <Image
+                                          src={service.image.split(",")[0].trim()}
+                                          alt={service.name}
+                                          fill
+                                          className="object-cover group-hover:scale-105 transition-transform duration-300"
+                                        />
+                                        {/* Show image count badge if multiple images */}
+                                        {service.image.split(",").filter(Boolean).length > 1 && (
+                                          <div className="absolute top-2 right-2 bg-black/60 text-white px-2 py-1 rounded-full text-xs font-medium">
+                                            {service.image.split(",").filter(Boolean).length} photos
+                                          </div>
+                                        )}
+                                        {/* Hover overlay */}
+                                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                                          <span className="text-white opacity-0 group-hover:opacity-100 transition-opacity text-sm font-medium">
+                                            Click to view
+                                          </span>
+                                        </div>
+                                      </>
                                     ) : (
                                       <div className="flex items-center justify-center h-full text-dark-400">
                                         No image
@@ -271,6 +309,15 @@ export default function ServicesPage() {
           </motion.div>
         )}
       </div>
+
+      {/* Image Lightbox */}
+      <ImageLightbox
+        images={lightboxImages}
+        initialIndex={lightboxIndex}
+        isOpen={lightboxOpen}
+        onClose={() => setLightboxOpen(false)}
+        title={lightboxTitle}
+      />
     </div>
   );
 }
