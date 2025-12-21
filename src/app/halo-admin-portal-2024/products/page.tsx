@@ -61,16 +61,19 @@ export default function AdminProductsPage() {
   >({});
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [enhanceHD, setEnhanceHD] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [showAddCategoryModal, setShowAddCategoryModal] = useState(false);
   const [showDeleteCategoryModal, setShowDeleteCategoryModal] = useState(false);
+  const [showDeleteProductModal, setShowDeleteProductModal] = useState(false);
   const [deletingCategory, setDeletingCategory] = useState<{
     value: string;
     label: string;
     count: number;
   } | null>(null);
+  const [deletingProduct, setDeletingProduct] = useState<Product | null>(null);
   const [newCategoryName, setNewCategoryName] = useState("");
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [formData, setFormData] = useState({
@@ -271,18 +274,28 @@ export default function AdminProductsPage() {
     setShowModal(true);
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this product?")) return;
+  const handleDelete = (product: Product) => {
+    setDeletingProduct(product);
+    setShowDeleteProductModal(true);
+  };
+
+  const confirmDeleteProduct = async () => {
+    if (!deletingProduct) return;
 
     try {
-      const res = await fetch(`/api/halo-admin-api/products/${id}`, {
-        method: "DELETE",
-      });
+      const res = await fetch(
+        `/api/halo-admin-api/products/${deletingProduct.id}`,
+        {
+          method: "DELETE",
+        }
+      );
 
       if (!res.ok) throw new Error("Failed to delete product");
 
       toast.success("Product deleted!");
       fetchProducts();
+      setShowDeleteProductModal(false);
+      setDeletingProduct(null);
     } catch (error) {
       toast.error("Failed to delete product");
     }
@@ -327,55 +340,66 @@ export default function AdminProductsPage() {
   };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (!file.type.startsWith("image/")) {
-      toast.error("Please select an image file");
-      return;
-    }
-
-    if (file.size > 10 * 1024 * 1024) {
-      toast.error("Image size must be less than 10MB");
-      return;
-    }
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
 
     try {
       setUploading(true);
+      const uploadedUrls: string[] = [];
 
-      const formDataUpload = new FormData();
-      formDataUpload.append("file", file);
-      formDataUpload.append("type", "product");
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
 
-      const res = await fetch("/api/upload", {
-        method: "POST",
-        body: formDataUpload,
-      });
+        if (!file.type.startsWith("image/")) {
+          toast.error(`${file.name} is not an image file`);
+          continue;
+        }
 
-      if (!res.ok) {
-        const error = await res.json();
-        throw new Error(error.error || "Upload failed");
+        if (file.size > 10 * 1024 * 1024) {
+          toast.error(`${file.name} is too large (max 10MB)`);
+          continue;
+        }
+
+        const formDataUpload = new FormData();
+        formDataUpload.append("file", file);
+        formDataUpload.append("type", "product");
+        formDataUpload.append("enhanceHD", enhanceHD.toString());
+
+        const res = await fetch("/api/upload", {
+          method: "POST",
+          body: formDataUpload,
+        });
+
+        if (!res.ok) {
+          const error = await res.json();
+          throw new Error(error.error || "Upload failed");
+        }
+
+        const data = await res.json();
+        uploadedUrls.push(data.url);
       }
 
-      const data = await res.json();
+      if (uploadedUrls.length > 0) {
+        // Add uploaded images to existing images
+        const currentImages = formData.images
+          ? formData.images
+              .split(",")
+              .map((s) => s.trim())
+              .filter(Boolean)
+          : [];
+        currentImages.push(...uploadedUrls);
 
-      // Add uploaded image to existing images
-      const currentImages = formData.images
-        ? formData.images
-            .split(",")
-            .map((s) => s.trim())
-            .filter(Boolean)
-        : [];
-      currentImages.push(data.url);
-
-      setFormData((prev) => ({ ...prev, images: currentImages.join(", ") }));
-      setImagePreview(data.url);
-      toast.success("Image uploaded successfully!");
+        setFormData((prev) => ({ ...prev, images: currentImages.join(", ") }));
+        setImagePreview(uploadedUrls[0]);
+        toast.success(`${uploadedUrls.length} image(s) uploaded successfully!`);
+      }
     } catch (error: any) {
       console.error("Upload error:", error);
       toast.error(error.message || "Failed to upload image");
     } finally {
       setUploading(false);
+      // Reset input
+      e.target.value = "";
     }
   };
 
@@ -769,7 +793,7 @@ export default function AdminProductsPage() {
                                         Edit
                                       </button>
                                       <button
-                                        onClick={() => handleDelete(product.id)}
+                                        onClick={() => handleDelete(product)}
                                         className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 text-xs bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors"
                                       >
                                         <Trash2 size={12} />
@@ -872,9 +896,9 @@ export default function AdminProductsPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-white dark:bg-dark-900 overflow-y-auto"
+            className="fixed top-16 left-0 right-0 bottom-0 z-50 bg-white dark:bg-dark-900 flex flex-col"
           >
-            <div className="sticky top-0 bg-white dark:bg-dark-900 z-10 px-4 py-3 border-b border-dark-200 dark:border-dark-700 flex justify-between items-center">
+            <div className="sticky top-0 bg-white dark:bg-dark-900 z-10 px-4 py-3 border-b border-dark-200 dark:border-dark-700 flex justify-between items-center flex-shrink-0">
               <h2 className="text-xl font-bold text-dark-900 dark:text-white">
                 {editingProduct ? "Edit Product" : "Add New Product"}
               </h2>
@@ -886,299 +910,320 @@ export default function AdminProductsPage() {
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-4 pt-6 space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="col-span-2">
-                  <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
-                    Product Name *
-                  </label>
-                  <Input
-                    type="text"
-                    value={formData.name}
-                    onChange={(e) =>
-                      setFormData({ ...formData, name: e.target.value })
-                    }
-                    placeholder="e.g., Keratin Shampoo"
-                    required
-                  />
-                </div>
+            <form
+              onSubmit={handleSubmit}
+              className="flex flex-col flex-1 overflow-hidden"
+            >
+              <div className="flex-1 overflow-y-auto p-4 pt-6">
+                <div className="grid grid-cols-2 gap-4 mb-20">
+                  <div className="col-span-2">
+                    <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
+                      Product Name *
+                    </label>
+                    <Input
+                      type="text"
+                      value={formData.name}
+                      onChange={(e) =>
+                        setFormData({ ...formData, name: e.target.value })
+                      }
+                      placeholder="e.g., Keratin Shampoo"
+                      required
+                    />
+                  </div>
 
-                <div className="col-span-2">
-                  <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
-                    Description *
-                  </label>
-                  <textarea
-                    value={formData.description}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        description: e.target.value,
-                      })
-                    }
-                    placeholder="Describe the product..."
-                    rows={3}
-                    required
-                    className="w-full px-4 py-2 bg-dark-50 dark:bg-dark-700 border border-dark-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                  />
-                </div>
+                  <div className="col-span-2">
+                    <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
+                      Description *
+                    </label>
+                    <textarea
+                      value={formData.description}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          description: e.target.value,
+                        })
+                      }
+                      placeholder="Describe the product..."
+                      rows={3}
+                      required
+                      className="w-full px-4 py-2 bg-dark-50 dark:bg-dark-700 border border-dark-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    />
+                  </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
-                    Price ($) *
-                  </label>
-                  <Input
-                    type="number"
-                    step="0.01"
-                    value={formData.price}
-                    onChange={(e) =>
-                      setFormData({ ...formData, price: e.target.value })
-                    }
-                    placeholder="0.00"
-                    required
-                  />
-                </div>
+                  <div>
+                    <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
+                      Price ($) *
+                    </label>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      value={formData.price}
+                      onChange={(e) =>
+                        setFormData({ ...formData, price: e.target.value })
+                      }
+                      placeholder="0.00"
+                      required
+                    />
+                  </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
-                    Compare at Price ($)
-                  </label>
-                  <Input
-                    type="number"
-                    step="0.01"
-                    value={formData.compareAtPrice}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        compareAtPrice: e.target.value,
-                      })
-                    }
-                    placeholder="0.00"
-                  />
-                </div>
+                  <div>
+                    <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
+                      Compare at Price ($)
+                    </label>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      value={formData.compareAtPrice}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          compareAtPrice: e.target.value,
+                        })
+                      }
+                      placeholder="0.00"
+                    />
+                  </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
-                    Stock Quantity *
-                  </label>
-                  <Input
-                    type="number"
-                    value={formData.stock}
-                    onChange={(e) =>
-                      setFormData({ ...formData, stock: e.target.value })
-                    }
-                    placeholder="0"
-                    required
-                  />
-                </div>
+                  <div>
+                    <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
+                      Stock Quantity *
+                    </label>
+                    <Input
+                      type="number"
+                      value={formData.stock}
+                      onChange={(e) =>
+                        setFormData({ ...formData, stock: e.target.value })
+                      }
+                      placeholder="0"
+                      required
+                    />
+                  </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
-                    Brand *
-                  </label>
-                  <Input
-                    type="text"
-                    value={formData.brand}
-                    onChange={(e) =>
-                      setFormData({ ...formData, brand: e.target.value })
-                    }
-                    placeholder="e.g., L'Oreal"
-                    required
-                  />
-                </div>
+                  <div>
+                    <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
+                      Brand *
+                    </label>
+                    <Input
+                      type="text"
+                      value={formData.brand}
+                      onChange={(e) =>
+                        setFormData({ ...formData, brand: e.target.value })
+                      }
+                      placeholder="e.g., L'Oreal"
+                      required
+                    />
+                  </div>
 
-                <div className="col-span-2">
-                  <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
-                    Category * (Select at least one)
-                  </label>
-                  <div className="flex flex-wrap gap-2">
-                    {categories.map((cat) => {
-                      const isSelected = formData.categories.includes(
-                        cat.value
-                      );
-                      return (
-                        <button
-                          key={cat.value}
-                          type="button"
-                          onClick={() => toggleProductCategory(cat.value)}
-                          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all border-2 ${
-                            isSelected
-                              ? "bg-green-500 text-white border-green-500 shadow-md"
-                              : "bg-white dark:bg-dark-800 text-dark-700 dark:text-dark-300 border-dark-300 dark:border-dark-600 hover:border-green-400"
-                          }`}
-                        >
-                          <div
-                            className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-all ${
+                  <div className="col-span-2">
+                    <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
+                      Category * (Select at least one)
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                      {categories.map((cat) => {
+                        const isSelected = formData.categories.includes(
+                          cat.value
+                        );
+                        return (
+                          <button
+                            key={cat.value}
+                            type="button"
+                            onClick={() => toggleProductCategory(cat.value)}
+                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all border-2 ${
                               isSelected
-                                ? "bg-white border-white"
-                                : "border-dark-400 dark:border-dark-500"
+                                ? "bg-green-500 text-white border-green-500 shadow-md"
+                                : "bg-white dark:bg-dark-800 text-dark-700 dark:text-dark-300 border-dark-300 dark:border-dark-600 hover:border-green-400"
                             }`}
                           >
-                            {isSelected && (
-                              <svg
-                                className="w-3 h-3 text-green-500"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={3}
-                                  d="M5 13l4 4L19 7"
-                                />
-                              </svg>
-                            )}
-                          </div>
-                          <span>{cat.label}</span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                  {formData.categories.length === 0 && (
-                    <p className="mt-2 text-xs text-red-500">
-                      Please select at least one category
-                    </p>
-                  )}
-                </div>
-
-                <div className="col-span-2">
-                  <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
-                    Image URLs (comma-separated)
-                  </label>
-                  <textarea
-                    value={formData.images}
-                    onChange={(e) =>
-                      setFormData({ ...formData, images: e.target.value })
-                    }
-                    placeholder="https://example.com/image1.jpg, https://example.com/image2.jpg"
-                    rows={2}
-                    className="w-full px-4 py-2 bg-dark-50 dark:bg-dark-700 border border-dark-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                  />
-                </div>
-
-                <div className="col-span-2">
-                  <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
-                    Or Upload Image from Device
-                  </label>
-                  <div className="flex items-center gap-3">
-                    <label className="flex-1 cursor-pointer">
-                      <div className="w-full px-4 py-2 bg-dark-50 dark:bg-dark-700 border border-dark-300 dark:border-dark-600 rounded-lg hover:bg-dark-100 dark:hover:bg-dark-600 transition-colors text-center">
-                        {uploading ? (
-                          <div className="flex items-center justify-center gap-2">
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                            <span className="text-sm">Uploading...</span>
-                          </div>
-                        ) : (
-                          <span className="text-sm text-dark-600 dark:text-dark-400">
-                            Choose file...
-                          </span>
-                        )}
-                      </div>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleImageUpload}
-                        disabled={uploading}
-                        className="hidden"
-                      />
-                    </label>
-                  </div>
-                  {formData.images && (
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      {formData.images
-                        .split(",")
-                        .map((img) => img.trim())
-                        .filter(Boolean)
-                        .map((imgUrl, idx) => (
-                          <div key={idx} className="relative group">
-                            <img
-                              src={imgUrl}
-                              alt={`Product ${idx + 1}`}
-                              className="w-20 h-20 object-cover rounded-lg border-2 border-dark-200 dark:border-dark-600"
-                            />
-                            <button
-                              type="button"
-                              onClick={() => {
-                                const images = formData.images
-                                  .split(",")
-                                  .map((s) => s.trim())
-                                  .filter(Boolean);
-                                images.splice(idx, 1);
-                                setFormData({
-                                  ...formData,
-                                  images: images.join(", "),
-                                });
-                              }}
-                              className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                            <div
+                              className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-all ${
+                                isSelected
+                                  ? "bg-white border-white"
+                                  : "border-dark-400 dark:border-dark-500"
+                              }`}
                             >
-                              <X size={12} />
-                            </button>
-                          </div>
-                        ))}
+                              {isSelected && (
+                                <svg
+                                  className="w-3 h-3 text-green-500"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={3}
+                                    d="M5 13l4 4L19 7"
+                                  />
+                                </svg>
+                              )}
+                            </div>
+                            <span>{cat.label}</span>
+                          </button>
+                        );
+                      })}
                     </div>
-                  )}
-                </div>
-
-                <div className="col-span-2">
-                  <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
-                    Tags (comma-separated)
-                  </label>
-                  <Input
-                    type="text"
-                    value={formData.tags}
-                    onChange={(e) =>
-                      setFormData({ ...formData, tags: e.target.value })
-                    }
-                    placeholder="moisturizing, sulfate-free, organic"
-                  />
-                </div>
-
-                <div className="col-span-2 flex gap-6">
-                  <div className="flex items-center gap-3">
-                    <input
-                      type="checkbox"
-                      id="isActive"
-                      checked={formData.isActive}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          isActive: e.target.checked,
-                        })
-                      }
-                      className="w-4 h-4 text-primary-600 rounded focus:ring-2 focus:ring-primary-500"
-                    />
-                    <label
-                      htmlFor="isActive"
-                      className="text-sm font-medium text-dark-700 dark:text-dark-300"
-                    >
-                      Product is active
-                    </label>
+                    {formData.categories.length === 0 && (
+                      <p className="mt-2 text-xs text-red-500">
+                        Please select at least one category
+                      </p>
+                    )}
                   </div>
 
-                  <div className="flex items-center gap-3">
-                    <input
-                      type="checkbox"
-                      id="isFeatured"
-                      checked={formData.isFeatured}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          isFeatured: e.target.checked,
-                        })
-                      }
-                      className="w-4 h-4 text-primary-600 rounded focus:ring-2 focus:ring-primary-500"
-                    />
-                    <label
-                      htmlFor="isFeatured"
-                      className="text-sm font-medium text-dark-700 dark:text-dark-300"
-                    >
-                      Feature this product
+                  <div className="col-span-2">
+                    <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
+                      Image URLs (comma-separated)
                     </label>
+                    <textarea
+                      value={formData.images}
+                      onChange={(e) =>
+                        setFormData({ ...formData, images: e.target.value })
+                      }
+                      placeholder="https://example.com/image1.jpg, https://example.com/image2.jpg"
+                      rows={2}
+                      className="w-full px-4 py-2 bg-dark-50 dark:bg-dark-700 border border-dark-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    />
+                  </div>
+
+                  <div className="col-span-2">
+                    <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
+                      Or Upload Images from Device
+                    </label>
+                    <div className="flex items-center gap-3 mb-2">
+                      <input
+                        type="checkbox"
+                        id="enhanceHDProduct"
+                        checked={enhanceHD}
+                        onChange={(e) => setEnhanceHD(e.target.checked)}
+                        className="w-4 h-4 text-primary-600 rounded focus:ring-2 focus:ring-primary-500"
+                      />
+                      <label
+                        htmlFor="enhanceHDProduct"
+                        className="text-sm font-medium text-dark-700 dark:text-dark-300"
+                      >
+                        Enhance image quality (HD)
+                      </label>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <label className="flex-1 cursor-pointer">
+                        <div className="w-full px-4 py-2 bg-dark-50 dark:bg-dark-700 border border-dark-300 dark:border-dark-600 rounded-lg hover:bg-dark-100 dark:hover:bg-dark-600 transition-colors text-center">
+                          {uploading ? (
+                            <div className="flex items-center justify-center gap-2">
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                              <span className="text-sm">Uploading...</span>
+                            </div>
+                          ) : (
+                            <span className="text-sm text-dark-600 dark:text-dark-400">
+                              Choose files...
+                            </span>
+                          )}
+                        </div>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          multiple
+                          onChange={handleImageUpload}
+                          disabled={uploading}
+                          className="hidden"
+                        />
+                      </label>
+                    </div>
+                    {formData.images && (
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        {formData.images
+                          .split(",")
+                          .map((img) => img.trim())
+                          .filter(Boolean)
+                          .map((imgUrl, idx) => (
+                            <div key={idx} className="relative group">
+                              <img
+                                src={imgUrl}
+                                alt={`Product ${idx + 1}`}
+                                className="w-20 h-20 object-cover rounded-lg border-2 border-dark-200 dark:border-dark-600"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const images = formData.images
+                                    .split(",")
+                                    .map((s) => s.trim())
+                                    .filter(Boolean);
+                                  images.splice(idx, 1);
+                                  setFormData({
+                                    ...formData,
+                                    images: images.join(", "),
+                                  });
+                                }}
+                                className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                              >
+                                <X size={12} />
+                              </button>
+                            </div>
+                          ))}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="col-span-2">
+                    <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
+                      Tags (comma-separated)
+                    </label>
+                    <Input
+                      type="text"
+                      value={formData.tags}
+                      onChange={(e) =>
+                        setFormData({ ...formData, tags: e.target.value })
+                      }
+                      placeholder="moisturizing, sulfate-free, organic"
+                    />
+                  </div>
+
+                  <div className="col-span-2 flex gap-6">
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="checkbox"
+                        id="isActive"
+                        checked={formData.isActive}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            isActive: e.target.checked,
+                          })
+                        }
+                        className="w-4 h-4 text-primary-600 rounded focus:ring-2 focus:ring-primary-500"
+                      />
+                      <label
+                        htmlFor="isActive"
+                        className="text-sm font-medium text-dark-700 dark:text-dark-300"
+                      >
+                        Product is active
+                      </label>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="checkbox"
+                        id="isFeatured"
+                        checked={formData.isFeatured}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            isFeatured: e.target.checked,
+                          })
+                        }
+                        className="w-4 h-4 text-primary-600 rounded focus:ring-2 focus:ring-primary-500"
+                      />
+                      <label
+                        htmlFor="isFeatured"
+                        className="text-sm font-medium text-dark-700 dark:text-dark-300"
+                      >
+                        Feature this product
+                      </label>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              <div className="sticky bottom-0 bg-white dark:bg-dark-900 border-t border-dark-200 dark:border-dark-700 p-4 flex gap-6 justify-center">
+              <div className="sticky bottom-0 left-0 right-0 bg-white dark:bg-dark-900 border-t border-dark-200 dark:border-dark-700 p-4 flex gap-6 justify-center shadow-lg">
                 <Button
                   type="button"
                   variant="outline"
@@ -1274,6 +1319,69 @@ export default function AdminProductsPage() {
                   }}
                 >
                   Delete Category
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Delete Product Confirmation Modal */}
+      <AnimatePresence>
+        {showDeleteProductModal && deletingProduct && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+            onClick={() => {
+              setShowDeleteProductModal(false);
+              setDeletingProduct(null);
+            }}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white dark:bg-dark-800 rounded-2xl shadow-2xl max-w-md w-full p-6"
+            >
+              <div className="flex items-start gap-4 mb-6">
+                <div className="w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center flex-shrink-0">
+                  <AlertTriangle className="w-6 h-6 text-red-600 dark:text-red-400" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg font-bold text-dark-900 dark:text-white mb-2">
+                    Delete Product
+                  </h3>
+                  <p className="text-sm text-dark-600 dark:text-dark-400">
+                    Are you sure you want to delete{" "}
+                    <span className="font-semibold text-dark-900 dark:text-white">
+                      {deletingProduct.name}
+                    </span>
+                    ? This action cannot be undone.
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    setShowDeleteProductModal(false);
+                    setDeletingProduct(null);
+                  }}
+                  className="flex-1 px-4 py-2.5 text-sm font-medium text-dark-700 dark:text-dark-300 bg-dark-100 dark:bg-dark-700 hover:bg-dark-200 dark:hover:bg-dark-600 rounded-lg transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmDeleteProduct}
+                  className="flex-1 px-4 py-2.5 text-sm font-medium text-white bg-gradient-to-b from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 rounded-lg shadow-lg hover:shadow-xl transition-all active:scale-95"
+                  style={{
+                    boxShadow:
+                      "0 4px 6px rgba(239, 68, 68, 0.4), inset 0 -2px 4px rgba(0, 0, 0, 0.2)",
+                  }}
+                >
+                  Delete Product
                 </button>
               </div>
             </motion.div>

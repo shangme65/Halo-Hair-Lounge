@@ -23,11 +23,11 @@ import Button from "@/components/ui/Button";
 
 const publicNavigation = [
   { name: "Home", href: "/", icon: Home },
-  { name: "About", href: "/about", icon: Info },
   { name: "Services", href: "/services", icon: Scissors },
   { name: "Products", href: "/products", icon: ShoppingBag },
   { name: "Book Now", href: "/book", icon: Calendar },
   { name: "Contact", href: "/contact", icon: Mail },
+  { name: "About", href: "/about", icon: Info },
 ];
 
 const adminNavigation = [

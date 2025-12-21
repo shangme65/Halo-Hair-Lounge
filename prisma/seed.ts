@@ -34,14 +34,14 @@ async function main() {
 
   console.log("✅ Created admin user:", admin.email);
 
-  // Create service categories
+  // Create service categories (matching the ones from your services page)
   const serviceCategories = [
-    { value: "haircut", label: "Haircut" },
-    { value: "coloring", label: "Coloring" },
-    { value: "treatment", label: "Treatment" },
-    { value: "styling", label: "Styling" },
-    { value: "extensions", label: "Extensions" },
-    { value: "braiding", label: "Braiding" },
+    { value: "chemical-straightening", label: "Chemical straightening" },
+    { value: "hair-coloring", label: "Hair Coloring" },
+    { value: "hair-loss-treatments", label: "Hair loss treatments" },
+    { value: "haircut-styling", label: "Haircut & Styling" },
+    { value: "keratin-treatments", label: "Keratin treatments" },
+    { value: "scalp-treatments", label: "Scalp treatments" },
   ];
 
   for (const category of serviceCategories) {
@@ -54,15 +54,13 @@ async function main() {
 
   console.log("✅ Created service categories");
 
-  // Create product categories
+  // Create product categories (matching the ones from your products page)
   const productCategories = [
-    { value: "SHAMPOO", label: "Shampoo" },
-    { value: "CONDITIONER", label: "Conditioner" },
-    { value: "TREATMENT", label: "Treatment" },
-    { value: "STYLING", label: "Styling" },
-    { value: "TOOLS", label: "Tools" },
-    { value: "ACCESSORIES", label: "Accessories" },
     { value: "COLORING", label: "Coloring" },
+    { value: "CONDITIONER", label: "Conditioner" },
+    { value: "SHAMPOO", label: "Shampoo" },
+    { value: "STYLING", label: "Styling" },
+    { value: "TREATMENT", label: "Treatment" },
   ];
 
   for (const category of productCategories) {
@@ -75,81 +73,84 @@ async function main() {
 
   console.log("✅ Created product categories");
 
-  // Create services
+  // Create services (updated to match new categories)
   const services = [
     {
-      name: "Classic Haircut",
+      name: "Balayage Color",
       description:
-        "Professional haircut with styling consultation. Includes wash and blow dry.",
-      price: 65.0,
-      duration: 60,
-      categories: ["haircut"],
-      image: "https://images.unsplash.com/photo-1562322140-8baeececf3df?w=800",
-    },
-    {
-      name: "Premium Color Treatment",
-      description:
-        "Full color service with premium products. Includes toner and deep conditioning.",
-      price: 180.0,
+        "Hand-painted highlights for a natural, sun-kissed look. Includes toner and styling.",
+      price: 220.0,
       duration: 180,
-      categories: ["coloring", "treatment"],
+      categories: ["hair-coloring"],
       image: "https://images.unsplash.com/photo-1560066984-138dadb4c035?w=800",
     },
     {
-      name: "Balayage Highlights",
-      description: "Hand-painted highlights for a natural, sun-kissed look.",
-      price: 220.0,
-      duration: 210,
-      categories: ["coloring"],
+      name: "Full Color Treatment",
+      description:
+        "Complete color transformation with premium products. Includes deep conditioning.",
+      price: 180.0,
+      duration: 150,
+      categories: ["hair-coloring"],
       image:
         "https://images.unsplash.com/photo-1522337660859-02fbefca4702?w=800",
     },
     {
-      name: "Deep Conditioning Treatment",
-      description: "Intensive moisture therapy for damaged or dry hair.",
+      name: "Classic Haircut & Style",
+      description:
+        "Professional haircut with styling consultation. Includes wash and blow dry.",
+      price: 65.0,
+      duration: 60,
+      categories: ["haircut-styling"],
+      image: "https://images.unsplash.com/photo-1562322140-8baeececf3df?w=800",
+    },
+    {
+      name: "Keratin Smoothing Treatment",
+      description:
+        "Professional keratin treatment that eliminates frizz and adds brilliant shine for up to 3 months.",
+      price: 300.0,
+      duration: 180,
+      categories: ["keratin-treatments"],
+      image:
+        "https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?w=800",
+    },
+    {
+      name: "Brazilian Blowout",
+      description:
+        "The original smoothing treatment that reduces frizz and styling time.",
+      price: 350.0,
+      duration: 120,
+      categories: ["keratin-treatments"],
+      image: "https://images.unsplash.com/photo-1560869713-7d0a29430803?w=800",
+    },
+    {
+      name: "Deep Scalp Treatment",
+      description:
+        "Therapeutic scalp treatment to promote healthy hair growth and relieve tension.",
       price: 85.0,
       duration: 45,
-      categories: ["treatment"],
+      categories: ["scalp-treatments"],
       image:
         "https://images.unsplash.com/photo-1519699047748-de8e457a634e?w=800",
     },
     {
-      name: "Special Event Styling",
+      name: "Japanese Hair Straightening",
       description:
-        "Elegant updo or styling for weddings and special occasions.",
-      price: 120.0,
-      duration: 90,
-      categories: ["styling"],
-      image:
-        "https://images.unsplash.com/photo-1487412912498-0447578fcca8?w=800",
-    },
-    {
-      name: "Hair Extensions Installation",
-      description:
-        "Premium quality hair extensions with professional installation.",
+        "Permanent straightening treatment for silky smooth, pin-straight hair.",
       price: 450.0,
       duration: 240,
-      categories: ["extensions", "styling"],
+      categories: ["chemical-straightening"],
       image:
-        "https://images.unsplash.com/photo-1522338140262-f46f5913618a?w=800",
+        "https://images.unsplash.com/photo-1522338242992-e1a54906a8da?w=800",
     },
     {
-      name: "Box Braids",
-      description: "Protective styling with premium synthetic or human hair.",
-      price: 200.0,
-      duration: 300,
-      categories: ["braiding", "styling"],
+      name: "Hair Growth Therapy",
+      description:
+        "Advanced treatment to combat hair loss and stimulate new growth.",
+      price: 150.0,
+      duration: 60,
+      categories: ["hair-loss-treatments"],
       image:
-        "https://images.unsplash.com/photo-1605980676233-e14c31c797b3?w=800",
-    },
-    {
-      name: "Keratin Treatment",
-      description: "Smoothing treatment that eliminates frizz and adds shine.",
-      price: 300.0,
-      duration: 180,
-      categories: ["treatment"],
-      image:
-        "https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?w=800",
+        "https://images.unsplash.com/photo-1487412912498-0447578fcca8?w=800",
     },
   ];
 
@@ -269,47 +270,32 @@ async function main() {
       tags: ["argan-oil", "mask", "weekly-treatment"],
     },
     {
-      name: "Professional Blow Dryer",
+      name: "Moisturizing Conditioner",
       description:
-        "Ionic technology blow dryer with 3 heat settings and cool shot.",
-      price: 145.0,
-      compareAtPrice: 200.0,
+        "Daily conditioner with coconut oil for soft, manageable hair.",
+      price: 30.0,
       images: [
         "https://images.unsplash.com/photo-1522338242992-e1a54906a8da?w=800",
       ],
-      categories: ["TOOLS"],
-      brand: "Halo Pro",
-      stock: 15,
-      isFeatured: true,
-      tags: ["blow-dryer", "ionic", "professional"],
+      categories: ["CONDITIONER"],
+      brand: "Halo Signature",
+      stock: 50,
+      isFeatured: false,
+      tags: ["moisturizing", "daily-use"],
     },
     {
-      name: "Ceramic Flat Iron",
+      name: "Curl Defining Gel",
       description:
-        "Professional-grade flat iron with adjustable temperature control.",
-      price: 120.0,
+        "Frizz-free hold for perfectly defined curls. Non-sticky formula.",
+      price: 24.0,
       images: [
         "https://images.unsplash.com/photo-1519699047748-de8e457a634e?w=800",
       ],
-      categories: ["TOOLS", "STYLING"],
-      brand: "Halo Pro",
-      stock: 20,
+      categories: ["STYLING"],
+      brand: "Halo Style",
+      stock: 35,
       isFeatured: false,
-      tags: ["flat-iron", "ceramic", "straightener"],
-    },
-    {
-      name: "Silk Scrunchie Set",
-      description:
-        "Set of 5 pure silk scrunchies. Gentle on hair, prevents breakage.",
-      price: 24.0,
-      images: [
-        "https://images.unsplash.com/photo-1535083783855-76ae62b2914e?w=800",
-      ],
-      categories: ["ACCESSORIES"],
-      brand: "Halo Essentials",
-      stock: 60,
-      isFeatured: false,
-      tags: ["scrunchies", "silk", "accessories"],
+      tags: ["curls", "gel", "definition"],
     },
     {
       name: "Semi-Permanent Hair Color - Rose Gold",
@@ -336,6 +322,19 @@ async function main() {
       stock: 40,
       isFeatured: false,
       tags: ["toning", "purple", "blonde-care"],
+    },
+    {
+      name: "Leave-In Conditioner Spray",
+      description: "Lightweight leave-in treatment for detangling and shine.",
+      price: 28.0,
+      images: [
+        "https://images.unsplash.com/photo-1535083783855-76ae62b2914e?w=800",
+      ],
+      categories: ["CONDITIONER", "TREATMENT"],
+      brand: "Halo Signature",
+      stock: 45,
+      isFeatured: false,
+      tags: ["leave-in", "detangling", "spray"],
     },
   ];
 
