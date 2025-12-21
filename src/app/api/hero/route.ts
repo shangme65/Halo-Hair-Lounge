@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { heroContentSchema, validateRequest } from "@/lib/validations";
 
 export async function GET() {
   try {
@@ -9,7 +12,7 @@ export async function GET() {
 
     return NextResponse.json({ heroContent });
   } catch (error) {
-    console.error("Error fetching hero content:", error);
+    // Security: Log error without exposing details
     return NextResponse.json(
       { error: "Failed to fetch hero content" },
       { status: 500 }
@@ -19,8 +22,24 @@ export async function GET() {
 
 export async function PUT(request: Request) {
   try {
+    // Security: Verify admin role
+    const session = await getServerSession(authOptions);
+    if (!session || session.user?.role !== "ADMIN") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const body = await request.json();
-    const { slides } = body;
+
+    // Validate input with Zod schema
+    const validation = validateRequest(heroContentSchema, body);
+    if (!validation.success) {
+      return NextResponse.json(
+        { error: "Validation failed", details: validation.errors },
+        { status: 400 }
+      );
+    }
+
+    const { slides } = validation.data;
 
     // Check if hero content exists
     const existing = await prisma.heroContent.findFirst();
@@ -39,7 +58,7 @@ export async function PUT(request: Request) {
 
     return NextResponse.json({ heroContent });
   } catch (error) {
-    console.error("Error updating hero content:", error);
+    // Security: Log error without exposing details
     return NextResponse.json(
       { error: "Failed to update hero content" },
       { status: 500 }

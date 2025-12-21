@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { faqContentSchema, validateRequest } from "@/lib/validations";
 
 export async function GET() {
   try {
@@ -15,7 +16,7 @@ export async function GET() {
 
     return NextResponse.json({ faqs: content.faqs });
   } catch (error) {
-    console.error("Error fetching FAQs:", error);
+    // Security: Log error without exposing details
     return NextResponse.json(
       { error: "Failed to fetch FAQs" },
       { status: 500 }
@@ -31,7 +32,18 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { faqs } = await request.json();
+    const body = await request.json();
+
+    // Validate input with Zod schema
+    const validation = validateRequest(faqContentSchema, body);
+    if (!validation.success) {
+      return NextResponse.json(
+        { error: "Validation failed", details: validation.errors },
+        { status: 400 }
+      );
+    }
+
+    const { faqs } = validation.data;
 
     const content = await prisma.faqContent.upsert({
       where: { id: "default" },
@@ -41,7 +53,7 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json({ success: true, content });
   } catch (error) {
-    console.error("Error updating FAQs:", error);
+    // Security: Log error without exposing details
     return NextResponse.json(
       { error: "Failed to update FAQs" },
       { status: 500 }

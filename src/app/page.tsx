@@ -182,20 +182,23 @@ export default function Home() {
       description: "Experience luxury styling with our expert stylists",
       colorScheme: "green" as const,
       cta: { text: "Book Appointment", href: "/book" },
+      secondaryCta: { text: "View Services", href: "/services" },
     },
     {
       title: "Discover Beauty",
       subtitle: "Innovative Hair Solutions",
       description: "From classic cuts to bold transformations",
       colorScheme: "green" as const,
-      cta: { text: "View Services", href: "/services" },
+      cta: { text: "View Products", href: "/products" },
+      secondaryCta: { text: "Explore Site", href: "/site-map" },
     },
     {
       title: "Your Hair Journey",
       subtitle: "Starts Here Today",
       description: "Personalized consultations and expert care",
       colorScheme: "green" as const,
-      cta: { text: "Get Started", href: "/about" },
+      cta: { text: "About Us", href: "/about" },
+      secondaryCta: { text: "Contact", href: "/contact" },
     },
   ]);
 
@@ -299,7 +302,7 @@ export default function Home() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.5, delay: 0.3 }}
-                className="flex flex-col sm:flex-row items-center justify-center gap-4"
+                className="flex flex-col items-center justify-center gap-6"
               >
                 <Link href={slide.cta.href}>
                   <Button size="md" className="group flex items-center">
@@ -307,15 +310,13 @@ export default function Home() {
                     <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
                   </Button>
                 </Link>
-                <Link href="/services">
-                  <Button
-                    size="md"
-                    variant="outline"
-                    className="border-white text-white hover:bg-white/10"
-                  >
-                    Explore Services
-                  </Button>
-                </Link>
+                {slide.secondaryCta && (
+                  <Link href={slide.secondaryCta.href}>
+                    <Button size="md" variant="outline">
+                      {slide.secondaryCta.text}
+                    </Button>
+                  </Link>
+                )}
               </motion.div>
             </AnimatePresence>
 

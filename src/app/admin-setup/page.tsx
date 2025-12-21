@@ -56,7 +56,7 @@ export default function AdminSetupPage() {
         throw new Error("Failed to delete account");
       }
 
-      toast.success("Account deleted successfully. Logging out...");
+      toast.success("Account deleted successfully.");
 
       // Clear cache
       if ("caches" in window) {
@@ -64,9 +64,15 @@ export default function AdminSetupPage() {
         await Promise.all(cacheNames.map((name) => caches.delete(name)));
       }
 
-      // Sign out and redirect
+      // Sign out but stay on this page
       await signOut({ redirect: false });
-      router.push("/");
+
+      // Dispatch event to notify other components (like Navbar) to update
+      window.dispatchEvent(new Event("sessionUpdated"));
+
+      setShowDeleteModal(false);
+      setIsDeleting(false);
+      setAlreadyInitialized(false); // Reset to show setup form
       router.refresh();
     } catch (error) {
       toast.error("Failed to delete account");

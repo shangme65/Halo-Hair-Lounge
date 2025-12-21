@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { unlink } from "fs/promises";
 import path from "path";
+import { serviceUpdateSchema, validateRequest } from "@/lib/validations";
 
 // PUT - Update service
 export async function PUT(
@@ -18,20 +19,33 @@ export async function PUT(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    // Validate ID format
+    if (!id || id.length > 50) {
+      return NextResponse.json({ error: "Invalid ID" }, { status: 400 });
+    }
+
     const body = await req.json();
+
+    // Validate input with Zod schema
+    const validation = validateRequest(serviceUpdateSchema, body);
+    if (!validation.success) {
+      return NextResponse.json(
+        { error: "Validation failed", details: validation.errors },
+        { status: 400 }
+      );
+    }
+
     const { name, description, price, duration, categories, image, isActive } =
-      body;
+      validation.data;
 
     const service = await prisma.service.update({
       where: { id },
       data: {
         ...(name && { name }),
         ...(description && { description }),
-        ...(price !== undefined && { price: parseFloat(price) }),
-        ...(duration && { duration: parseInt(duration) }),
-        ...(categories &&
-          Array.isArray(categories) &&
-          categories.length > 0 && { categories }),
+        ...(price !== undefined && { price }),
+        ...(duration !== undefined && { duration }),
+        ...(categories && categories.length > 0 && { categories }),
         ...(image !== undefined && { image }),
         ...(isActive !== undefined && { isActive }),
       },
@@ -39,7 +53,7 @@ export async function PUT(
 
     return NextResponse.json(service);
   } catch (error) {
-    console.error("Update service error:", error);
+    // Security: Log error without exposing details
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -58,6 +72,11 @@ export async function DELETE(
 
     if (!session || session.user?.role !== "ADMIN") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Validate ID format
+    if (!id || id.length > 50) {
+      return NextResponse.json({ error: "Invalid ID" }, { status: 400 });
     }
 
     // Get the service to retrieve image path
@@ -80,14 +99,13 @@ export async function DELETE(
         const imagePath = path.join(process.cwd(), "public", service.image);
         await unlink(imagePath);
       } catch (error) {
-        console.error("Error deleting image file:", error);
-        // Continue even if file deletion fails
+        // Continue even if file deletion fails - not critical
       }
     }
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Delete service error:", error);
+    // Security: Log error without exposing details
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

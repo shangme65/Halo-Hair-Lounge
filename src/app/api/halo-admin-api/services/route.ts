@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { serviceCreateSchema, validateRequest } from "@/lib/validations";
 
 // GET - Fetch all services (admin only)
 export async function GET() {
@@ -18,7 +19,7 @@ export async function GET() {
 
     return NextResponse.json(services);
   } catch (error) {
-    console.error("Get services error:", error);
+    // Security: Log error without exposing details
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -36,39 +37,34 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { name, description, price, duration, categories, image, isActive } =
-      body;
 
-    if (
-      !name ||
-      !description ||
-      price === undefined ||
-      !duration ||
-      !categories ||
-      !Array.isArray(categories) ||
-      categories.length === 0
-    ) {
+    // Validate input with Zod schema
+    const validation = validateRequest(serviceCreateSchema, body);
+    if (!validation.success) {
       return NextResponse.json(
-        { error: "Missing required fields or invalid categories" },
+        { error: "Validation failed", details: validation.errors },
         { status: 400 }
       );
     }
+
+    const { name, description, price, duration, categories, image, isActive } =
+      validation.data;
 
     const service = await prisma.service.create({
       data: {
         name,
         description,
-        price: parseFloat(price),
-        duration: parseInt(duration),
+        price,
+        duration,
         categories,
         image: image || "",
-        isActive: isActive !== undefined ? isActive : true,
+        isActive: isActive ?? true,
       },
     });
 
     return NextResponse.json(service, { status: 201 });
   } catch (error) {
-    console.error("Create service error:", error);
+    // Security: Log error without exposing details
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

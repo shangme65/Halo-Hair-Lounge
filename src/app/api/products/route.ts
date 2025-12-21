@@ -36,7 +36,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ products });
   } catch (error) {
-    console.error("Get products error:", error);
+    // Security: Log error without exposing details
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

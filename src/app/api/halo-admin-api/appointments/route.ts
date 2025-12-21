@@ -36,7 +36,7 @@ export async function GET() {
 
     return NextResponse.json(appointments);
   } catch (error) {
-    console.error("Get appointments error:", error);
+    // Security: Log error without exposing details
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { unlink } from "fs/promises";
 import path from "path";
+import { productUpdateSchema, validateRequest } from "@/lib/validations";
 
 // PUT - Update product
 export async function PUT(
@@ -18,7 +19,22 @@ export async function PUT(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    // Validate ID format
+    if (!id || id.length > 50) {
+      return NextResponse.json({ error: "Invalid ID" }, { status: 400 });
+    }
+
     const body = await req.json();
+
+    // Validate input with Zod schema
+    const validation = validateRequest(productUpdateSchema, body);
+    if (!validation.success) {
+      return NextResponse.json(
+        { error: "Validation failed", details: validation.errors },
+        { status: 400 }
+      );
+    }
+
     const {
       name,
       description,
@@ -31,21 +47,19 @@ export async function PUT(
       isActive,
       isFeatured,
       tags,
-    } = body;
+    } = validation.data;
 
     const product = await prisma.product.update({
       where: { id },
       data: {
         ...(name && { name }),
         ...(description && { description }),
-        ...(price !== undefined && { price: parseFloat(price) }),
-        ...(compareAtPrice !== undefined && {
-          compareAtPrice: compareAtPrice ? parseFloat(compareAtPrice) : null,
-        }),
+        ...(price !== undefined && { price }),
+        ...(compareAtPrice !== undefined && { compareAtPrice }),
         ...(images !== undefined && { images }),
         ...(categories !== undefined && { categories }),
         ...(brand && { brand }),
-        ...(stock !== undefined && { stock: parseInt(stock) }),
+        ...(stock !== undefined && { stock }),
         ...(isActive !== undefined && { isActive }),
         ...(isFeatured !== undefined && { isFeatured }),
         ...(tags !== undefined && { tags }),
@@ -54,7 +68,7 @@ export async function PUT(
 
     return NextResponse.json(product);
   } catch (error) {
-    console.error("Update product error:", error);
+    // Security: Log error without exposing details
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -73,6 +87,11 @@ export async function DELETE(
 
     if (!session || session.user?.role !== "ADMIN") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Validate ID format
+    if (!id || id.length > 50) {
+      return NextResponse.json({ error: "Invalid ID" }, { status: 400 });
     }
 
     // Get the product to retrieve image paths
@@ -97,8 +116,7 @@ export async function DELETE(
             const imagePath = path.join(process.cwd(), "public", imageUrl);
             await unlink(imagePath);
           } catch (error) {
-            console.error("Error deleting image file:", error);
-            // Continue even if file deletion fails
+            // Continue even if file deletion fails - not critical
           }
         }
       }
@@ -106,7 +124,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Delete product error:", error);
+    // Security: Log error without exposing details
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

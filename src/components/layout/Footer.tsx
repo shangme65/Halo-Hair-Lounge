@@ -122,6 +122,7 @@ export default function Footer() {
                   alt="Halo Hair Lounge"
                   fill
                   className="object-contain"
+                  unoptimized
                   style={{
                     filter:
                       "drop-shadow(0 0 12px rgba(34, 197, 94, 0.5)) drop-shadow(0 0 20px rgba(134, 239, 172, 0.3)) brightness(1.15)",

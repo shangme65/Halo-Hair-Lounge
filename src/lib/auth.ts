@@ -73,11 +73,7 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.id = user.id;
         token.role = user.role;
-        console.log("JWT callback - User logged in:", {
-          id: user.id,
-          role: user.role,
-          email: user.email,
-        });
+        // Security: Removed sensitive logging in production
       }
 
       if (trigger === "update" && session) {
@@ -90,11 +86,7 @@ export const authOptions: NextAuthOptions = {
       if (session.user) {
         session.user.id = token.id as string;
         session.user.role = token.role as string;
-        console.log("Session callback - Session created:", {
-          id: session.user.id,
-          role: session.user.role,
-          email: session.user.email,
-        });
+        // Security: Removed sensitive logging in production
       }
       return session;
     },

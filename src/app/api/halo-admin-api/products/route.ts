@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { productCreateSchema, validateRequest } from "@/lib/validations";
 
 // GET - Fetch all products (admin only)
 export async function GET() {
@@ -18,7 +19,7 @@ export async function GET() {
 
     return NextResponse.json(products);
   } catch (error) {
-    console.error("Get products error:", error);
+    // Security: Log error without exposing details
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -36,6 +37,16 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
+
+    // Validate input with Zod schema
+    const validation = validateRequest(productCreateSchema, body);
+    if (!validation.success) {
+      return NextResponse.json(
+        { error: "Validation failed", details: validation.errors },
+        { status: 400 }
+      );
+    }
+
     const {
       name,
       description,
@@ -48,42 +59,27 @@ export async function POST(req: NextRequest) {
       isActive,
       isFeatured,
       tags,
-    } = body;
-
-    if (
-      !name ||
-      !description ||
-      price === undefined ||
-      !categories ||
-      categories.length === 0 ||
-      !brand ||
-      stock === undefined
-    ) {
-      return NextResponse.json(
-        { error: "Missing required fields" },
-        { status: 400 }
-      );
-    }
+    } = validation.data;
 
     const product = await prisma.product.create({
       data: {
         name,
         description,
-        price: parseFloat(price),
-        compareAtPrice: compareAtPrice ? parseFloat(compareAtPrice) : null,
-        images: images || [],
-        categories: categories,
+        price,
+        compareAtPrice: compareAtPrice ?? null,
+        images: images ?? [],
+        categories,
         brand,
-        stock: parseInt(stock),
-        isActive: isActive !== undefined ? isActive : true,
-        isFeatured: isFeatured !== undefined ? isFeatured : false,
-        tags: tags || [],
+        stock,
+        isActive: isActive ?? true,
+        isFeatured: isFeatured ?? false,
+        tags: tags ?? [],
       },
     });
 
     return NextResponse.json(product, { status: 201 });
   } catch (error) {
-    console.error("Create product error:", error);
+    // Security: Log error without exposing details
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

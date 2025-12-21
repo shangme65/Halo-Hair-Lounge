@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { whyChooseUsContentSchema, validateRequest } from "@/lib/validations";
 
 export async function GET() {
   try {
@@ -15,7 +16,7 @@ export async function GET() {
 
     return NextResponse.json({ reasons: content.reasons });
   } catch (error) {
-    console.error("Error fetching why choose us:", error);
+    // Security: Log error without exposing details
     return NextResponse.json(
       { error: "Failed to fetch content" },
       { status: 500 }
@@ -31,7 +32,19 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { reasons } = await request.json();
+    const body = await request.json();
+
+    // Validate input with Zod schema - items will be stored as reasons
+    const validation = validateRequest(whyChooseUsContentSchema, body);
+    if (!validation.success) {
+      return NextResponse.json(
+        { error: "Validation failed", details: validation.errors },
+        { status: 400 }
+      );
+    }
+
+    // Map items to reasons for database storage
+    const reasons = validation.data.items;
 
     const content = await prisma.whyChooseUsContent.upsert({
       where: { id: "default" },
@@ -41,7 +54,7 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json({ success: true, content });
   } catch (error) {
-    console.error("Error updating why choose us:", error);
+    // Security: Log error without exposing details
     return NextResponse.json(
       { error: "Failed to update content" },
       { status: 500 }

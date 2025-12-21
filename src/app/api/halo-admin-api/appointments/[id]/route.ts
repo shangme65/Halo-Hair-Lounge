@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { appointmentStatusSchema, validateRequest } from "@/lib/validations";
 
 // PUT - Update appointment status
 export async function PUT(
@@ -16,16 +17,23 @@ export async function PUT(
     }
 
     const body = await req.json();
-    const { status } = body;
 
-    if (!status) {
+    // Validate input with Zod schema
+    const validation = validateRequest(appointmentStatusSchema, body);
+    if (!validation.success) {
       return NextResponse.json(
-        { error: "Status is required" },
+        { error: "Validation failed", details: validation.errors },
         { status: 400 }
       );
     }
 
+    const { status } = validation.data;
     const { id } = await params;
+
+    // Validate ID format
+    if (!id || id.length > 50) {
+      return NextResponse.json({ error: "Invalid ID" }, { status: 400 });
+    }
 
     const appointment = await prisma.appointment.update({
       where: { id },
@@ -52,7 +60,7 @@ export async function PUT(
 
     return NextResponse.json(appointment);
   } catch (error) {
-    console.error("Update appointment error:", error);
+    // Security: Log error without exposing details
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

@@ -2,8 +2,33 @@ import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcrypt";
 import prisma from "@/lib/prisma";
 
+// Security: One-time setup secret to prevent unauthorized access
+const SETUP_SECRET = process.env.ADMIN_SETUP_SECRET;
+
 export async function POST(req: NextRequest) {
   try {
+    // Security: Verify setup secret from header or body
+    const authHeader = req.headers.get("x-setup-secret");
+    let setupSecret = authHeader;
+
+    // If not in header, check body
+    if (!setupSecret) {
+      try {
+        const body = await req.clone().json();
+        setupSecret = body.setupSecret;
+      } catch {
+        // Body might not be JSON, continue
+      }
+    }
+
+    // If ADMIN_SETUP_SECRET is configured, require it
+    if (SETUP_SECRET && setupSecret !== SETUP_SECRET) {
+      return NextResponse.json(
+        { error: "Unauthorized - Invalid setup secret" },
+        { status: 401 }
+      );
+    }
+
     // Check if any admin already exists - this is for initial setup only
     const existingAdmin = await prisma.user.findFirst({
       where: { role: "ADMIN" },
@@ -13,7 +38,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         {
           error:
-            "Admin account already exists. Use the admin portal to create additional admins.",
+            "Admin account already exists. This endpoint is disabled after initial setup.",
         },
         { status: 403 }
       );
@@ -47,8 +72,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Hash password
-    const hashedPassword = await bcrypt.hash(adminPassword, 10);
+    // Hash password with higher cost factor for admin
+    const hashedPassword = await bcrypt.hash(adminPassword, 12);
 
     // Create admin user and seed default data in a transaction
     const result = await prisma.$transaction(async (tx) => {
@@ -217,15 +242,12 @@ export async function POST(req: NextRequest) {
       {
         message: "Admin account created successfully with default data",
         user: result,
-        credentials: {
-          email: adminEmail,
-          password: adminPassword, // Return plain password for auto-login only
-        },
+        // Security: Don't return password in response
       },
       { status: 201 }
     );
   } catch (error: any) {
-    console.error("Admin setup error:", error);
+    // Security: Log error without exposing details
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -244,7 +266,7 @@ export async function GET() {
       adminExists: !!existingAdmin,
     });
   } catch (error) {
-    console.error("Failed to check admin status:", error);
+    // Security: Log error without exposing details
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

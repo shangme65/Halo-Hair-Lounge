@@ -74,7 +74,7 @@ export default function Navbar() {
   const [mounted, setMounted] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
-  const { data: session } = useSession();
+  const { data: session, update } = useSession();
 
   useEffect(() => {
     setMounted(true);
@@ -88,6 +88,17 @@ export default function Navbar() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // Listen for session updates (e.g., after admin account deletion)
+  useEffect(() => {
+    const handleSessionUpdate = () => {
+      update(); // Force session refresh
+    };
+
+    window.addEventListener("sessionUpdated", handleSessionUpdate);
+    return () =>
+      window.removeEventListener("sessionUpdated", handleSessionUpdate);
+  }, [update]);
 
   // Determine which navigation to show based on user role
   const isAdmin =
@@ -138,6 +149,7 @@ export default function Navbar() {
                   fill
                   className="object-contain"
                   priority
+                  unoptimized
                 />
               </motion.div>
             </Link>{" "}

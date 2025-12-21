@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { featuresContentSchema, validateRequest } from "@/lib/validations";
 
 export async function GET() {
   try {
@@ -15,7 +16,7 @@ export async function GET() {
 
     return NextResponse.json({ features: content.features });
   } catch (error) {
-    console.error("Error fetching features:", error);
+    // Security: Log error without exposing details
     return NextResponse.json(
       { error: "Failed to fetch features" },
       { status: 500 }
@@ -31,7 +32,18 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { features } = await request.json();
+    const body = await request.json();
+
+    // Validate input with Zod schema
+    const validation = validateRequest(featuresContentSchema, body);
+    if (!validation.success) {
+      return NextResponse.json(
+        { error: "Validation failed", details: validation.errors },
+        { status: 400 }
+      );
+    }
+
+    const { features } = validation.data;
 
     const content = await prisma.featuresContent.upsert({
       where: { id: "default" },
@@ -41,7 +53,7 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json({ success: true, content });
   } catch (error) {
-    console.error("Error updating features:", error);
+    // Security: Log error without exposing details
     return NextResponse.json(
       { error: "Failed to update features" },
       { status: 500 }

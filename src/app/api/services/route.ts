@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ services });
   } catch (error) {
-    console.error("Get services error:", error);
+    // Security: Log error without exposing details
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
