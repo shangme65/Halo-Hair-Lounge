@@ -8,7 +8,28 @@ export async function GET() {
     const categories = await prisma.serviceCategory.findMany({
       orderBy: { label: "asc" },
     });
-    return NextResponse.json(categories);
+
+    // Get service counts for each category (only active services for public)
+    const categoriesWithCounts = await Promise.all(
+      categories.map(async (category) => {
+        const count = await prisma.service.count({
+          where: {
+            categories: {
+              has: category.value,
+            },
+            isActive: true, // Only count active services for public
+          },
+        });
+
+        return {
+          value: category.value,
+          label: category.label,
+          serviceCount: count,
+        };
+      })
+    );
+
+    return NextResponse.json(categoriesWithCounts);
   } catch (error) {
     console.error("Error fetching categories:", error);
     return NextResponse.json(

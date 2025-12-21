@@ -99,6 +99,17 @@ model ServiceCategory {
   @@map("service_categories")
 }
 
+model ProductCategoryModel {
+  id        String    @id @default(cuid())
+  value     String    @unique
+  label     String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  products  Product[]
+
+  @@map("product_categories")
+}
+
 model Appointment {
   id          String            @id @default(cuid())
   userId      String
@@ -144,7 +155,8 @@ model Product {
   price       Float
   compareAtPrice Float?
   images      String[]
-  category    ProductCategory
+  categories  String[]    // Array of categories - product appears in all selected categories
+  categoryId  String?
   brand       String?
   stock       Int         @default(0)
   isActive    Boolean     @default(true)
@@ -154,8 +166,9 @@ model Product {
   updatedAt   DateTime    @updatedAt
   
   appointments AppointmentProduct[]
+  productCategory ProductCategoryModel? @relation(fields: [categoryId], references: [id])
 
-  @@index([category])
+  @@index([categoryId])
   @@index([isFeatured])
   @@map("products")
 }
@@ -222,16 +235,6 @@ enum Role {
   USER
   ADMIN
   STAFF
-}
-
-enum ProductCategory {
-  SHAMPOO
-  CONDITIONER
-  TREATMENT
-  STYLING
-  COLORING
-  TOOLS
-  ACCESSORIES
 }
 
 enum AppointmentStatus {

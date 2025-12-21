@@ -1,4 +1,4 @@
-import { PrismaClient, ProductCategory } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
 
 const prisma = new PrismaClient();
@@ -35,7 +35,7 @@ async function main() {
   console.log("✅ Created admin user:", admin.email);
 
   // Create service categories
-  const categories = [
+  const serviceCategories = [
     { value: "haircut", label: "Haircut" },
     { value: "coloring", label: "Coloring" },
     { value: "treatment", label: "Treatment" },
@@ -44,7 +44,7 @@ async function main() {
     { value: "braiding", label: "Braiding" },
   ];
 
-  for (const category of categories) {
+  for (const category of serviceCategories) {
     await prisma.serviceCategory.upsert({
       where: { value: category.value },
       update: {},
@@ -53,6 +53,27 @@ async function main() {
   }
 
   console.log("✅ Created service categories");
+
+  // Create product categories
+  const productCategories = [
+    { value: "SHAMPOO", label: "Shampoo" },
+    { value: "CONDITIONER", label: "Conditioner" },
+    { value: "TREATMENT", label: "Treatment" },
+    { value: "STYLING", label: "Styling" },
+    { value: "TOOLS", label: "Tools" },
+    { value: "ACCESSORIES", label: "Accessories" },
+    { value: "COLORING", label: "Coloring" },
+  ];
+
+  for (const category of productCategories) {
+    await prisma.productCategoryModel.upsert({
+      where: { value: category.value },
+      update: {},
+      create: category,
+    });
+  }
+
+  console.log("✅ Created product categories");
 
   // Create services
   const services = [
@@ -145,7 +166,7 @@ async function main() {
 
   console.log("✅ Created services");
 
-  // Create products
+  // Create products with categories array (multi-category support)
   const products = [
     {
       name: "Hydrating Shampoo",
@@ -156,7 +177,7 @@ async function main() {
       images: [
         "https://images.unsplash.com/photo-1571875257727-256c39da42af?w=800",
       ],
-      category: ProductCategory.SHAMPOO,
+      categories: ["SHAMPOO"],
       brand: "Halo Signature",
       stock: 50,
       isFeatured: true,
@@ -171,7 +192,7 @@ async function main() {
       images: [
         "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=800",
       ],
-      category: ProductCategory.CONDITIONER,
+      categories: ["CONDITIONER", "TREATMENT"],
       brand: "Halo Signature",
       stock: 45,
       isFeatured: true,
@@ -185,7 +206,7 @@ async function main() {
       images: [
         "https://images.unsplash.com/photo-1535585209827-a15fcdbc4c2d?w=800",
       ],
-      category: ProductCategory.SHAMPOO,
+      categories: ["SHAMPOO", "COLORING"],
       brand: "Halo Pro",
       stock: 30,
       isFeatured: false,
@@ -200,7 +221,7 @@ async function main() {
       images: [
         "https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?w=800",
       ],
-      category: ProductCategory.TREATMENT,
+      categories: ["TREATMENT"],
       brand: "Halo Labs",
       stock: 25,
       isFeatured: true,
@@ -214,7 +235,7 @@ async function main() {
       images: [
         "https://images.unsplash.com/photo-1629198688000-71f23e745b6e?w=800",
       ],
-      category: ProductCategory.STYLING,
+      categories: ["STYLING"],
       brand: "Halo Style",
       stock: 40,
       isFeatured: false,
@@ -228,7 +249,7 @@ async function main() {
       images: [
         "https://images.unsplash.com/photo-1620967098601-c44db8f51667?w=800",
       ],
-      category: ProductCategory.STYLING,
+      categories: ["STYLING", "TREATMENT"],
       brand: "Halo Style",
       stock: 55,
       isFeatured: true,
@@ -241,7 +262,7 @@ async function main() {
       images: [
         "https://images.unsplash.com/photo-1570554886111-e80fcca6a029?w=800",
       ],
-      category: ProductCategory.TREATMENT,
+      categories: ["TREATMENT", "CONDITIONER"],
       brand: "Halo Signature",
       stock: 35,
       isFeatured: true,
@@ -256,7 +277,7 @@ async function main() {
       images: [
         "https://images.unsplash.com/photo-1522338242992-e1a54906a8da?w=800",
       ],
-      category: ProductCategory.TOOLS,
+      categories: ["TOOLS"],
       brand: "Halo Pro",
       stock: 15,
       isFeatured: true,
@@ -270,7 +291,7 @@ async function main() {
       images: [
         "https://images.unsplash.com/photo-1519699047748-de8e457a634e?w=800",
       ],
-      category: ProductCategory.TOOLS,
+      categories: ["TOOLS", "STYLING"],
       brand: "Halo Pro",
       stock: 20,
       isFeatured: false,
@@ -284,7 +305,7 @@ async function main() {
       images: [
         "https://images.unsplash.com/photo-1535083783855-76ae62b2914e?w=800",
       ],
-      category: ProductCategory.ACCESSORIES,
+      categories: ["ACCESSORIES"],
       brand: "Halo Essentials",
       stock: 60,
       isFeatured: false,
@@ -297,7 +318,7 @@ async function main() {
       images: [
         "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=800",
       ],
-      category: ProductCategory.COLORING,
+      categories: ["COLORING"],
       brand: "Halo Color",
       stock: 30,
       isFeatured: false,
@@ -310,7 +331,7 @@ async function main() {
       images: [
         "https://images.unsplash.com/photo-1526045478516-99145907023c?w=800",
       ],
-      category: ProductCategory.SHAMPOO,
+      categories: ["SHAMPOO", "COLORING"],
       brand: "Halo Pro",
       stock: 40,
       isFeatured: false,
@@ -318,9 +339,16 @@ async function main() {
     },
   ];
 
+  // Use upsert for products to avoid duplicates
   for (const product of products) {
-    await prisma.product.create({
-      data: product,
+    const productId = product.name.toLowerCase().replace(/\s+/g, "-");
+    await prisma.product.upsert({
+      where: { id: productId },
+      update: { categories: product.categories },
+      create: {
+        id: productId,
+        ...product,
+      },
     });
   }
 

@@ -13,7 +13,8 @@ export async function GET(req: NextRequest) {
     const where: any = { isActive: true };
 
     if (category) {
-      where.category = category;
+      // Filter products that have this category in their categories array
+      where.categories = { has: category };
     }
 
     if (featured === "true") {

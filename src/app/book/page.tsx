@@ -13,6 +13,8 @@ import {
   Tag,
   X,
   ChevronRight,
+  Check,
+  Sparkles,
 } from "lucide-react";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
@@ -84,6 +86,29 @@ export default function BookingPage() {
   const [showProductModal, setShowProductModal] = useState(false);
   const [activeProductCategory, setActiveProductCategory] =
     useState<string>("");
+  const [currentStep, setCurrentStep] = useState(1);
+
+  const steps = [
+    { id: 1, name: "Info", icon: User },
+    { id: 2, name: "Service", icon: Scissors },
+    { id: 3, name: "DateTime", icon: CalendarIcon },
+    { id: 4, name: "Confirm", icon: Check },
+  ];
+
+  const isStepComplete = (step: number) => {
+    switch (step) {
+      case 1:
+        return customerName && customerEmail && customerPhone;
+      case 2:
+        return selectedCategory;
+      case 3:
+        return selectedDate && selectedTime;
+      case 4:
+        return true;
+      default:
+        return false;
+    }
+  };
 
   useEffect(() => {
     fetchCategories();
@@ -226,96 +251,269 @@ export default function BookingPage() {
   };
 
   return (
-    <div className="min-h-screen py-6 pt-32 bg-gradient-to-br from-primary-50/30 via-white to-primary-50/20 dark:from-dark-900 dark:via-dark-950 dark:to-dark-900">
-      <div className="container mx-auto px-4 max-w-2xl">
+    <div className="min-h-screen py-6 pt-32 bg-gradient-to-br from-primary-50/30 via-white to-primary-50/20 dark:from-dark-900 dark:via-dark-950 dark:to-dark-900 relative overflow-hidden">
+      {/* Animated background orbs */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-20 left-10 w-72 h-72 bg-primary-400/20 rounded-full blur-3xl animate-pulse-slow" />
+        <div
+          className="absolute bottom-20 right-10 w-96 h-96 bg-green-400/20 rounded-full blur-3xl animate-pulse-slow"
+          style={{ animationDelay: "1s" }}
+        />
+        <div
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-primary-300/20 rounded-full blur-3xl animate-pulse-slow"
+          style={{ animationDelay: "2s" }}
+        />
+      </div>
+
+      <div className="container mx-auto px-4 max-w-3xl relative z-10">
+        {/* Header with sparkle effect */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-5"
+          className="text-center mb-8"
         >
-          <h1 className="text-2xl sm:text-3xl font-display font-bold mb-1 bg-gradient-to-r from-primary-600 to-primary-800 bg-clip-text text-transparent">
-            Book Your Appointment
-          </h1>
-          <p className="text-sm text-dark-600 dark:text-dark-400">
-            Choose your service, date, and time
+          <div className="inline-flex items-center gap-2 mb-3">
+            <Sparkles className="w-6 h-6 text-primary-600 animate-pulse" />
+            <h1 className="text-3xl sm:text-4xl font-display font-bold bg-gradient-to-r from-primary-600 via-green-600 to-primary-700 bg-clip-text text-transparent">
+              Book Your Appointment
+            </h1>
+            <Sparkles className="w-6 h-6 text-primary-600 animate-pulse" />
+          </div>
+          <p className="text-base text-dark-600 dark:text-dark-400 font-medium">
+            Experience luxury hair care in just a few steps
           </p>
         </motion.div>
 
-        <form onSubmit={handleSubmit} className="space-y-3">
-          {/* Customer Information Card */}
-          <Card className="p-3">
-            <h2 className="text-sm font-semibold flex items-center mb-2">
-              <User className="w-4 h-4 mr-1.5 text-primary-600" />
-              Your Information
-            </h2>
-            <div className="space-y-2">
-              <Input
-                type="text"
-                placeholder="Full Name *"
-                value={customerName}
-                onChange={(e) => setCustomerName(e.target.value)}
-                required
-                className="text-sm h-9"
-              />
-              <Input
-                type="email"
-                placeholder="Email Address *"
-                value={customerEmail}
-                onChange={(e) => setCustomerEmail(e.target.value)}
-                required
-                className="text-sm h-9"
-              />
-              <Input
-                type="tel"
-                placeholder="Phone Number *"
-                value={customerPhone}
-                onChange={(e) => setCustomerPhone(e.target.value)}
-                required
-                className="text-sm h-9"
+        {/* Progress Stepper */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.2 }}
+          className="mb-8 backdrop-blur-xl bg-white/70 dark:bg-dark-800/70 rounded-2xl p-6 shadow-2xl border border-white/20 dark:border-dark-700/50"
+        >
+          <div className="flex items-center justify-between relative">
+            {/* Progress line */}
+            <div className="absolute top-6 left-0 right-0 h-1 bg-dark-200 dark:bg-dark-700 -z-10">
+              <motion.div
+                className="h-full bg-gradient-to-r from-primary-600 to-green-600 rounded-full"
+                initial={{ width: "0%" }}
+                animate={{
+                  width: `${
+                    (steps.filter((s) => isStepComplete(s.id)).length /
+                      steps.length) *
+                    100
+                  }%`,
+                }}
+                transition={{ duration: 0.5, ease: "easeInOut" }}
               />
             </div>
-          </Card>
+
+            {steps.map((step, idx) => {
+              const StepIcon = step.icon;
+              const isComplete = isStepComplete(step.id);
+              const isCurrent = step.id === currentStep;
+
+              return (
+                <div
+                  key={step.id}
+                  className="flex flex-col items-center relative z-10"
+                >
+                  <motion.div
+                    className={`w-12 h-12 rounded-full flex items-center justify-center mb-2 transition-all duration-300 ${
+                      isComplete
+                        ? "bg-gradient-to-br from-primary-600 to-green-600 shadow-lg shadow-primary-500/50"
+                        : isCurrent
+                        ? "bg-white dark:bg-dark-700 border-2 border-primary-600 shadow-lg"
+                        : "bg-dark-100 dark:bg-dark-800 border-2 border-dark-300 dark:border-dark-600"
+                    }`}
+                    whileHover={{ scale: 1.1 }}
+                    animate={isCurrent ? { scale: [1, 1.05, 1] } : {}}
+                    transition={
+                      isCurrent ? { repeat: Infinity, duration: 2 } : {}
+                    }
+                  >
+                    {isComplete ? (
+                      <Check className="w-6 h-6 text-white" />
+                    ) : (
+                      <StepIcon
+                        className={`w-6 h-6 ${
+                          isCurrent
+                            ? "text-primary-600"
+                            : "text-dark-400 dark:text-dark-500"
+                        }`}
+                      />
+                    )}
+                  </motion.div>
+                  <span
+                    className={`text-xs font-medium hidden sm:block ${
+                      isComplete || isCurrent
+                        ? "text-primary-700 dark:text-primary-400"
+                        : "text-dark-500 dark:text-dark-500"
+                    }`}
+                  >
+                    {step.name}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </motion.div>
+
+        <form onSubmit={handleSubmit} className="space-y-5">
+          {/* Customer Information Card */}
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.3 }}
+          >
+            <Card className="p-6 backdrop-blur-xl bg-white/80 dark:bg-dark-800/80 border border-white/20 dark:border-dark-700/50 shadow-xl hover:shadow-2xl transition-all duration-300">
+              <div className="flex items-center gap-3 mb-5">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary-600 to-green-600 flex items-center justify-center shadow-lg shadow-primary-500/50">
+                  <User className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-bold text-dark-900 dark:text-white">
+                    Your Information
+                  </h2>
+                  <p className="text-sm text-dark-500 dark:text-dark-400">
+                    Tell us about yourself
+                  </p>
+                </div>
+              </div>
+              <div className="space-y-4">
+                <motion.div whileFocus={{ scale: 1.01 }} className="relative">
+                  <Input
+                    type="text"
+                    placeholder="Full Name *"
+                    value={customerName}
+                    onChange={(e) => {
+                      setCustomerName(e.target.value);
+                      if (e.target.value && customerEmail && customerPhone)
+                        setCurrentStep(2);
+                    }}
+                    required
+                    className="h-12 text-base pl-4 bg-white/50 dark:bg-dark-900/50 border-2 border-dark-200 dark:border-dark-700 focus:border-primary-500 focus:ring-4 focus:ring-primary-500/20 rounded-xl transition-all"
+                  />
+                </motion.div>
+                <motion.div whileFocus={{ scale: 1.01 }} className="relative">
+                  <Input
+                    type="email"
+                    placeholder="Email Address *"
+                    value={customerEmail}
+                    onChange={(e) => {
+                      setCustomerEmail(e.target.value);
+                      if (customerName && e.target.value && customerPhone)
+                        setCurrentStep(2);
+                    }}
+                    required
+                    className="h-12 text-base pl-4 bg-white/50 dark:bg-dark-900/50 border-2 border-dark-200 dark:border-dark-700 focus:border-primary-500 focus:ring-4 focus:ring-primary-500/20 rounded-xl transition-all"
+                  />
+                </motion.div>
+                <motion.div whileFocus={{ scale: 1.01 }} className="relative">
+                  <Input
+                    type="tel"
+                    placeholder="Phone Number *"
+                    value={customerPhone}
+                    onChange={(e) => {
+                      setCustomerPhone(e.target.value);
+                      if (customerName && customerEmail && e.target.value)
+                        setCurrentStep(2);
+                    }}
+                    required
+                    className="h-12 text-base pl-4 bg-white/50 dark:bg-dark-900/50 border-2 border-dark-200 dark:border-dark-700 focus:border-primary-500 focus:ring-4 focus:ring-primary-500/20 rounded-xl transition-all"
+                  />
+                </motion.div>
+              </div>
+            </Card>
+          </motion.div>
 
           {/* Service Category Selection Card */}
-          <Card className="p-3">
-            <h2 className="text-sm font-semibold flex items-center mb-2">
-              <Scissors className="w-4 h-4 mr-1.5 text-primary-600" />
-              Select Service
-            </h2>
-            {isLoadingCategories ? (
-              <div className="grid grid-cols-2 gap-2">
-                {[1, 2, 3, 4].map((i) => (
-                  <div
-                    key={i}
-                    className="h-14 bg-dark-100 dark:bg-dark-800 rounded-lg animate-pulse"
-                  />
-                ))}
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.4 }}
+          >
+            <Card className="p-6 backdrop-blur-xl bg-white/80 dark:bg-dark-800/80 border border-white/20 dark:border-dark-700/50 shadow-xl hover:shadow-2xl transition-all duration-300">
+              <div className="flex items-center gap-3 mb-5">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-600 to-primary-600 flex items-center justify-center shadow-lg shadow-green-500/50">
+                  <Scissors className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-bold text-dark-900 dark:text-white">
+                    Select Service
+                  </h2>
+                  <p className="text-sm text-dark-500 dark:text-dark-400">
+                    Choose your desired service
+                  </p>
+                </div>
               </div>
-            ) : (
-              <div className="grid grid-cols-2 gap-2">
-                {categories.map((category) => (
-                  <motion.div
-                    key={category.id}
-                    className={`p-2.5 rounded-lg border-2 cursor-pointer transition-all ${
-                      selectedCategory === category.id
-                        ? "border-primary-600 bg-primary-50 dark:bg-primary-950"
-                        : "border-dark-200 dark:border-dark-700 hover:border-primary-400"
-                    }`}
-                    onClick={() => setSelectedCategory(category.id)}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    <div className="flex items-center gap-1.5">
-                      <Tag className="w-3.5 h-3.5 text-primary-600 flex-shrink-0" />
-                      <h3 className="font-semibold text-xs truncate">
-                        {category.label}
-                      </h3>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            )}
-          </Card>
+              {isLoadingCategories ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {[1, 2, 3, 4].map((i) => (
+                    <div
+                      key={i}
+                      className="h-20 bg-gradient-to-br from-dark-100 to-dark-200 dark:from-dark-800 dark:to-dark-700 rounded-xl animate-pulse"
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {categories.map((category, idx) => (
+                    <motion.div
+                      key={category.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.4 + idx * 0.05 }}
+                      className={`group relative p-4 rounded-xl cursor-pointer transition-all duration-300 overflow-hidden ${
+                        selectedCategory === category.id
+                          ? "bg-gradient-to-br from-primary-600 to-green-600 shadow-lg shadow-primary-500/50 scale-105"
+                          : "bg-gradient-to-br from-white to-primary-50/50 dark:from-dark-700 dark:to-dark-600 hover:shadow-lg hover:scale-102 border-2 border-dark-200 dark:border-dark-600"
+                      }`}
+                      onClick={() => {
+                        setSelectedCategory(category.id);
+                        setCurrentStep(3);
+                      }}
+                      whileHover={{ y: -4 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      {/* Animated background */}
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+
+                      <div className="relative flex items-center gap-3">
+                        <Tag
+                          className={`w-5 h-5 flex-shrink-0 transition-colors ${
+                            selectedCategory === category.id
+                              ? "text-white"
+                              : "text-primary-600"
+                          }`}
+                        />
+                        <div className="flex-1">
+                          <h3
+                            className={`font-bold text-sm transition-colors ${
+                              selectedCategory === category.id
+                                ? "text-white"
+                                : "text-dark-900 dark:text-white"
+                            }`}
+                          >
+                            {category.label}
+                          </h3>
+                        </div>
+                        {selectedCategory === category.id && (
+                          <motion.div
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center"
+                          >
+                            <Check className="w-4 h-4 text-white" />
+                          </motion.div>
+                        )}
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              )}
+            </Card>
+          </motion.div>
 
           {/* Product Selection Card */}
           <Card className="p-3">

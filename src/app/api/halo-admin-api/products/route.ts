@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
       price,
       compareAtPrice,
       images,
-      category,
+      categories,
       brand,
       stock,
       isActive,
@@ -54,7 +54,8 @@ export async function POST(req: NextRequest) {
       !name ||
       !description ||
       price === undefined ||
-      !category ||
+      !categories ||
+      categories.length === 0 ||
       !brand ||
       stock === undefined
     ) {
@@ -71,7 +72,7 @@ export async function POST(req: NextRequest) {
         price: parseFloat(price),
         compareAtPrice: compareAtPrice ? parseFloat(compareAtPrice) : null,
         images: images || [],
-        category,
+        categories: categories,
         brand,
         stock: parseInt(stock),
         isActive: isActive !== undefined ? isActive : true,

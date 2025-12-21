@@ -1,10 +1,9 @@
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
-import { ShoppingBag, DollarSign, Package, Tag } from "lucide-react";
 import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Search, Loader2, ChevronDown, ChevronRight, Star } from "lucide-react";
 import Card from "@/components/ui/Card";
-import Button from "@/components/ui/Button";
 import Image from "next/image";
 
 interface Product {
@@ -12,382 +11,382 @@ interface Product {
   name: string;
   description: string;
   price: number;
-  compareAtPrice?: number;
-  stock: number;
-  category: string;
-  brand?: string;
+  compareAtPrice: number | null;
   images: string[];
-  isFeatured: boolean;
+  categories: string[];
+  brand: string;
+  stock: number;
   isActive: boolean;
+  isFeatured: boolean;
+  tags: string[];
 }
 
-const categories = [
-  { value: "All", label: "All Products" },
-  { value: "SHAMPOO", label: "Shampoo" },
-  { value: "CONDITIONER", label: "Conditioner" },
-  { value: "TREATMENT", label: "Treatment" },
-  { value: "STYLING", label: "Styling" },
-  { value: "COLORING", label: "Coloring" },
-  { value: "TOOLS", label: "Tools" },
-  { value: "ACCESSORIES", label: "Accessories" },
-];
+interface CategoryInfo {
+  value: string;
+  label: string;
+  productCount: number;
+}
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState("All");
-  const [isLoading, setIsLoading] = useState(true);
+  const [categories, setCategories] = useState<CategoryInfo[]>([]);
+  const [expandedCategories, setExpandedCategories] = useState<string[]>([]);
+  const [currentImageIndex, setCurrentImageIndex] = useState<
+    Record<string, number>
+  >({});
+  const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     fetchProducts();
+    fetchCategories();
   }, []);
 
   const fetchProducts = async () => {
     try {
-      const response = await fetch("/api/products");
-      const data = await response.json();
-      // API already filters for active products only
+      const res = await fetch("/api/products");
+      const data = await res.json();
       setProducts(data.products || []);
     } catch (error) {
-      console.error("Error fetching products:", error);
+      console.error("Failed to load products");
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
-  const filteredProducts =
-    selectedCategory === "All"
-      ? products
-      : products.filter((p) => p.category === selectedCategory);
-
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-      },
-    },
+  const fetchCategories = async () => {
+    try {
+      const res = await fetch("/api/product-categories");
+      const data = await res.json();
+      setCategories(data);
+    } catch (error) {
+      console.error("Failed to load categories");
+    }
   };
 
-  const itemVariants = {
-    hidden: { opacity: 0, y: 50 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        type: "spring" as const,
-        stiffness: 100,
-      },
-    },
+  const toggleCategory = (categoryValue: string) => {
+    setExpandedCategories((prev) =>
+      prev.includes(categoryValue)
+        ? prev.filter((c) => c !== categoryValue)
+        : [...prev, categoryValue]
+    );
   };
+
+  const filteredProducts = products.filter((product) =>
+    product.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  // Group products by category - products appear in all their categories
+  // Handle backward compatibility: check both categories array and legacy category string
+  const productsByCategory = Array.isArray(categories)
+    ? categories.reduce((acc, category) => {
+        acc[category.value] = filteredProducts.filter((product) => {
+          // Support both new array format and legacy single category
+          const productCategories =
+            product.categories ||
+            ((product as any).category ? [(product as any).category] : []);
+          return productCategories.includes(category.value);
+        });
+        return acc;
+      }, {} as Record<string, Product[]>)
+    : {};
 
   return (
-    <div className="min-h-screen py-20 bg-gradient-to-br from-primary-50/30 via-white to-primary-50/20 dark:from-dark-900 dark:via-dark-950 dark:to-dark-900">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <motion.div
-          initial={{ opacity: 0, y: -30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-          className="text-center mb-16"
-        >
+    <div className="min-h-screen bg-gradient-to-br from-dark-50 via-white to-primary-50 dark:from-dark-950 dark:via-dark-900 dark:to-dark-950">
+      <div className="pt-20 px-3 pb-4 sm:pt-24 sm:px-4 container mx-auto max-w-7xl">
+        {!mounted ? (
+          <div className="flex items-center justify-center p-12">
+            <Loader2 className="w-8 h-8 animate-spin text-primary-600" />
+          </div>
+        ) : (
           <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-            className="inline-block mb-4"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
           >
-            <ShoppingBag className="w-12 h-12 text-primary-600 mx-auto" />
-          </motion.div>
+            {/* Header */}
+            <div className="mb-2">
+              <h1 className="text-2xl font-bold text-dark-900 dark:text-white leading-tight">
+                Our Products
+              </h1>
+              <p className="text-xs text-dark-600 dark:text-dark-400">
+                Premium hair care products for professional results
+              </p>
+            </div>
 
-          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-display font-bold mb-6 relative">
-            <motion.span
-              className="bg-gradient-to-r from-primary-600 via-primary-700 to-primary-800 bg-clip-text text-transparent"
-              animate={{
-                backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
-              }}
-              transition={{
-                duration: 5,
-                repeat: Infinity,
-                ease: "linear",
-              }}
-              style={{
-                backgroundSize: "200% 200%",
-              }}
-            >
-              Our Products
-            </motion.span>
-          </h1>
+            {/* Search */}
+            <Card className="p-2 mb-2">
+              <div className="relative">
+                <Search
+                  className="absolute left-2 top-1/2 transform -translate-y-1/2 text-dark-400"
+                  size={12}
+                />
+                <input
+                  type="text"
+                  placeholder="Search products..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-7 pr-2 py-1.5 text-xs bg-dark-50 dark:bg-dark-800 border border-dark-200 dark:border-dark-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                />
+              </div>
+            </Card>
 
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.5 }}
-            className="text-xl text-dark-600 dark:text-dark-400 max-w-2xl mx-auto leading-relaxed"
-          >
-            Premium hair care products for professional results at home
-          </motion.p>
-        </motion.div>
+            {/* Products by Category */}
+            {loading ? (
+              <div className="flex items-center justify-center p-12">
+                <Loader2 className="w-8 h-8 animate-spin text-primary-600" />
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {Array.isArray(categories) &&
+                  categories.map((category) => {
+                    const categoryProducts =
+                      productsByCategory[category.value] || [];
+                    const isExpanded = expandedCategories.includes(
+                      category.value
+                    );
 
-        {/* Category Filter */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="flex flex-wrap justify-center gap-3 mb-16"
-        >
-          {categories.map((category, index) => (
-            <motion.div
-              key={category.value}
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.1 * index }}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <Button
-                variant={
-                  selectedCategory === category.value ? "primary" : "outline"
-                }
-                size="sm"
-                onClick={() => setSelectedCategory(category.value)}
-                className={`
-                  group relative overflow-hidden transition-all duration-300
-                  ${
-                    selectedCategory === category.value
-                      ? "shadow-lg shadow-primary-500/50"
-                      : "hover:shadow-md"
-                  }
-                `}
-              >
-                <span className="relative z-10">{category.label}</span>
-              </Button>
-            </motion.div>
-          ))}
-        </motion.div>
+                    if (categoryProducts.length === 0) return null;
 
-        {/* Products Grid */}
-        <AnimatePresence mode="wait">
-          {isLoading ? (
-            <motion.div
-              key="loading"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
-            >
-              {[1, 2, 3, 4, 5, 6].map((i) => (
-                <Card
-                  key={i}
-                  className="h-80 animate-pulse bg-gradient-to-br from-dark-100 to-dark-200 dark:from-dark-800 dark:to-dark-900"
-                >
-                  <div />
-                </Card>
-              ))}
-            </motion.div>
-          ) : (
-            <motion.div
-              key={selectedCategory}
-              variants={containerVariants}
-              initial="hidden"
-              animate="visible"
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
-            >
-              {filteredProducts.map((product) => (
-                <motion.div
-                  key={product.id}
-                  variants={itemVariants}
-                  whileHover={{ y: -8 }}
-                  className="group"
-                >
-                  <Card className="h-full flex flex-col relative overflow-hidden border-2 border-transparent hover:border-primary-500/50 transition-all duration-500 hover:shadow-2xl hover:shadow-primary-500/20 p-0">
-                    {/* Animated gradient background on hover */}
-                    <motion.div
-                      className="absolute inset-0 bg-gradient-to-br from-primary-500/0 via-primary-600/0 to-primary-700/0 opacity-0 group-hover:opacity-10 transition-opacity duration-500"
-                      animate={{
-                        backgroundPosition: ["0% 0%", "100% 100%"],
-                      }}
-                      transition={{
-                        duration: 3,
-                        repeat: Infinity,
-                        repeatType: "reverse",
-                      }}
-                    />
-
-                    {/* Shimmer effect */}
-                    <motion.div
-                      className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100"
-                      initial={{ x: "-100%" }}
-                      whileHover={{
-                        x: "100%",
-                        transition: {
-                          duration: 1,
-                          ease: "easeInOut",
-                        },
-                      }}
-                    />
-
-                    {/* Product Image - Full Width */}
-                    <div className="relative w-full aspect-square overflow-hidden bg-gradient-to-br from-dark-100 to-dark-200 dark:from-dark-800 dark:to-dark-900">
-                      {product.images && product.images.length > 0 ? (
-                        <motion.img
-                          src={product.images[0]}
-                          alt={product.name}
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                          whileHover={{ scale: 1.1 }}
-                        />
-                      ) : (
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <Package className="w-16 h-16 text-dark-400 dark:text-dark-600" />
-                        </div>
-                      )}
-
-                      {/* Featured Badge */}
-                      {product.isFeatured && (
-                        <motion.div
-                          initial={{ scale: 0, rotate: -180 }}
-                          animate={{ scale: 1, rotate: 0 }}
-                          className="absolute top-2 right-2 bg-gradient-to-r from-amber-400 to-amber-600 text-white px-2.5 py-1 rounded-full text-xs font-bold shadow-lg"
+                    return (
+                      <Card
+                        key={category.value}
+                        className="overflow-hidden !p-0"
+                      >
+                        {/* Category Header */}
+                        <div
+                          className="flex items-center justify-between py-2 px-3 bg-primary-50 dark:bg-primary-900/20 border-b border-dark-200 dark:border-dark-700 cursor-pointer hover:bg-primary-100 dark:hover:bg-primary-900/30 transition-colors"
+                          onClick={() => toggleCategory(category.value)}
                         >
-                          ⭐ Featured
-                        </motion.div>
-                      )}
+                          <div className="flex items-center gap-2">
+                            <button className="p-0.5 hover:bg-primary-200 dark:hover:bg-primary-800 transition-colors">
+                              {isExpanded ? (
+                                <ChevronDown
+                                  size={20}
+                                  className="text-primary-700 dark:text-primary-300"
+                                />
+                              ) : (
+                                <ChevronRight
+                                  size={20}
+                                  className="text-primary-700 dark:text-primary-300"
+                                />
+                              )}
+                            </button>
+                            <h2 className="text-lg font-bold text-primary-900 dark:text-primary-100">
+                              {category.label}
+                            </h2>
+                            <span className="px-2 py-0.5 text-xs font-medium bg-primary-200 dark:bg-primary-800 text-primary-800 dark:text-primary-200 rounded-full">
+                              {categoryProducts.length}{" "}
+                              {categoryProducts.length === 1
+                                ? "product"
+                                : "products"}
+                            </span>
+                          </div>
+                        </div>
 
-                      {/* Discount Badge */}
-                      {product.compareAtPrice &&
-                        product.compareAtPrice > product.price && (
+                        {/* Category Products */}
+                        {isExpanded && (
                           <motion.div
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
-                            className="absolute top-2 left-2 bg-gradient-to-r from-red-500 to-red-600 text-white px-2.5 py-1 rounded-full text-xs font-bold shadow-lg"
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: "auto", opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.3 }}
+                            className="p-2"
                           >
-                            {Math.round(
-                              ((product.compareAtPrice - product.price) /
-                                product.compareAtPrice) *
-                                100
-                            )}
-                            % OFF
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                              {categoryProducts.map((product) => (
+                                <div
+                                  key={product.id}
+                                  className="overflow-hidden border border-dark-200 dark:border-dark-700 rounded-lg bg-white dark:bg-dark-800 hover:shadow-lg transition-shadow duration-300"
+                                >
+                                  <div className="aspect-[4/3] bg-dark-100 dark:bg-dark-800 relative group">
+                                    {product.images.length > 0 ? (
+                                      <>
+                                        <Image
+                                          src={
+                                            product.images[
+                                              currentImageIndex[product.id] || 0
+                                            ]
+                                          }
+                                          alt={product.name}
+                                          fill
+                                          className="object-cover"
+                                        />
+                                        {product.images.length > 1 && (
+                                          <>
+                                            <button
+                                              onClick={(e) => {
+                                                e.stopPropagation();
+                                                const current =
+                                                  currentImageIndex[
+                                                    product.id
+                                                  ] || 0;
+                                                const newIndex =
+                                                  current === 0
+                                                    ? product.images.length - 1
+                                                    : current - 1;
+                                                setCurrentImageIndex({
+                                                  ...currentImageIndex,
+                                                  [product.id]: newIndex,
+                                                });
+                                              }}
+                                              className="absolute left-1 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-all"
+                                            >
+                                              <ChevronRight
+                                                size={16}
+                                                className="rotate-180"
+                                              />
+                                            </button>
+                                            <button
+                                              onClick={(e) => {
+                                                e.stopPropagation();
+                                                const current =
+                                                  currentImageIndex[
+                                                    product.id
+                                                  ] || 0;
+                                                const newIndex =
+                                                  current ===
+                                                  product.images.length - 1
+                                                    ? 0
+                                                    : current + 1;
+                                                setCurrentImageIndex({
+                                                  ...currentImageIndex,
+                                                  [product.id]: newIndex,
+                                                });
+                                              }}
+                                              className="absolute right-1 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-all"
+                                            >
+                                              <ChevronRight size={16} />
+                                            </button>
+                                            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
+                                              {product.images.map((_, idx) => (
+                                                <div
+                                                  key={idx}
+                                                  className={`w-1.5 h-1.5 rounded-full transition-all ${
+                                                    idx ===
+                                                    (currentImageIndex[
+                                                      product.id
+                                                    ] || 0)
+                                                      ? "bg-white w-4"
+                                                      : "bg-white/50"
+                                                  }`}
+                                                />
+                                              ))}
+                                            </div>
+                                          </>
+                                        )}
+                                      </>
+                                    ) : (
+                                      <div className="flex items-center justify-center h-full text-dark-400">
+                                        No image
+                                      </div>
+                                    )}
+                                    {product.compareAtPrice &&
+                                      product.compareAtPrice >
+                                        product.price && (
+                                        <div className="absolute top-2 left-2 bg-red-600 text-white px-2 py-1 rounded-full text-xs font-bold">
+                                          -
+                                          {Math.round(
+                                            ((product.compareAtPrice -
+                                              product.price) /
+                                              product.compareAtPrice) *
+                                              100
+                                          )}
+                                          %
+                                        </div>
+                                      )}
+                                    {product.isFeatured && (
+                                      <div className="absolute top-2 right-2 bg-yellow-500 text-white px-2 py-1 rounded-full text-xs flex items-center gap-1">
+                                        <Star size={12} fill="white" />
+                                        Featured
+                                      </div>
+                                    )}
+                                  </div>
+
+                                  <div className="p-2">
+                                    <h3 className="text-sm font-bold text-dark-900 dark:text-white mb-1 line-clamp-1">
+                                      {product.name}
+                                    </h3>
+                                    <p className="text-xs text-dark-600 dark:text-dark-400 mb-1.5 line-clamp-2">
+                                      {product.description}
+                                    </p>
+
+                                    <div className="flex items-center justify-between mb-1.5">
+                                      <div className="flex items-center gap-2">
+                                        <span className="text-base font-bold text-dark-900 dark:text-white">
+                                          ${product.price}
+                                        </span>
+                                        {product.compareAtPrice && (
+                                          <span className="text-xs text-dark-500 line-through">
+                                            ${product.compareAtPrice}
+                                          </span>
+                                        )}
+                                      </div>
+                                      <span className="text-xs text-dark-600 dark:text-dark-400 font-bold">
+                                        Stock: {product.stock}
+                                      </span>
+                                      <div className="flex flex-wrap gap-1">
+                                        {(
+                                          product.categories ||
+                                          ((product as any).category
+                                            ? [(product as any).category]
+                                            : [])
+                                        ).map((cat: string) => (
+                                          <span
+                                            key={cat}
+                                            className="text-[10px] bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400 px-2 py-0.5 rounded-full font-medium"
+                                          >
+                                            {categories.find(
+                                              (c) => c.value === cat
+                                            )?.label || cat}
+                                          </span>
+                                        ))}
+                                      </div>
+                                    </div>
+
+                                    <div className="flex items-center gap-1.5 mb-1.5">
+                                      <div
+                                        className={`w-full px-2 py-0.5 rounded text-[10px] font-medium text-center ${
+                                          product.isActive
+                                            ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400"
+                                            : "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400"
+                                        }`}
+                                      >
+                                        {product.isActive
+                                          ? "Active"
+                                          : "Inactive"}
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
                           </motion.div>
                         )}
-                    </div>
+                      </Card>
+                    );
+                  })}
 
-                    <div className="relative z-10 flex-1 p-4">
-                      {/* Header with badge */}
-                      <div className="mb-3">
-                        <motion.h3
-                          className="text-lg font-bold mb-1.5 group-hover:text-primary-600 transition-colors duration-300 line-clamp-2"
-                          whileHover={{ scale: 1.02 }}
-                        >
-                          {product.name}
-                        </motion.h3>
-
-                        {product.brand && (
-                          <p className="text-xs text-dark-500 dark:text-dark-500 mb-1.5 font-medium">
-                            by {product.brand}
-                          </p>
-                        )}
-
-                        <motion.span
-                          className="inline-block px-2.5 py-0.5 bg-gradient-to-r from-primary-100 to-primary-200 dark:from-primary-900/30 dark:to-primary-800/30 text-primary-700 dark:text-primary-400 text-xs font-semibold rounded-full shadow-sm"
-                          whileHover={{ scale: 1.05 }}
-                        >
-                          {product.category.replace(/_/g, " ")}
-                        </motion.span>
-                      </div>
-
-                      <p className="text-dark-600 dark:text-dark-400 mb-3 leading-relaxed text-sm line-clamp-2">
-                        {product.description}
+                {filteredProducts.length === 0 &&
+                  Array.isArray(categories) &&
+                  categories.length > 0 && (
+                    <div className="text-center py-12">
+                      <p className="text-dark-600 dark:text-dark-400">
+                        No products found matching your search
                       </p>
-
-                      {/* Product details */}
-                      <div className="space-y-2 mb-3">
-                        <motion.div
-                          className="flex items-center justify-between p-2 rounded-lg bg-dark-50 dark:bg-dark-800/50 group-hover:bg-primary-50/50 dark:group-hover:bg-primary-900/10 transition-colors duration-300"
-                          whileHover={{ x: 5 }}
-                        >
-                          <span className="flex items-center text-dark-700 dark:text-dark-300 font-medium text-xs">
-                            <Package className="w-3.5 h-3.5 mr-1.5 text-primary-600" />
-                            Stock
-                          </span>
-                          <span
-                            className={`font-bold text-xs ${
-                              product.stock > 10
-                                ? "text-green-600"
-                                : product.stock > 0
-                                ? "text-amber-600"
-                                : "text-red-600"
-                            }`}
-                          >
-                            {product.stock > 0
-                              ? `${product.stock} units`
-                              : "Out of stock"}
-                          </span>
-                        </motion.div>
-
-                        <motion.div
-                          className="flex items-center justify-between p-2 rounded-lg bg-gradient-to-r from-primary-50 to-primary-100 dark:from-primary-900/20 dark:to-primary-800/20 group-hover:shadow-md transition-all duration-300"
-                          whileHover={{ x: 5 }}
-                        >
-                          <span className="flex items-center text-dark-700 dark:text-dark-300 font-medium text-xs">
-                            <DollarSign className="w-3.5 h-3.5 mr-1.5 text-primary-600" />
-                            Price
-                          </span>
-                          <div className="flex flex-col items-end">
-                            {product.compareAtPrice &&
-                              product.compareAtPrice > product.price && (
-                                <span className="text-xs text-dark-500 line-through">
-                                  ${product.compareAtPrice.toFixed(2)}
-                                </span>
-                              )}
-                            <motion.span
-                              className="font-bold text-lg bg-gradient-to-r from-primary-600 to-primary-800 bg-clip-text text-transparent"
-                              whileHover={{ scale: 1.1 }}
-                            >
-                              ${product.price.toFixed(2)}
-                            </motion.span>
-                          </div>
-                        </motion.div>
-                      </div>
-
-                      {/* Contact button */}
-                      <motion.div
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                      >
-                        <Button
-                          className="w-full relative overflow-hidden group/btn shadow-lg hover:shadow-xl transition-shadow duration-300"
-                          onClick={() => {
-                            window.location.href = "/contact";
-                          }}
-                        >
-                          <span className="relative z-10 flex items-center justify-center gap-2">
-                            <ShoppingBag className="w-4 h-4" />
-                            Contact Us
-                          </span>
-                          <motion.div
-                            className="absolute inset-0 bg-gradient-to-r from-primary-700 to-primary-800 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300"
-                            initial={false}
-                          />
-                        </Button>
-                      </motion.div>
                     </div>
-                  </Card>
-                </motion.div>
-              ))}
-            </motion.div>
-          )}
-        </AnimatePresence>
+                  )}
 
-        {/* No products found message */}
-        {!isLoading && filteredProducts.length === 0 && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="text-center py-20"
-          >
-            <ShoppingBag className="w-16 h-16 mx-auto mb-4 text-dark-400" />
-            <p className="text-xl text-dark-600 dark:text-dark-400">
-              No products found in this category
-            </p>
+                {(!Array.isArray(categories) || categories.length === 0) && (
+                  <div className="text-center py-12">
+                    <p className="text-dark-600 dark:text-dark-400">
+                      No products available
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
           </motion.div>
         )}
       </div>

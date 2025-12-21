@@ -4,19 +4,11 @@ import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { motion } from "framer-motion";
-import {
-  ArrowLeft,
-  Upload,
-  Image as ImageIcon,
-  Loader2,
-  X,
-} from "lucide-react";
+import { Loader2, X, Check } from "lucide-react";
 import AdminSidebar from "@/components/admin/AdminSidebar";
-import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import toast from "react-hot-toast";
-import Image from "next/image";
 
 export default function ServiceFormPage() {
   const { data: session } = useSession();
@@ -26,7 +18,6 @@ export default function ServiceFormPage() {
 
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [imagePreview, setImagePreview] = useState<string>("");
   const [categories, setCategories] = useState<
     { id: string; value: string; label: string }[]
   >([]);
@@ -39,7 +30,6 @@ export default function ServiceFormPage() {
     image: "",
     isActive: true,
   });
-  const [enhanceHD, setEnhanceHD] = useState(false);
 
   useEffect(() => {
     if (session && session.user.role !== "ADMIN") {
@@ -61,14 +51,6 @@ export default function ServiceFormPage() {
       setCategories(data);
     } catch (error) {
       console.error("Failed to load categories");
-      // Set default categories if API fails
-      const defaultCategories = [
-        { id: "1", value: "HAIRCUT", label: "Haircut" },
-        { id: "2", value: "COLORING", label: "Coloring" },
-        { id: "3", value: "STYLING", label: "Styling" },
-        { id: "4", value: "TREATMENT", label: "Treatment" },
-      ];
-      setCategories(defaultCategories);
     }
   };
 
@@ -93,7 +75,6 @@ export default function ServiceFormPage() {
           image: service.image,
           isActive: service.isActive,
         });
-        setImagePreview(service.image);
       } else {
         toast.error("Service not found");
         router.push("/halo-admin-portal-2024/services");
@@ -109,43 +90,24 @@ export default function ServiceFormPage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate file type
-    if (!file.type.startsWith("image/")) {
-      toast.error("Please select an image file");
-      return;
-    }
-
-    // Validate file size (max 10MB)
-    if (file.size > 10 * 1024 * 1024) {
-      toast.error("Image size must be less than 10MB");
-      return;
-    }
-
     try {
       setUploading(true);
-
       const formDataUpload = new FormData();
       formDataUpload.append("file", file);
-      formDataUpload.append("type", "service");
-      formDataUpload.append("enhanceHD", enhanceHD.toString());
+      formDataUpload.append("folder", "services");
 
       const res = await fetch("/api/upload", {
         method: "POST",
         body: formDataUpload,
       });
 
-      if (!res.ok) {
-        const error = await res.json();
-        throw new Error(error.error || "Upload failed");
-      }
+      if (!res.ok) throw new Error("Upload failed");
 
-      const data = await res.json();
-      setFormData((prev) => ({ ...prev, image: data.url }));
-      setImagePreview(data.url);
+      const { url } = await res.json();
+      setFormData((prev) => ({ ...prev, image: url }));
       toast.success("Image uploaded successfully!");
-    } catch (error: any) {
-      console.error("Upload error:", error);
-      toast.error(error.message || "Failed to upload image");
+    } catch (error) {
+      toast.error("Failed to upload image");
     } finally {
       setUploading(false);
     }
@@ -197,9 +159,13 @@ export default function ServiceFormPage() {
     }
   };
 
-  const removeImage = () => {
-    setFormData((prev) => ({ ...prev, image: "" }));
-    setImagePreview("");
+  const toggleCategory = (value: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      categories: prev.categories.includes(value)
+        ? prev.categories.filter((c) => c !== value)
+        : [...prev.categories, value],
+    }));
   };
 
   if (loading && isEdit) {
@@ -214,329 +180,159 @@ export default function ServiceFormPage() {
     <div className="min-h-screen bg-white dark:bg-gradient-to-br dark:from-dark-950 dark:via-dark-900 dark:to-dark-950">
       <AdminSidebar />
 
-      <div className="pt-16 pb-4">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          {/* Header - Back Button and Title in Same Row */}
-          <div className="flex items-center justify-between gap-2 px-3 py-2 bg-primary-600">
-            <motion.div whileHover={{ x: -3 }} transition={{ duration: 0.2 }}>
-              <Button
-                onClick={() => router.push("/halo-admin-portal-2024/services")}
-                className="flex items-center gap-1.5 text-xs px-2.5 py-1.5 bg-white/20 hover:bg-white/30 text-white border-none shadow-none"
-              >
-                <ArrowLeft size={16} />
-                Back to Services
-              </Button>
-            </motion.div>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 z-50 bg-white dark:bg-dark-900 overflow-y-auto"
+      >
+        <div className="sticky top-0 bg-white dark:bg-dark-900 z-10 px-4 py-3 border-b border-dark-200 dark:border-dark-700 flex justify-between items-center">
+          <h2 className="text-xl font-bold text-dark-900 dark:text-white">
+            {isEdit ? "Edit Service" : "Add New Service"}
+          </h2>
+          <button
+            onClick={() => router.push("/halo-admin-portal-2024/services")}
+            className="p-2 hover:bg-dark-100 dark:hover:bg-dark-700 rounded-lg transition-colors"
+          >
+            <X size={24} />
+          </button>
+        </div>
 
-            <div className="flex items-center gap-2">
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ type: "spring", stiffness: 200, delay: 0.2 }}
-                className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center"
-              >
-                <ImageIcon className="text-white" size={16} />
-              </motion.div>
-              <div>
-                <h1 className="text-sm font-bold text-white">
-                  {isEdit ? "Edit Service" : "Add New Service"}
-                </h1>
-                <p className="text-white/80 text-[10px] leading-none">
-                  {isEdit
-                    ? "Update service information"
-                    : "Create a new service for your salon"}
-                </p>
-              </div>
+        <form onSubmit={handleSubmit} className="p-4 pt-6 space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="col-span-2">
+              <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
+                Service Name *
+              </label>
+              <Input
+                type="text"
+                value={formData.name}
+                onChange={(e) =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
+                placeholder="e.g., Classic Haircut"
+                required
+              />
             </div>
-          </div>
 
-          {/* Form */}
-          <Card className="bg-white dark:bg-gradient-to-br dark:from-dark-900/95 dark:to-dark-800/95 backdrop-blur-xl border-0 rounded-none shadow-none">
-            <form onSubmit={handleSubmit} className="space-y-3 py-2">
-              {/* Service Name */}
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.1 }}
-                className="px-3"
-              >
-                <label className="block text-dark-900 dark:text-white font-semibold mb-2 text-xs uppercase tracking-wide">
-                  Service Name <span className="text-red-500">*</span>
-                </label>
-                <div className="relative group">
-                  <Input
-                    type="text"
-                    value={formData.name}
-                    onChange={(e) =>
-                      setFormData({ ...formData, name: e.target.value })
-                    }
-                    placeholder="e.g., Classic Haircut"
-                    className="bg-white dark:bg-dark-800/80 border-dark-300 dark:border-dark-600 text-dark-900 dark:text-white placeholder:text-dark-400 dark:placeholder:text-dark-500 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/30 transition-all duration-300 text-base py-2"
-                    required
-                  />
-                  <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-primary-500/0 to-primary-600/0 group-hover:from-primary-500/10 group-hover:to-primary-600/10 pointer-events-none transition-all duration-300" />
-                </div>
-              </motion.div>
+            <div className="col-span-2">
+              <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
+                Description *
+              </label>
+              <textarea
+                value={formData.description}
+                onChange={(e) =>
+                  setFormData({ ...formData, description: e.target.value })
+                }
+                placeholder="Describe the service..."
+                rows={3}
+                required
+                className="w-full px-4 py-2 bg-dark-50 dark:bg-dark-700 border border-dark-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              />
+            </div>
 
-              {/* Description */}
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.2 }}
-                className="px-3"
-              >
-                <label className="block text-dark-900 dark:text-white font-semibold mb-2 text-xs uppercase tracking-wide">
-                  Description <span className="text-red-500">*</span>
-                </label>
-                <div className="relative group">
-                  <textarea
-                    value={formData.description}
-                    onChange={(e) =>
-                      setFormData({ ...formData, description: e.target.value })
-                    }
-                    placeholder="Describe the service in detail..."
-                    className="w-full px-3 py-2 bg-white dark:bg-dark-800/80 border-2 border-dark-300 dark:border-dark-600 text-dark-900 dark:text-white placeholder:text-dark-400 dark:placeholder:text-dark-500 rounded-lg focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/30 min-h-[100px] sm:min-h-[120px] transition-all duration-300 resize-none text-sm"
-                    required
-                  />
-                  <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-primary-500/0 to-primary-600/0 group-hover:from-primary-500/10 group-hover:to-primary-600/10 pointer-events-none transition-all duration-300" />
-                </div>
-              </motion.div>
+            <div>
+              <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
+                Price ($) *
+              </label>
+              <Input
+                type="number"
+                step="0.01"
+                value={formData.price}
+                onChange={(e) =>
+                  setFormData({ ...formData, price: e.target.value })
+                }
+                placeholder="0.00"
+                required
+              />
+            </div>
 
-              {/* Price and Duration */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-                className="grid grid-cols-1 md:grid-cols-2 gap-6 px-3"
-              >
-                <div>
-                  <label className="block text-dark-900 dark:text-white font-semibold mb-2 text-xs uppercase tracking-wide">
-                    Price ($) <span className="text-red-500">*</span>
-                  </label>
-                  <div className="relative group">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-primary-500 font-bold text-xl">
-                      $
-                    </span>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      value={formData.price}
-                      onChange={(e) =>
-                        setFormData({ ...formData, price: e.target.value })
-                      }
-                      placeholder="0.00"
-                      className="bg-white dark:bg-dark-800/80 border-dark-300 dark:border-dark-600 text-dark-900 dark:text-white placeholder:text-dark-400 dark:placeholder:text-dark-500 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/30 pl-8 text-base py-2 transition-all duration-300"
-                      required
-                    />
-                    <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-primary-500/0 to-primary-600/0 group-hover:from-primary-500/10 group-hover:to-primary-600/10 pointer-events-none transition-all duration-300" />
-                  </div>
-                </div>
+            <div>
+              <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
+                Duration (minutes) *
+              </label>
+              <Input
+                type="number"
+                value={formData.duration}
+                onChange={(e) =>
+                  setFormData({ ...formData, duration: e.target.value })
+                }
+                placeholder="30"
+                required
+              />
+            </div>
 
-                <div>
-                  <label className="block text-dark-900 dark:text-white font-semibold mb-2 text-xs uppercase tracking-wide">
-                    Duration (minutes) <span className="text-red-500">*</span>
-                  </label>
-                  <div className="relative group">
-                    <Input
-                      type="number"
-                      value={formData.duration}
-                      onChange={(e) =>
-                        setFormData({ ...formData, duration: e.target.value })
-                      }
-                      placeholder="60"
-                      className="bg-white dark:bg-dark-800/80 border-dark-300 dark:border-dark-600 text-dark-900 dark:text-white placeholder:text-dark-400 dark:placeholder:text-dark-500 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/30 text-base py-2 transition-all duration-300"
-                      required
-                    />
-                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-dark-500 dark:text-dark-400 text-xs">
-                      min
-                    </span>
-                    <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-primary-500/0 to-primary-600/0 group-hover:from-primary-500/10 group-hover:to-primary-600/10 pointer-events-none transition-all duration-300" />
-                  </div>
-                </div>
-              </motion.div>
-
-              {/* Categories - Multi-Select */}
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.4 }}
-                className="px-3"
-              >
-                <label className="block text-dark-900 dark:text-white font-semibold mb-2 text-xs uppercase tracking-wide">
-                  Categories <span className="text-red-500">*</span>
-                  <span className="ml-2 text-[10px] font-normal text-dark-500 dark:text-dark-400">
-                    (Select one or more)
-                  </span>
-                </label>
-                <div className="space-y-2">
-                  {categories.map((cat) => {
-                    const isSelected = formData.categories.includes(cat.value);
-                    return (
-                      <motion.div
-                        key={cat.id}
-                        whileHover={{ scale: 1.01, x: 4 }}
-                        whileTap={{ scale: 0.99 }}
-                        onClick={() => {
-                          const newCategories = isSelected
-                            ? formData.categories.filter((c) => c !== cat.value)
-                            : [...formData.categories, cat.value];
-                          setFormData({
-                            ...formData,
-                            categories: newCategories,
-                          });
-                        }}
-                        className={`relative flex items-center gap-3 p-3 rounded-lg border-2 cursor-pointer transition-all duration-300 ${
+            <div className="col-span-2">
+              <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
+                Categories * (Select at least one)
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {categories.map((cat) => {
+                  const isSelected = formData.categories.includes(cat.value);
+                  return (
+                    <button
+                      key={cat.id}
+                      type="button"
+                      onClick={() => toggleCategory(cat.value)}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all border-2 ${
+                        isSelected
+                          ? "bg-green-500 text-white border-green-500 shadow-md"
+                          : "bg-white dark:bg-dark-800 text-dark-700 dark:text-dark-300 border-dark-300 dark:border-dark-600 hover:border-green-400"
+                      }`}
+                    >
+                      <div
+                        className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-all ${
                           isSelected
-                            ? "bg-primary-50 dark:bg-primary-900/30 border-primary-500 shadow-md shadow-primary-500/20"
-                            : "bg-white dark:bg-dark-800/80 border-dark-300 dark:border-dark-600 hover:border-primary-400 dark:hover:border-primary-600"
+                            ? "bg-white border-white"
+                            : "border-dark-400 dark:border-dark-500"
                         }`}
                       >
-                        <div
-                          className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all duration-300 ${
-                            isSelected
-                              ? "bg-primary-500 border-primary-500"
-                              : "border-dark-400 dark:border-dark-600"
-                          }`}
-                        >
-                          {isSelected && (
-                            <motion.svg
-                              initial={{ scale: 0 }}
-                              animate={{ scale: 1 }}
-                              className="w-4 h-4 text-white"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={3}
-                                d="M5 13l4 4L19 7"
-                              />
-                            </motion.svg>
-                          )}
-                        </div>
-                        <span
-                          className={`text-sm font-medium transition-colors duration-300 ${
-                            isSelected
-                              ? "text-primary-700 dark:text-primary-400"
-                              : "text-dark-900 dark:text-white"
-                          }`}
-                        >
-                          {cat.label}
-                        </span>
-                      </motion.div>
-                    );
-                  })}
-                </div>
-                {formData.categories.length === 0 && (
-                  <p className="mt-2 text-xs text-red-500">
-                    Please select at least one category
-                  </p>
-                )}
-              </motion.div>
+                        {isSelected && (
+                          <svg
+                            className="w-3 h-3 text-green-500"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={3}
+                              d="M5 13l4 4L19 7"
+                            />
+                          </svg>
+                        )}
+                      </div>
+                      <span>{cat.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+              {formData.categories.length === 0 && (
+                <p className="mt-2 text-xs text-red-500">
+                  Please select at least one category
+                </p>
+              )}
+            </div>
 
-              {/* Image Upload */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5 }}
-                className="px-3"
-              >
-                <label className="block text-dark-900 dark:text-white font-semibold mb-2 text-xs uppercase tracking-wide">
-                  Service Image
-                </label>
-
-                {/* HD Enhancement Toggle */}
-                <motion.div
-                  whileHover={{ scale: 1.01 }}
-                  className="flex items-start gap-3 mb-4 p-3 sm:p-4 bg-dark-50 dark:bg-gradient-to-r dark:from-dark-800/60 dark:to-dark-700/60 rounded-lg border border-dark-200 dark:border-dark-600/50 backdrop-blur-sm"
-                >
-                  <input
-                    type="checkbox"
-                    id="enhanceHD"
-                    checked={enhanceHD}
-                    onChange={(e) => setEnhanceHD(e.target.checked)}
-                    className="w-5 h-5 mt-0.5 text-primary-600 bg-white dark:bg-dark-700 border-dark-300 dark:border-dark-600 rounded cursor-pointer"
-                  />
-                  <label htmlFor="enhanceHD" className="flex-1 cursor-pointer">
-                    <span className="font-semibold text-dark-900 dark:text-white text-sm block mb-1">
-                      Enhance HD Quality
-                    </span>
-                    <p className="text-xs text-dark-600 dark:text-dark-400 leading-relaxed">
-                      Upload image in high definition (1920x1080) with enhanced
-                      sharpness and quality for professional presentation
-                    </p>
-                  </label>
-                </motion.div>
-
-                {/* Image Preview */}
-                {imagePreview && (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="relative mb-4 rounded-xl overflow-hidden border-2 border-primary-500/30 shadow-lg"
-                  >
-                    <Image
-                      src={imagePreview}
-                      alt="Service preview"
-                      width={800}
-                      height={400}
-                      className="w-full h-48 sm:h-64 object-cover"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                    <motion.button
-                      type="button"
-                      onClick={removeImage}
-                      whileHover={{ scale: 1.1, rotate: 90 }}
-                      whileTap={{ scale: 0.9 }}
-                      className="absolute top-4 right-4 p-3 bg-red-600 hover:bg-red-700 rounded-full text-white shadow-xl transition-colors"
-                    >
-                      <X size={20} />
-                    </motion.button>
-                  </motion.div>
-                )}
-
-                {/* Upload Button */}
-                <label className="cursor-pointer block">
-                  <motion.div
-                    whileHover={{
-                      scale: 1.02,
-                      borderColor: "rgb(34, 197, 94)",
-                    }}
-                    whileTap={{ scale: 0.98 }}
-                    className="flex items-center justify-center gap-4 px-8 py-6 bg-gradient-to-r from-dark-800/80 to-dark-700/80 border-2 border-dashed border-dark-600 hover:border-primary-500 rounded-2xl transition-all duration-300 backdrop-blur-sm"
-                  >
+            <div className="col-span-2">
+              <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
+                Service Image
+              </label>
+              <div className="flex items-center gap-3">
+                <label className="flex-1 cursor-pointer">
+                  <div className="w-full px-4 py-2 bg-dark-50 dark:bg-dark-700 border border-dark-300 dark:border-dark-600 rounded-lg hover:bg-dark-100 dark:hover:bg-dark-600 transition-colors text-center">
                     {uploading ? (
-                      <>
-                        <Loader2
-                          className="animate-spin text-primary-500"
-                          size={28}
-                        />
-                        <span className="text-white font-medium text-lg">
-                          Uploading...
-                        </span>
-                      </>
+                      <div className="flex items-center justify-center gap-2">
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span className="text-sm">Uploading...</span>
+                      </div>
                     ) : (
-                      <>
-                        <div className="w-14 h-14 rounded-full bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center shadow-lg">
-                          <Upload className="text-white" size={24} />
-                        </div>
-                        <div className="text-left">
-                          <span className="text-white font-semibold text-lg block">
-                            {imagePreview ? "Change Image" : "Upload Image"}
-                          </span>
-                          <span className="text-dark-600 dark:text-dark-400 text-xs">
-                            JPG, PNG or WebP • Max 10MB
-                          </span>
-                        </div>
-                      </>
+                      <span className="text-sm text-dark-600 dark:text-dark-400">
+                        Choose file...
+                      </span>
                     )}
-                  </motion.div>
+                  </div>
                   <input
                     type="file"
                     accept="image/*"
@@ -545,90 +341,75 @@ export default function ServiceFormPage() {
                     className="hidden"
                   />
                 </label>
-              </motion.div>
+              </div>
+              {formData.image && (
+                <div className="mt-3 relative group">
+                  <img
+                    src={formData.image}
+                    alt="Service preview"
+                    className="w-full h-48 object-cover rounded-lg border-2 border-dark-200 dark:border-dark-600"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, image: "" })}
+                    className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <X size={12} />
+                  </button>
+                </div>
+              )}
+            </div>
 
-              {/* Status Toggle */}
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.6 }}
-                whileHover={{ scale: 1.01 }}
-                className="flex items-center gap-4 p-5 bg-gradient-to-r from-dark-800/60 to-dark-700/60 rounded-xl border border-dark-600/50 mx-3"
-              >
+            <div className="col-span-2 flex gap-6">
+              <div className="flex items-center gap-3">
                 <input
                   type="checkbox"
                   id="isActive"
                   checked={formData.isActive}
                   onChange={(e) =>
-                    setFormData({ ...formData, isActive: e.target.checked })
+                    setFormData({
+                      ...formData,
+                      isActive: e.target.checked,
+                    })
                   }
-                  className="w-6 h-6 text-primary-600 bg-dark-700 border-dark-600 rounded-md focus:ring-primary-500 focus:ring-2 cursor-pointer"
+                  className="w-4 h-4 text-primary-600 rounded focus:ring-2 focus:ring-primary-500"
                 />
                 <label
                   htmlFor="isActive"
-                  className="text-white font-medium cursor-pointer flex-1 text-base"
+                  className="text-sm font-medium text-dark-700 dark:text-dark-300"
                 >
-                  Service is active and visible to customers
+                  Service is active
                 </label>
-                <span
-                  className={`px-3 py-1 rounded-full text-xs font-bold ${
-                    formData.isActive
-                      ? "bg-green-500/20 text-green-400"
-                      : "bg-red-500/20 text-red-400"
-                  }`}
-                >
-                  {formData.isActive ? "ACTIVE" : "INACTIVE"}
-                </span>
-              </motion.div>
+              </div>
+            </div>
+          </div>
 
-              {/* Action Buttons */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.7 }}
-                className="flex flex-col sm:flex-row gap-3 pt-4 sm:pt-6 border-t border-dark-200 dark:border-dark-700/50 px-3"
-              >
-                <motion.div
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="flex-1"
-                >
-                  <Button
-                    type="button"
-                    onClick={() =>
-                      router.push("/halo-admin-portal-2024/services")
-                    }
-                    className="w-full bg-dark-800 hover:bg-dark-700 text-white border border-dark-600 py-4 text-base font-semibold"
-                    disabled={loading}
-                  >
-                    Cancel
-                  </Button>
-                </motion.div>
-                <motion.div
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="flex-1"
-                >
-                  <Button
-                    type="submit"
-                    className="w-full bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white shadow-lg shadow-primary-900/50 border-none py-4 text-base font-semibold"
-                    disabled={loading || uploading}
-                  >
-                    {loading ? (
-                      <>
-                        <Loader2 className="animate-spin mr-2" size={22} />
-                        Saving...
-                      </>
-                    ) : (
-                      <>{isEdit ? "Update Service" : "Create Service"}</>
-                    )}
-                  </Button>
-                </motion.div>
-              </motion.div>
-            </form>
-          </Card>
-        </motion.div>
-      </div>
+          <div className="sticky bottom-0 bg-white dark:bg-dark-900 border-t border-dark-200 dark:border-dark-700 p-4 flex gap-6 justify-center">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => router.push("/halo-admin-portal-2024/services")}
+              className="px-6 py-2 text-sm"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              disabled={loading}
+              className="px-6 py-2 text-sm"
+            >
+              {loading ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <span className="flex items-center gap-2">
+                  <Check size={16} />
+                  {isEdit ? "Update Service" : "Create Service"}
+                </span>
+              )}
+            </Button>
+          </div>
+        </form>
+      </motion.div>
     </div>
   );
 }

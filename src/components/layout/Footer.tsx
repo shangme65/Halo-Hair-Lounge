@@ -23,7 +23,6 @@ const staticFooterLinks = {
   Company: [
     { name: "About Us", href: "/about" },
     { name: "Contact", href: "/contact" },
-    { name: "Careers", href: "/careers" },
     { name: "Privacy Policy", href: "/privacy" },
     { name: "Terms of Service", href: "/terms" },
   ],
@@ -55,6 +54,20 @@ export default function Footer() {
     };
 
     fetchCategories();
+
+    // Listen for category updates
+    const handleCategoryUpdate = () => {
+      fetchCategories();
+    };
+
+    window.addEventListener("serviceCategoriesUpdated", handleCategoryUpdate);
+
+    return () => {
+      window.removeEventListener(
+        "serviceCategoriesUpdated",
+        handleCategoryUpdate
+      );
+    };
   }, []);
 
   // Build footer links dynamically

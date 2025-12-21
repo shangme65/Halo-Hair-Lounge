@@ -33,7 +33,7 @@ interface Product {
   price: number;
   compareAtPrice: number | null;
   images: string[];
-  category: string;
+  categories: string[]; // Array of categories - product appears in all selected
   brand: string;
   stock: number;
   isActive: boolean;
@@ -53,12 +53,24 @@ export default function AdminProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<CategoryInfo[]>([]);
   const [expandedCategories, setExpandedCategories] = useState<string[]>([]);
+  const [visibleDeleteButtons, setVisibleDeleteButtons] = useState<string[]>(
+    []
+  );
+  const [currentImageIndex, setCurrentImageIndex] = useState<
+    Record<string, number>
+  >({});
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [showAddCategoryModal, setShowAddCategoryModal] = useState(false);
+  const [showDeleteCategoryModal, setShowDeleteCategoryModal] = useState(false);
+  const [deletingCategory, setDeletingCategory] = useState<{
+    value: string;
+    label: string;
+    count: number;
+  } | null>(null);
   const [newCategoryName, setNewCategoryName] = useState("");
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [formData, setFormData] = useState({
@@ -67,7 +79,7 @@ export default function AdminProductsPage() {
     price: "",
     compareAtPrice: "",
     images: "",
-    category: "SHAMPOO",
+    categories: [] as string[],
     brand: "",
     stock: "",
     isActive: true,
@@ -101,7 +113,7 @@ export default function AdminProductsPage() {
       const res = await fetch("/api/halo-admin-api/product-categories");
       const data = await res.json();
       setCategories(data);
-      setExpandedCategories(data.map((cat: CategoryInfo) => cat.value));
+      setExpandedCategories([]);
     } catch (error) {
       toast.error("Failed to load categories");
     }
@@ -117,24 +129,19 @@ export default function AdminProductsPage() {
 
   const handleDeleteCategory = async (
     category: string,
+    label: string,
     productCount: number
   ) => {
-    if (productCount === 0) {
-      toast.error("This category has no products to delete");
-      return;
-    }
+    setDeletingCategory({ value: category, label, count: productCount });
+    setShowDeleteCategoryModal(true);
+  };
 
-    if (
-      !confirm(
-        `Are you sure you want to delete all ${productCount} product(s) in the ${category} category? This action cannot be undone.`
-      )
-    ) {
-      return;
-    }
+  const confirmDeleteCategory = async () => {
+    if (!deletingCategory) return;
 
     try {
       const res = await fetch(
-        `/api/halo-admin-api/product-categories/${category}`,
+        `/api/halo-admin-api/product-categories/${deletingCategory.value}`,
         { method: "DELETE" }
       );
 
@@ -142,6 +149,8 @@ export default function AdminProductsPage() {
 
       const data = await res.json();
       toast.success(data.message);
+      setShowDeleteCategoryModal(false);
+      setDeletingCategory(null);
       fetchProducts();
       fetchCategories();
     } catch (error) {
@@ -149,12 +158,41 @@ export default function AdminProductsPage() {
     }
   };
 
-  const handleAddCategory = () => {
-    toast.error(
-      "Adding new categories requires updating the database schema. Please contact the developer to add new product categories."
-    );
-    setShowAddCategoryModal(false);
-    setNewCategoryName("");
+  const handleAddCategory = async () => {
+    if (!newCategoryName.trim()) {
+      toast.error("Please enter a category name");
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/halo-admin-api/product-categories", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: newCategoryName }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to create category");
+      }
+
+      toast.success("Category created successfully!");
+      setShowAddCategoryModal(false);
+      setNewCategoryName("");
+      fetchCategories();
+    } catch (error: any) {
+      toast.error(error.message || "Failed to create category");
+    }
+  };
+
+  const toggleProductCategory = (value: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      categories: prev.categories.includes(value)
+        ? prev.categories.filter((c) => c !== value)
+        : [...prev.categories, value],
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -179,7 +217,7 @@ export default function AdminProductsPage() {
           .split(",")
           .map((img) => img.trim())
           .filter(Boolean),
-        category: formData.category,
+        categories: formData.categories,
         brand: formData.brand,
         stock: parseInt(formData.stock),
         isActive: formData.isActive,
@@ -211,13 +249,19 @@ export default function AdminProductsPage() {
 
   const handleEdit = (product: Product) => {
     setEditingProduct(product);
+    // Handle backward compatibility: support both categories array and legacy category string
+    const productCategories =
+      product.categories ||
+      ((product as any).category ? [(product as any).category] : []);
     setFormData({
       name: product.name,
       description: product.description,
       price: product.price.toString(),
       compareAtPrice: product.compareAtPrice?.toString() || "",
       images: product.images.join(", "),
-      category: product.category,
+      categories: Array.isArray(productCategories)
+        ? productCategories
+        : [productCategories],
       brand: product.brand,
       stock: product.stock.toString(),
       isActive: product.isActive,
@@ -273,7 +317,7 @@ export default function AdminProductsPage() {
       price: "",
       compareAtPrice: "",
       images: "",
-      category: "SHAMPOO",
+      categories: [],
       brand: "",
       stock: "",
       isActive: true,
@@ -339,13 +383,20 @@ export default function AdminProductsPage() {
     product.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Group products by category
-  const productsByCategory = categories.reduce((acc, category) => {
-    acc[category.value] = filteredProducts.filter(
-      (product) => product.category === category.value
-    );
-    return acc;
-  }, {} as Record<string, Product[]>);
+  // Group products by category - products appear in all their categories
+  // Handle backward compatibility: check both categories array and legacy category string
+  const productsByCategory = Array.isArray(categories)
+    ? categories.reduce((acc, category) => {
+        acc[category.value] = filteredProducts.filter((product) => {
+          // Support both new array format and legacy single category
+          const productCategories =
+            product.categories ||
+            ((product as any).category ? [(product as any).category] : []);
+          return productCategories.includes(category.value);
+        });
+        return acc;
+      }, {} as Record<string, Product[]>)
+    : {};
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-dark-50 via-white to-primary-50 dark:from-dark-950 dark:via-dark-900 dark:to-dark-950">
@@ -357,50 +408,55 @@ export default function AdminProductsPage() {
           animate={{ opacity: 1, y: 0 }}
         >
           {/* Header */}
-          <div className="flex justify-between items-center mb-3">
+          <div className="flex justify-between items-center mb-2">
             <div>
-              <h1 className="text-xl font-bold text-dark-900 dark:text-white mb-0.5">
+              <h1 className="text-lg font-bold text-dark-900 dark:text-white leading-tight">
                 Products
               </h1>
-              <p className="text-xs text-dark-600 dark:text-dark-400">
+              <p className="text-[10px] text-dark-600 dark:text-dark-400">
                 Manage inventory by category
               </p>
             </div>
-            <div className="flex gap-2">
-              <Button
+            <div className="flex gap-1.5">
+              <button
                 onClick={() => setShowAddCategoryModal(true)}
-                variant="outline"
-                className="flex items-center gap-1 px-2 py-1.5 text-xs"
+                className="flex items-center gap-0.5 px-2 py-1 text-[10px] font-medium bg-gradient-to-b from-white to-primary-50 dark:from-dark-700 dark:to-dark-800 border border-primary-200 dark:border-primary-800 text-primary-700 dark:text-primary-400 rounded-lg hover:from-primary-50 hover:to-primary-100 dark:hover:from-dark-600 dark:hover:to-dark-700 transition-all active:scale-95 shadow-[0_2px_4px_rgba(0,0,0,0.1),inset_0_1px_0_rgba(255,255,255,0.5),inset_0_-1px_2px_rgba(0,0,0,0.1)]"
+                style={{
+                  textShadow: "0 1px 1px rgba(255,255,255,0.5)",
+                }}
               >
-                <FolderPlus size={16} />
+                <FolderPlus size={12} />
                 Add Category
-              </Button>
-              <Button
+              </button>
+              <button
                 onClick={() => {
                   resetForm();
                   setShowModal(true);
                 }}
-                className="flex items-center gap-1 px-2 py-1.5 text-xs"
+                className="flex items-center gap-0.5 px-2 py-1 text-[10px] font-medium bg-gradient-to-b from-primary-400 to-primary-600 dark:from-primary-600 dark:to-primary-800 text-white rounded-lg hover:from-primary-500 hover:to-primary-700 dark:hover:from-primary-500 dark:hover:to-primary-700 transition-all active:scale-95 shadow-[0_2px_4px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.2),inset_0_-1px_2px_rgba(0,0,0,0.2)]"
+                style={{
+                  textShadow: "0 1px 2px rgba(0,0,0,0.3)",
+                }}
               >
-                <Plus size={16} />
+                <Plus size={12} />
                 Add Product
-              </Button>
+              </button>
             </div>
           </div>
 
           {/* Search */}
-          <Card className="p-2.5 mb-3">
+          <Card className="p-2 mb-2">
             <div className="relative">
               <Search
                 className="absolute left-2 top-1/2 transform -translate-y-1/2 text-dark-400"
-                size={14}
+                size={12}
               />
               <input
                 type="text"
                 placeholder="Search products..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-8 pr-3 py-2 text-sm bg-dark-50 dark:bg-dark-800 border border-dark-200 dark:border-dark-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                className="w-full pl-7 pr-2 py-1.5 text-xs bg-dark-50 dark:bg-dark-800 border border-dark-200 dark:border-dark-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               />
             </div>
           </Card>
@@ -418,14 +474,14 @@ export default function AdminProductsPage() {
                 const isExpanded = expandedCategories.includes(category.value);
 
                 return (
-                  <Card key={category.value} className="overflow-hidden">
+                  <Card key={category.value} className="overflow-hidden !p-0">
                     {/* Category Header */}
                     <div
-                      className="flex items-center justify-between p-3 bg-primary-50 dark:bg-primary-900/20 border-b border-dark-200 dark:border-dark-700 cursor-pointer hover:bg-primary-100 dark:hover:bg-primary-900/30 transition-colors"
+                      className="flex items-center justify-between py-2 px-3 bg-primary-50 dark:bg-primary-900/20 border-b border-dark-200 dark:border-dark-700 cursor-pointer hover:bg-primary-100 dark:hover:bg-primary-900/30 transition-colors"
                       onClick={() => toggleCategory(category.value)}
                     >
                       <div className="flex items-center gap-2">
-                        <button className="p-1 hover:bg-primary-200 dark:hover:bg-primary-800 rounded transition-colors">
+                        <button className="p-0.5 hover:bg-primary-200 dark:hover:bg-primary-800 transition-colors">
                           {isExpanded ? (
                             <ChevronDown
                               size={20}
@@ -448,19 +504,42 @@ export default function AdminProductsPage() {
                             : "products"}
                         </span>
                       </div>
-                      {categoryProducts.length > 0 && (
+                      {!visibleDeleteButtons.includes(category.value) ? (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setVisibleDeleteButtons([
+                              ...visibleDeleteButtons,
+                              category.value,
+                            ]);
+                          }}
+                          className="flex items-center gap-1 px-3 py-1.5 text-xs bg-gradient-to-b from-dark-200 to-dark-300 hover:from-dark-300 hover:to-dark-400 dark:from-dark-700 dark:to-dark-800 dark:hover:from-dark-600 dark:hover:to-dark-700 text-dark-700 dark:text-dark-300 font-medium rounded-full shadow-md hover:shadow-lg transition-all active:scale-95"
+                          title="Click to reveal delete button"
+                          style={{
+                            boxShadow:
+                              "0 4px 6px rgba(0, 0, 0, 0.1), inset 0 -2px 4px rgba(0, 0, 0, 0.1)",
+                          }}
+                        >
+                          <Trash2 size={14} />?
+                        </button>
+                      ) : (
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
                             handleDeleteCategory(
                               category.value,
+                              category.label,
                               categoryProducts.length
                             );
                           }}
-                          className="flex items-center gap-1 px-2 py-1 text-xs bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors"
+                          className="flex items-center gap-1 px-3 py-1.5 text-xs bg-gradient-to-b from-red-400 to-red-500 hover:from-red-500 hover:to-red-600 text-white font-medium rounded-full shadow-md hover:shadow-lg transition-all active:scale-95"
+                          style={{
+                            boxShadow:
+                              "0 4px 6px rgba(239, 68, 68, 0.3), inset 0 -2px 4px rgba(0, 0, 0, 0.2)",
+                          }}
                         >
                           <Trash2 size={14} />
-                          Delete Category
+                          Delete
                         </button>
                       )}
                     </div>
@@ -473,7 +552,7 @@ export default function AdminProductsPage() {
                           animate={{ height: "auto", opacity: 1 }}
                           exit={{ height: 0, opacity: 0 }}
                           transition={{ duration: 0.3 }}
-                          className="p-3"
+                          className="p-2"
                         >
                           {categoryProducts.length === 0 ? (
                             <div className="text-center py-8 text-dark-600 dark:text-dark-400">
@@ -495,25 +574,108 @@ export default function AdminProductsPage() {
                               </button>
                             </div>
                           ) : (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
                               {categoryProducts.map((product) => (
-                                <Card
+                                <div
                                   key={product.id}
-                                  className="overflow-hidden hover:shadow-lg transition-shadow duration-300"
+                                  className="overflow-hidden border border-dark-200 dark:border-dark-700 rounded-lg bg-white dark:bg-dark-800 hover:shadow-lg transition-shadow duration-300"
                                 >
-                                  <div className="aspect-[4/3] bg-dark-100 dark:bg-dark-800 relative">
-                                    {product.images[0] ? (
-                                      <Image
-                                        src={product.images[0]}
-                                        alt={product.name}
-                                        fill
-                                        className="object-cover"
-                                      />
+                                  <div className="aspect-[4/3] bg-dark-100 dark:bg-dark-800 relative group">
+                                    {product.images.length > 0 ? (
+                                      <>
+                                        <Image
+                                          src={
+                                            product.images[
+                                              currentImageIndex[product.id] || 0
+                                            ]
+                                          }
+                                          alt={product.name}
+                                          fill
+                                          className="object-cover"
+                                        />
+                                        {product.images.length > 1 && (
+                                          <>
+                                            <button
+                                              onClick={(e) => {
+                                                e.stopPropagation();
+                                                const current =
+                                                  currentImageIndex[
+                                                    product.id
+                                                  ] || 0;
+                                                const newIndex =
+                                                  current === 0
+                                                    ? product.images.length - 1
+                                                    : current - 1;
+                                                setCurrentImageIndex({
+                                                  ...currentImageIndex,
+                                                  [product.id]: newIndex,
+                                                });
+                                              }}
+                                              className="absolute left-1 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-all"
+                                            >
+                                              <ChevronRight
+                                                size={16}
+                                                className="rotate-180"
+                                              />
+                                            </button>
+                                            <button
+                                              onClick={(e) => {
+                                                e.stopPropagation();
+                                                const current =
+                                                  currentImageIndex[
+                                                    product.id
+                                                  ] || 0;
+                                                const newIndex =
+                                                  current ===
+                                                  product.images.length - 1
+                                                    ? 0
+                                                    : current + 1;
+                                                setCurrentImageIndex({
+                                                  ...currentImageIndex,
+                                                  [product.id]: newIndex,
+                                                });
+                                              }}
+                                              className="absolute right-1 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-all"
+                                            >
+                                              <ChevronRight size={16} />
+                                            </button>
+                                            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
+                                              {product.images.map((_, idx) => (
+                                                <div
+                                                  key={idx}
+                                                  className={`w-1.5 h-1.5 rounded-full transition-all ${
+                                                    idx ===
+                                                    (currentImageIndex[
+                                                      product.id
+                                                    ] || 0)
+                                                      ? "bg-white w-4"
+                                                      : "bg-white/50"
+                                                  }`}
+                                                />
+                                              ))}
+                                            </div>
+                                          </>
+                                        )}
+                                      </>
                                     ) : (
                                       <div className="flex items-center justify-center h-full">
                                         <Upload className="w-12 h-12 text-dark-400" />
                                       </div>
                                     )}
+                                    {product.compareAtPrice &&
+                                      product.compareAtPrice >
+                                        product.price && (
+                                        <div className="absolute top-2 left-2 bg-red-600 text-white px-2 py-1 rounded-full text-xs font-bold">
+                                          -
+                                          {Math.round(
+                                            ((product.compareAtPrice -
+                                              product.price) /
+                                              product.compareAtPrice) *
+                                              100
+                                          )}
+                                          %
+                                        </div>
+                                      )}
                                     {product.isFeatured && (
                                       <div className="absolute top-2 right-2 bg-yellow-500 text-white px-2 py-1 rounded-full text-xs flex items-center gap-1">
                                         <Star size={12} fill="white" />
@@ -522,33 +684,48 @@ export default function AdminProductsPage() {
                                     )}
                                   </div>
 
-                                  <div className="p-3">
+                                  <div className="p-2">
                                     <h3 className="text-sm font-bold text-dark-900 dark:text-white mb-1 line-clamp-1">
                                       {product.name}
                                     </h3>
-                                    <p className="text-xs text-dark-600 dark:text-dark-400 mb-2 line-clamp-2">
+                                    <p className="text-xs text-dark-600 dark:text-dark-400 mb-1.5 line-clamp-2">
                                       {product.description}
                                     </p>
 
-                                    <div className="flex items-center gap-2 mb-2">
-                                      <span className="text-base font-bold text-dark-900 dark:text-white">
-                                        ${product.price}
-                                      </span>
-                                      {product.compareAtPrice && (
-                                        <span className="text-xs text-dark-500 line-through">
-                                          ${product.compareAtPrice}
+                                    <div className="flex items-center justify-between mb-1.5">
+                                      <div className="flex items-center gap-2">
+                                        <span className="text-base font-bold text-dark-900 dark:text-white">
+                                          ${product.price}
                                         </span>
-                                      )}
-                                    </div>
-
-                                    <div className="flex items-center justify-between text-xs text-dark-600 dark:text-dark-400 mb-2">
-                                      <span>Stock: {product.stock}</span>
-                                      <span className="text-[10px] bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400 px-2 py-0.5 rounded-full font-medium">
-                                        {product.category}
+                                        {product.compareAtPrice && (
+                                          <span className="text-xs text-dark-500 line-through">
+                                            ${product.compareAtPrice}
+                                          </span>
+                                        )}
+                                      </div>
+                                      <span className="text-xs text-dark-600 dark:text-dark-400 font-bold">
+                                        Stock: {product.stock}
                                       </span>
+                                      <div className="flex flex-wrap gap-1">
+                                        {(
+                                          product.categories ||
+                                          ((product as any).category
+                                            ? [(product as any).category]
+                                            : [])
+                                        ).map((cat: string) => (
+                                          <span
+                                            key={cat}
+                                            className="text-[10px] bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400 px-2 py-0.5 rounded-full font-medium"
+                                          >
+                                            {categories.find(
+                                              (c) => c.value === cat
+                                            )?.label || cat}
+                                          </span>
+                                        ))}
+                                      </div>
                                     </div>
 
-                                    <div className="flex items-center gap-1.5 mb-2">
+                                    <div className="flex items-center gap-1.5 mb-1.5">
                                       <button
                                         onClick={() =>
                                           toggleStatus(product, "isActive")
@@ -600,7 +777,7 @@ export default function AdminProductsPage() {
                                       </button>
                                     </div>
                                   </div>
-                                </Card>
+                                </div>
                               ))}
                             </div>
                           )}
@@ -649,7 +826,7 @@ export default function AdminProductsPage() {
               className="bg-white dark:bg-dark-900 rounded-lg p-6 max-w-md w-full"
             >
               <div className="flex items-center gap-2 mb-4">
-                <AlertTriangle className="w-6 h-6 text-yellow-600" />
+                <FolderPlus className="w-6 h-6 text-primary-600" />
                 <h3 className="text-lg font-bold text-dark-900 dark:text-white">
                   Add New Category
                 </h3>
@@ -665,15 +842,6 @@ export default function AdminProductsPage() {
                   onChange={(e) => setNewCategoryName(e.target.value)}
                   placeholder="e.g., Hair Masks"
                 />
-              </div>
-
-              <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3 mb-4">
-                <p className="text-xs text-yellow-800 dark:text-yellow-200">
-                  <strong>Note:</strong> Adding new product categories requires
-                  database schema updates. This feature is currently limited to
-                  predefined categories. Please contact your developer to add
-                  new categories to the system.
-                </p>
               </div>
 
               <div className="flex gap-2">
@@ -718,7 +886,7 @@ export default function AdminProductsPage() {
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-4 space-y-4">
+            <form onSubmit={handleSubmit} className="p-4 pt-6 space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="col-span-2">
                   <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
@@ -820,23 +988,57 @@ export default function AdminProductsPage() {
 
                 <div className="col-span-2">
                   <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
-                    Category *
+                    Category * (Select at least one)
                   </label>
-                  <select
-                    value={formData.category}
-                    onChange={(e) =>
-                      setFormData({ ...formData, category: e.target.value })
-                    }
-                    className="w-full px-4 py-2 bg-dark-50 dark:bg-dark-700 border border-dark-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                    required
-                  >
-                    <option value="SHAMPOO">Shampoo</option>
-                    <option value="CONDITIONER">Conditioner</option>
-                    <option value="STYLING">Styling</option>
-                    <option value="TREATMENT">Treatment</option>
-                    <option value="TOOLS">Tools</option>
-                    <option value="ACCESSORIES">Accessories</option>
-                  </select>
+                  <div className="flex flex-wrap gap-2">
+                    {categories.map((cat) => {
+                      const isSelected = formData.categories.includes(
+                        cat.value
+                      );
+                      return (
+                        <button
+                          key={cat.value}
+                          type="button"
+                          onClick={() => toggleProductCategory(cat.value)}
+                          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all border-2 ${
+                            isSelected
+                              ? "bg-green-500 text-white border-green-500 shadow-md"
+                              : "bg-white dark:bg-dark-800 text-dark-700 dark:text-dark-300 border-dark-300 dark:border-dark-600 hover:border-green-400"
+                          }`}
+                        >
+                          <div
+                            className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-all ${
+                              isSelected
+                                ? "bg-white border-white"
+                                : "border-dark-400 dark:border-dark-500"
+                            }`}
+                          >
+                            {isSelected && (
+                              <svg
+                                className="w-3 h-3 text-green-500"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={3}
+                                  d="M5 13l4 4L19 7"
+                                />
+                              </svg>
+                            )}
+                          </div>
+                          <span>{cat.label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {formData.categories.length === 0 && (
+                    <p className="mt-2 text-xs text-red-500">
+                      Please select at least one category
+                    </p>
+                  )}
                 </div>
 
                 <div className="col-span-2">
@@ -881,13 +1083,38 @@ export default function AdminProductsPage() {
                       />
                     </label>
                   </div>
-                  {imagePreview && (
-                    <div className="mt-2">
-                      <img
-                        src={imagePreview}
-                        alt="Preview"
-                        className="w-32 h-32 object-cover rounded-lg"
-                      />
+                  {formData.images && (
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {formData.images
+                        .split(",")
+                        .map((img) => img.trim())
+                        .filter(Boolean)
+                        .map((imgUrl, idx) => (
+                          <div key={idx} className="relative group">
+                            <img
+                              src={imgUrl}
+                              alt={`Product ${idx + 1}`}
+                              className="w-20 h-20 object-cover rounded-lg border-2 border-dark-200 dark:border-dark-600"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const images = formData.images
+                                  .split(",")
+                                  .map((s) => s.trim())
+                                  .filter(Boolean);
+                                images.splice(idx, 1);
+                                setFormData({
+                                  ...formData,
+                                  images: images.join(", "),
+                                });
+                              }}
+                              className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              <X size={12} />
+                            </button>
+                          </div>
+                        ))}
                     </div>
                   )}
                 </div>
@@ -951,27 +1178,105 @@ export default function AdminProductsPage() {
                 </div>
               </div>
 
-              <div className="sticky bottom-0 bg-white dark:bg-dark-900 border-t border-dark-200 dark:border-dark-700 p-4 flex gap-3">
+              <div className="sticky bottom-0 bg-white dark:bg-dark-900 border-t border-dark-200 dark:border-dark-700 p-4 flex gap-6 justify-center">
                 <Button
                   type="button"
                   variant="outline"
                   onClick={() => setShowModal(false)}
-                  className="flex-1"
+                  className="px-6 py-2 text-sm"
                 >
                   Cancel
                 </Button>
-                <Button type="submit" disabled={loading} className="flex-1">
+                <Button
+                  type="submit"
+                  disabled={loading}
+                  className="px-6 py-2 text-sm"
+                >
                   {loading ? (
-                    <Loader2 className="w-5 h-5 animate-spin" />
+                    <Loader2 className="w-4 h-4 animate-spin" />
                   ) : (
                     <span className="flex items-center gap-2">
-                      <Check size={20} />
+                      <Check size={16} />
                       {editingProduct ? "Update Product" : "Create Product"}
                     </span>
                   )}
                 </Button>
               </div>
             </form>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Delete Category Confirmation Modal */}
+      <AnimatePresence>
+        {showDeleteCategoryModal && deletingCategory && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+            onClick={() => {
+              setShowDeleteCategoryModal(false);
+              setDeletingCategory(null);
+            }}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white dark:bg-dark-800 rounded-2xl shadow-2xl max-w-md w-full p-6"
+            >
+              <div className="flex items-start gap-4 mb-6">
+                <div className="w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center flex-shrink-0">
+                  <AlertTriangle className="w-6 h-6 text-red-600 dark:text-red-400" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg font-bold text-dark-900 dark:text-white mb-2">
+                    Delete Category
+                  </h3>
+                  <p className="text-sm text-dark-600 dark:text-dark-400">
+                    Are you sure you want to delete the{" "}
+                    <span className="font-semibold text-dark-900 dark:text-white">
+                      {deletingCategory.label}
+                    </span>{" "}
+                    category
+                    {deletingCategory.count > 0 && (
+                      <>
+                        {" "}
+                        and all{" "}
+                        <span className="font-semibold text-red-600 dark:text-red-400">
+                          {deletingCategory.count}
+                        </span>{" "}
+                        product(s) in it
+                      </>
+                    )}
+                    ? This action cannot be undone.
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    setShowDeleteCategoryModal(false);
+                    setDeletingCategory(null);
+                  }}
+                  className="flex-1 px-4 py-2.5 text-sm font-medium text-dark-700 dark:text-dark-300 bg-dark-100 dark:bg-dark-700 hover:bg-dark-200 dark:hover:bg-dark-600 rounded-lg transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmDeleteCategory}
+                  className="flex-1 px-4 py-2.5 text-sm font-medium text-white bg-gradient-to-b from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 rounded-lg shadow-lg hover:shadow-xl transition-all active:scale-95"
+                  style={{
+                    boxShadow:
+                      "0 4px 6px rgba(239, 68, 68, 0.4), inset 0 -2px 4px rgba(0, 0, 0, 0.2)",
+                  }}
+                >
+                  Delete Category
+                </button>
+              </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
