@@ -106,6 +106,10 @@ export default function AdminSetupPage() {
         toast.error("Login failed. Please try signing in manually.");
       } else {
         toast.success("Logged in successfully! Redirecting to admin portal...");
+        
+        // Trigger event to refresh service categories in footer
+        window.dispatchEvent(new Event("serviceCategoriesUpdated"));
+        
         setTimeout(() => {
           router.push("/halo-admin-portal-2024");
         }, 1000);
