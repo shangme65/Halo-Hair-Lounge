@@ -19,31 +19,33 @@ export async function DELETE(req: NextRequest) {
     // Delete all data when admin account is deleted
     // Delete items in correct order to avoid foreign key constraint errors
     try {
-      // Delete appointments first (they reference users)
+      // Delete appointment products first (references appointments and products)
+      await prisma.appointmentProduct.deleteMany({});
+      
+      // Delete appointments (references users and services)
       await prisma.appointment.deleteMany({});
-
+      
       // Delete all page content sections (no foreign keys)
-      await prisma.heroSection.deleteMany({});
-      await prisma.cTASection.deleteMany({});
-      await prisma.feature.deleteMany({});
-      await prisma.fAQ.deleteMany({});
-      await prisma.testimonial.deleteMany({});
-      await prisma.whyChooseUs.deleteMany({});
-
+      await prisma.heroContent.deleteMany({});
+      await prisma.ctaContent.deleteMany({});
+      await prisma.featuresContent.deleteMany({});
+      await prisma.faqContent.deleteMany({});
+      await prisma.testimonialsContent.deleteMany({});
+      await prisma.whyChooseUsContent.deleteMany({});
+      
       // Delete all products (before categories)
       await prisma.product.deleteMany({});
-
-      // Delete all services (before categories)
+      
+      // Delete all services (before anything that references them)
       await prisma.service.deleteMany({});
-
+      
       // Now delete categories (no more dependencies)
       await prisma.productCategoryModel.deleteMany({});
       await prisma.serviceCategory.deleteMany({});
-
-      // Delete all other users except the current admin
-      await prisma.user.deleteMany({
-        where: {
-          id: { not: userId },
+      
+      // Delete accounts and sessions for all users
+      await prisma.account.deleteMany({});
+      await prisma.session.deleteMany({});
         },
       });
 
