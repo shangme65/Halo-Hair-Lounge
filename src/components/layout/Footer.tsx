@@ -145,7 +145,7 @@ export default function Footer() {
                 <h4 className="text-lg font-semibold mb-4">{category}</h4>
                 <ul className="space-y-2">
                   {links.map((link) => (
-                    <li key={link.key || link.name}>
+                    <li key={"key" in link ? link.key : link.name}>
                       <Link
                         href={link.href}
                         className="text-dark-300 hover:text-green-400 transition-colors inline-block"

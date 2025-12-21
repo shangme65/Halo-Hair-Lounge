@@ -21,10 +21,10 @@ export async function DELETE(req: NextRequest) {
     try {
       // Delete appointment products first (references appointments and products)
       await prisma.appointmentProduct.deleteMany({});
-      
+
       // Delete appointments (references users and services)
       await prisma.appointment.deleteMany({});
-      
+
       // Delete all page content sections (no foreign keys)
       await prisma.heroContent.deleteMany({});
       await prisma.ctaContent.deleteMany({});
@@ -32,22 +32,20 @@ export async function DELETE(req: NextRequest) {
       await prisma.faqContent.deleteMany({});
       await prisma.testimonialsContent.deleteMany({});
       await prisma.whyChooseUsContent.deleteMany({});
-      
+
       // Delete all products (before categories)
       await prisma.product.deleteMany({});
-      
+
       // Delete all services (before anything that references them)
       await prisma.service.deleteMany({});
-      
+
       // Now delete categories (no more dependencies)
       await prisma.productCategoryModel.deleteMany({});
       await prisma.serviceCategory.deleteMany({});
-      
+
       // Delete accounts and sessions for all users
       await prisma.account.deleteMany({});
       await prisma.session.deleteMany({});
-        },
-      });
 
       // Finally, delete the admin user
       await prisma.user.delete({
