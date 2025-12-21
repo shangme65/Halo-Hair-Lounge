@@ -17,6 +17,7 @@ interface ServiceCategory {
   id: string;
   value: string;
   label: string;
+  serviceCount?: number;
 }
 
 const staticFooterLinks = {
@@ -70,18 +71,20 @@ export default function Footer() {
     };
   }, []);
 
-  // Build footer links dynamically - remove duplicates based on value
-  const uniqueCategories = serviceCategories.reduce((acc, category) => {
-    if (!acc.find((c) => c.value === category.value)) {
-      acc.push(category);
-    }
-    return acc;
-  }, [] as ServiceCategory[]);
+  // Build footer links dynamically - remove duplicates and only show categories with active services
+  const uniqueCategories = serviceCategories
+    .filter((category) => (category.serviceCount ?? 0) > 0) // Only categories with active services
+    .reduce((acc, category) => {
+      if (!acc.find((c) => c.value === category.value)) {
+        acc.push(category);
+      }
+      return acc;
+    }, [] as ServiceCategory[]);
 
   const footerLinks = {
     Services: uniqueCategories.map((category) => ({
       name: category.label,
-      href: `/services#${category.value.toLowerCase()}`,
+      href: `/services?category=${encodeURIComponent(category.value)}`,
       key: category.id || category.value, // Use ID or value as unique key
     })),
     ...staticFooterLinks,
