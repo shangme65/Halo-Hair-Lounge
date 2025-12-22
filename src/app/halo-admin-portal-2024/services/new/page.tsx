@@ -59,13 +59,13 @@ export default function ServiceFormPage() {
     try {
       setLoading(true);
       const res = await fetch(`/api/halo-admin-api/services/${params.id}`);
-      
+
       if (!res.ok) {
         toast.error("Service not found");
         router.push("/halo-admin-portal-2024/services");
         return;
       }
-      
+
       const service = await res.json();
 
       if (service) {
@@ -195,10 +195,10 @@ export default function ServiceFormPage() {
       if (!res.ok) throw new Error("Failed to save service");
 
       toast.success(isEdit ? "Service updated!" : "Service created!");
-      
+
       // Notify other components (like Footer) to update categories
       window.dispatchEvent(new Event("serviceCategoriesUpdated"));
-      
+
       router.push("/halo-admin-portal-2024/services");
     } catch (error) {
       toast.error("Failed to save service");

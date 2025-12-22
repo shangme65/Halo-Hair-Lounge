@@ -48,10 +48,12 @@ export default function AdminServicesPage() {
   const [services, setServices] = useState<Service[]>([]);
   const [categories, setCategories] = useState<CategoryInfo[]>([]);
   const [expandedCategories, setExpandedCategories] = useState<string[]>([]);
-  const [visibleDeleteButtons, setVisibleDeleteButtons] = useState<string[]>(
-    []
+  const [visibleDeleteButton, setVisibleDeleteButton] = useState<string | null>(
+    null
   );
-  const [serviceImageIndex, setServiceImageIndex] = useState<Record<string, number>>({});
+  const [serviceImageIndex, setServiceImageIndex] = useState<
+    Record<string, number>
+  >({});
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [showAddCategoryModal, setShowAddCategoryModal] = useState(false);
@@ -74,6 +76,20 @@ export default function AdminServicesPage() {
     fetchServices();
     fetchCategories();
   }, [session, router]);
+
+  // Close delete button when clicking anywhere else
+  useEffect(() => {
+    const handleClickOutside = () => {
+      if (visibleDeleteButton) {
+        setVisibleDeleteButton(null);
+      }
+    };
+
+    document.addEventListener("click", handleClickOutside);
+    return () => {
+      document.removeEventListener("click", handleClickOutside);
+    };
+  }, [visibleDeleteButton]);
 
   const fetchServices = async () => {
     try {
@@ -244,10 +260,8 @@ export default function AdminServicesPage() {
     : {};
 
   const toggleDeleteButton = (categoryValue: string) => {
-    setVisibleDeleteButtons((prev) =>
-      prev.includes(categoryValue)
-        ? prev.filter((c) => c !== categoryValue)
-        : [...prev, categoryValue]
+    setVisibleDeleteButton((prev) =>
+      prev === categoryValue ? null : categoryValue
     );
   };
 
@@ -357,7 +371,7 @@ export default function AdminServicesPage() {
                         </span>
                       </div>
 
-                      {!visibleDeleteButtons.includes(category.value) ? (
+                      {visibleDeleteButton !== category.value ? (
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
@@ -424,132 +438,153 @@ export default function AdminServicesPage() {
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
                               {categoryServices.map((service) => {
                                 const images = service.image
-                                  ? service.image.split(",").map((img) => img.trim()).filter(Boolean)
+                                  ? service.image
+                                      .split(",")
+                                      .map((img) => img.trim())
+                                      .filter(Boolean)
                                   : [];
-                                const currentImageIndex = serviceImageIndex[service.id] || 0;
+                                const currentImageIndex =
+                                  serviceImageIndex[service.id] || 0;
                                 const hasMultipleImages = images.length > 1;
-                                
+
                                 return (
-                                <div
-                                  key={service.id}
-                                  className="overflow-hidden border border-dark-200 dark:border-dark-700 rounded-lg bg-white dark:bg-dark-800 hover:shadow-lg transition-shadow duration-300"
-                                >
-                                  <div className="aspect-[4/3] bg-dark-100 dark:bg-dark-800 relative group">
-                                    {images.length > 0 ? (
-                                      <>
-                                        <Image
-                                          src={images[currentImageIndex] || images[0]}
-                                          alt={service.name}
-                                          fill
-                                          className="object-cover"
-                                        />
-                                        {hasMultipleImages && (
-                                          <>
-                                            {/* Previous button */}
-                                            <button
-                                              onClick={(e) => {
-                                                e.stopPropagation();
-                                                setServiceImageIndex((prev) => ({
-                                                  ...prev,
-                                                  [service.id]: currentImageIndex === 0 ? images.length - 1 : currentImageIndex - 1,
-                                                }));
-                                              }}
-                                              className="absolute left-1 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                                            >
-                                              <ChevronLeft size={16} />
-                                            </button>
-                                            {/* Next button */}
-                                            <button
-                                              onClick={(e) => {
-                                                e.stopPropagation();
-                                                setServiceImageIndex((prev) => ({
-                                                  ...prev,
-                                                  [service.id]: currentImageIndex === images.length - 1 ? 0 : currentImageIndex + 1,
-                                                }));
-                                              }}
-                                              className="absolute right-1 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                                            >
-                                              <ChevronRight size={16} />
-                                            </button>
-                                            {/* Image counter */}
-                                            <div className="absolute bottom-1 left-1/2 -translate-x-1/2 bg-black/50 text-white text-xs px-2 py-0.5 rounded-full">
-                                              {currentImageIndex + 1} / {images.length}
-                                            </div>
-                                          </>
-                                        )}
-                                      </>
-                                    ) : (
-                                      <div className="flex items-center justify-center h-full text-dark-400">
-                                        No image
+                                  <div
+                                    key={service.id}
+                                    className="overflow-hidden border border-dark-200 dark:border-dark-700 rounded-lg bg-white dark:bg-dark-800 hover:shadow-lg transition-shadow duration-300"
+                                  >
+                                    <div className="aspect-[4/3] bg-dark-100 dark:bg-dark-800 relative group">
+                                      {images.length > 0 ? (
+                                        <>
+                                          <Image
+                                            src={
+                                              images[currentImageIndex] ||
+                                              images[0]
+                                            }
+                                            alt={service.name}
+                                            fill
+                                            className="object-cover"
+                                          />
+                                          {hasMultipleImages && (
+                                            <>
+                                              {/* Previous button */}
+                                              <button
+                                                onClick={(e) => {
+                                                  e.stopPropagation();
+                                                  setServiceImageIndex(
+                                                    (prev) => ({
+                                                      ...prev,
+                                                      [service.id]:
+                                                        currentImageIndex === 0
+                                                          ? images.length - 1
+                                                          : currentImageIndex -
+                                                            1,
+                                                    })
+                                                  );
+                                                }}
+                                                className="absolute left-1 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                                              >
+                                                <ChevronLeft size={16} />
+                                              </button>
+                                              {/* Next button */}
+                                              <button
+                                                onClick={(e) => {
+                                                  e.stopPropagation();
+                                                  setServiceImageIndex(
+                                                    (prev) => ({
+                                                      ...prev,
+                                                      [service.id]:
+                                                        currentImageIndex ===
+                                                        images.length - 1
+                                                          ? 0
+                                                          : currentImageIndex +
+                                                            1,
+                                                    })
+                                                  );
+                                                }}
+                                                className="absolute right-1 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                                              >
+                                                <ChevronRight size={16} />
+                                              </button>
+                                              {/* Image counter */}
+                                              <div className="absolute bottom-1 left-1/2 -translate-x-1/2 bg-black/50 text-white text-xs px-2 py-0.5 rounded-full">
+                                                {currentImageIndex + 1} /{" "}
+                                                {images.length}
+                                              </div>
+                                            </>
+                                          )}
+                                        </>
+                                      ) : (
+                                        <div className="flex items-center justify-center h-full text-dark-400">
+                                          No image
+                                        </div>
+                                      )}
+                                    </div>
+
+                                    <div className="p-2">
+                                      <h3 className="text-sm font-bold text-dark-900 dark:text-white mb-1 line-clamp-1">
+                                        {service.name}
+                                      </h3>
+                                      <p className="text-xs text-dark-600 dark:text-dark-400 mb-1.5 line-clamp-2">
+                                        {service.description}
+                                      </p>
+
+                                      <div className="flex items-center justify-between mb-1.5">
+                                        <div className="flex items-center gap-1">
+                                          <DollarSign
+                                            size={12}
+                                            className="text-dark-500"
+                                          />
+                                          <span className="text-base font-bold text-dark-900 dark:text-white">
+                                            ${service.price}
+                                          </span>
+                                        </div>
+                                        <div className="flex items-center gap-1">
+                                          <Clock
+                                            size={12}
+                                            className="text-dark-500"
+                                          />
+                                          <span className="text-xs text-dark-600 dark:text-dark-400 font-bold">
+                                            {service.duration} min
+                                          </span>
+                                        </div>
                                       </div>
-                                    )}
+
+                                      <div className="flex items-center gap-1.5 mb-1.5">
+                                        <button
+                                          onClick={() =>
+                                            toggleStatus(service, "isActive")
+                                          }
+                                          className={`flex-1 px-2 py-0.5 rounded text-[10px] font-medium ${
+                                            service.isActive
+                                              ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400"
+                                              : "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400"
+                                          }`}
+                                        >
+                                          {service.isActive
+                                            ? "Active"
+                                            : "Inactive"}
+                                        </button>
+                                      </div>
+
+                                      <div className="flex gap-1.5">
+                                        <button
+                                          onClick={() => handleEdit(service)}
+                                          className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 text-xs bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400 rounded-lg hover:bg-primary-200 dark:hover:bg-primary-900/50 transition-colors"
+                                        >
+                                          <Edit2 size={12} />
+                                          Edit
+                                        </button>
+                                        <button
+                                          onClick={() => handleDelete(service)}
+                                          className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 text-xs bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors"
+                                        >
+                                          <Trash2 size={12} />
+                                          Delete
+                                        </button>
+                                      </div>
+                                    </div>
                                   </div>
-
-                                  <div className="p-2">
-                                    <h3 className="text-sm font-bold text-dark-900 dark:text-white mb-1 line-clamp-1">
-                                      {service.name}
-                                    </h3>
-                                    <p className="text-xs text-dark-600 dark:text-dark-400 mb-1.5 line-clamp-2">
-                                      {service.description}
-                                    </p>
-
-                                    <div className="flex items-center justify-between mb-1.5">
-                                      <div className="flex items-center gap-1">
-                                        <DollarSign
-                                          size={12}
-                                          className="text-dark-500"
-                                        />
-                                        <span className="text-base font-bold text-dark-900 dark:text-white">
-                                          ${service.price}
-                                        </span>
-                                      </div>
-                                      <div className="flex items-center gap-1">
-                                        <Clock
-                                          size={12}
-                                          className="text-dark-500"
-                                        />
-                                        <span className="text-xs text-dark-600 dark:text-dark-400 font-bold">
-                                          {service.duration} min
-                                        </span>
-                                      </div>
-                                    </div>
-
-                                    <div className="flex items-center gap-1.5 mb-1.5">
-                                      <button
-                                        onClick={() =>
-                                          toggleStatus(service, "isActive")
-                                        }
-                                        className={`flex-1 px-2 py-0.5 rounded text-[10px] font-medium ${
-                                          service.isActive
-                                            ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400"
-                                            : "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400"
-                                        }`}
-                                      >
-                                        {service.isActive
-                                          ? "Active"
-                                          : "Inactive"}
-                                      </button>
-                                    </div>
-
-                                    <div className="flex gap-1.5">
-                                      <button
-                                        onClick={() => handleEdit(service)}
-                                        className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 text-xs bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400 rounded-lg hover:bg-primary-200 dark:hover:bg-primary-900/50 transition-colors"
-                                      >
-                                        <Edit2 size={12} />
-                                        Edit
-                                      </button>
-                                      <button
-                                        onClick={() => handleDelete(service)}
-                                        className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 text-xs bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors"
-                                      >
-                                        <Trash2 size={12} />
-                                        Delete
-                                      </button>
-                                    </div>
-                                  </div>
-                                </div>
-                              );
+                                );
                               })}
                             </div>
                           )}
