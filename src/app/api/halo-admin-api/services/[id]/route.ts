@@ -6,6 +6,41 @@ import { unlink } from "fs/promises";
 import path from "path";
 import { serviceUpdateSchema, validateRequest } from "@/lib/validations";
 
+// GET - Get single service by ID
+export async function GET(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+    const session = await getServerSession(authOptions);
+
+    if (!session || session.user?.role !== "ADMIN") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Validate ID format
+    if (!id || id.length > 50) {
+      return NextResponse.json({ error: "Invalid ID" }, { status: 400 });
+    }
+
+    const service = await prisma.service.findUnique({
+      where: { id },
+    });
+
+    if (!service) {
+      return NextResponse.json({ error: "Service not found" }, { status: 404 });
+    }
+
+    return NextResponse.json(service);
+  } catch (error) {
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+
 // PUT - Update service
 export async function PUT(
   req: NextRequest,
