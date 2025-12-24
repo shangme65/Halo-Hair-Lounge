@@ -32,13 +32,25 @@ export async function POST(req: NextRequest) {
 
     // Security: Only ADMIN can upload (removed STAFF since you don't need it)
     if (!session || session.user?.role !== "ADMIN") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      console.error("Upload auth failed:", {
+        hasSession: !!session,
+        role: session?.user?.role,
+      });
+      return NextResponse.json({ error: "Unauthorized - Admin access required" }, { status: 401 });
     }
 
     const formData = await req.formData();
     const file = formData.get("file") as File;
     const type = formData.get("type") as string;
     const enhanceHD = formData.get("enhanceHD") === "true";
+
+    console.log("Upload request:", {
+      fileName: file?.name,
+      fileType: file?.type,
+      fileSize: file?.size,
+      type,
+      enhanceHD,
+    });
 
     if (!file) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
@@ -169,11 +181,18 @@ export async function POST(req: NextRequest) {
       url: publicUrl,
       fileName,
     });
-  } catch (error) {
-    // Log error for debugging (won't expose details to client)
-    console.error("Upload error:", error);
+  } catch (error: any) {
+    // Log detailed error for debugging
+    console.error("Upload error details:", {
+      message: error?.message,
+      stack: error?.stack,
+      name: error?.name,
+    });
+    
+    // Return more specific error message
+    const errorMessage = error?.message || "Failed to upload file";
     return NextResponse.json(
-      { error: "Failed to upload file" },
+      { error: errorMessage },
       { status: 500 }
     );
   }
