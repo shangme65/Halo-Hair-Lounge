@@ -164,9 +164,10 @@ export default function ServiceFormPage() {
     if (failedFiles.length > 0 && uploadedUrls.length === 0) {
       toast.error(`All uploads failed (${failedFiles.length} files)`);
     } else if (failedFiles.length > 0) {
-      toast.warning(
-        `${uploadedUrls.length} succeeded, ${failedFiles.length} failed`
-      );
+      toast(`${uploadedUrls.length} succeeded, ${failedFiles.length} failed`, {
+        icon: "⚠️",
+        duration: 4000,
+      });
     }
 
     setUploading(false);
