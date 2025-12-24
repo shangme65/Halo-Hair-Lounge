@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { name, description, price, duration, categories, image, isActive } =
+    const { name, description, price, compareAtPrice, duration, categories, image, isActive } =
       validation.data;
 
     const service = await prisma.service.create({
@@ -55,6 +55,7 @@ export async function POST(req: NextRequest) {
         name,
         description,
         price,
+        compareAtPrice: compareAtPrice ?? null,
         duration,
         categories,
         image: image || "",

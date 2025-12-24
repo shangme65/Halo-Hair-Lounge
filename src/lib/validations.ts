@@ -24,6 +24,19 @@ export const serviceCreateSchema = z.object({
       (val) => !isNaN(val) && val >= 0,
       "Price must be a positive number"
     ),
+  compareAtPrice: z
+    .union([z.string(), z.number(), z.null()])
+    .transform((val): number | null => {
+      if (val === null || val === "" || val === undefined) return null;
+      const num = typeof val === "string" ? parseFloat(val) : val;
+      return isNaN(num) ? null : num;
+    })
+    .refine(
+      (val) => val === null || val >= 0,
+      "Compare at price must be a positive number"
+    )
+    .optional()
+    .nullable(),
   duration: z
     .union([z.string(), z.number()])
     .transform((val): number => {
@@ -63,6 +76,19 @@ export const serviceUpdateSchema = z.object({
     })
     .refine((val) => !isNaN(val) && val >= 0, "Price must be a positive number")
     .optional(),
+  compareAtPrice: z
+    .union([z.string(), z.number(), z.null()])
+    .transform((val): number | null => {
+      if (val === null || val === "" || val === undefined) return null;
+      const num = typeof val === "string" ? parseFloat(val) : val;
+      return isNaN(num) ? null : num;
+    })
+    .refine(
+      (val) => val === null || val >= 0,
+      "Compare at price must be a positive number"
+    )
+    .optional()
+    .nullable(),
   duration: z
     .union([z.string(), z.number()])
     .transform((val): number => {

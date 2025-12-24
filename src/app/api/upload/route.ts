@@ -165,9 +165,7 @@ export async function POST(req: NextRequest) {
           folder: `halo-hair-lounge/${typeValidation.data}s`,
           resource_type: "image",
           format: "jpg",
-          transformation: [
-            { quality: "auto", fetch_format: "auto" },
-          ],
+          transformation: [{ quality: "auto", fetch_format: "auto" }],
         },
         (error, result) => {
           if (error) reject(error);

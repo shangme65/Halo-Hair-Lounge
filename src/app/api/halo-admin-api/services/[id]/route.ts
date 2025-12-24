@@ -70,7 +70,7 @@ export async function PUT(
       );
     }
 
-    const { name, description, price, duration, categories, image, isActive } =
+    const { name, description, price, compareAtPrice, duration, categories, image, isActive } =
       validation.data;
 
     const service = await prisma.service.update({
@@ -79,6 +79,7 @@ export async function PUT(
         ...(name && { name }),
         ...(description && { description }),
         ...(price !== undefined && { price }),
+        ...(compareAtPrice !== undefined && { compareAtPrice }),
         ...(duration !== undefined && { duration }),
         ...(categories && categories.length > 0 && { categories }),
         ...(image !== undefined && { image }),
