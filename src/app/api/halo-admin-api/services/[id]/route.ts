@@ -105,7 +105,7 @@ export async function PUT(
   }
 }
 
-// DELETE - Delete service
+// DELETE - Delete service or remove from specific category
 export async function DELETE(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -123,7 +123,7 @@ export async function DELETE(
       return NextResponse.json({ error: "Invalid ID" }, { status: 400 });
     }
 
-    // Get the service to retrieve image path
+    // Get the service to retrieve image path and categories
     const service = await prisma.service.findUnique({
       where: { id },
     });
@@ -132,22 +132,51 @@ export async function DELETE(
       return NextResponse.json({ error: "Service not found" }, { status: 404 });
     }
 
-    // Delete the service from database
-    await prisma.service.delete({
-      where: { id },
-    });
+    // Check if this is a category-specific removal or full deletion
+    const url = new URL(req.url);
+    const categoryToRemove = url.searchParams.get("removeFromCategory");
 
-    // Delete the image file if it exists and is a local upload
-    if (service.image && service.image.startsWith("/uploads/")) {
-      try {
-        const imagePath = path.join(process.cwd(), "public", service.image);
-        await unlink(imagePath);
-      } catch (error) {
-        // Continue even if file deletion fails - not critical
+    if (categoryToRemove) {
+      // Remove service from specific category only
+      const updatedCategories = service.categories.filter(
+        (cat: string) => cat !== categoryToRemove
+      );
+
+      // If removing from the last category, we need to decide what to do
+      // For now, we'll keep the service but with no categories
+      const updatedService = await prisma.service.update({
+        where: { id },
+        data: { categories: updatedCategories },
+      });
+
+      return NextResponse.json({
+        success: true,
+        action: "removed_from_category",
+        message: `Service removed from "${categoryToRemove}" category`,
+        remainingCategories: updatedCategories.length,
+      });
+    } else {
+      // Full service deletion (original behavior)
+      await prisma.service.delete({
+        where: { id },
+      });
+
+      // Delete the image file if it exists and is a local upload
+      if (service.image && service.image.startsWith("/uploads/")) {
+        try {
+          const imagePath = path.join(process.cwd(), "public", service.image);
+          await unlink(imagePath);
+        } catch (error) {
+          // Continue even if file deletion fails - not critical
+        }
       }
-    }
 
-    return NextResponse.json({ success: true });
+      return NextResponse.json({
+        success: true,
+        action: "deleted_completely",
+        message: "Service deleted completely",
+      });
+    }
   } catch (error) {
     // Security: Log error without exposing details
     return NextResponse.json(

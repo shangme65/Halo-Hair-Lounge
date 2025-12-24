@@ -76,7 +76,7 @@ export async function PUT(
   }
 }
 
-// DELETE - Delete product
+// DELETE - Delete product or remove from specific category
 export async function DELETE(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -94,7 +94,7 @@ export async function DELETE(
       return NextResponse.json({ error: "Invalid ID" }, { status: 400 });
     }
 
-    // Get the product to retrieve image paths
+    // Get the product to retrieve image paths and categories
     const product = await prisma.product.findUnique({
       where: { id },
     });
@@ -103,26 +103,55 @@ export async function DELETE(
       return NextResponse.json({ error: "Product not found" }, { status: 404 });
     }
 
-    // Delete the product from database
-    await prisma.product.delete({
-      where: { id },
-    });
+    // Check if this is a category-specific removal or full deletion
+    const url = new URL(req.url);
+    const categoryToRemove = url.searchParams.get("removeFromCategory");
 
-    // Delete all product image files if they exist and are local uploads
-    if (product.images && product.images.length > 0) {
-      for (const imageUrl of product.images) {
-        if (imageUrl.startsWith("/uploads/")) {
-          try {
-            const imagePath = path.join(process.cwd(), "public", imageUrl);
-            await unlink(imagePath);
-          } catch (error) {
-            // Continue even if file deletion fails - not critical
+    if (categoryToRemove) {
+      // Remove product from specific category only
+      const updatedCategories = product.categories.filter(
+        (cat: string) => cat !== categoryToRemove
+      );
+
+      // If removing from the last category, we need to decide what to do
+      // For now, we'll keep the product but with no categories
+      const updatedProduct = await prisma.product.update({
+        where: { id },
+        data: { categories: updatedCategories },
+      });
+
+      return NextResponse.json({
+        success: true,
+        action: "removed_from_category",
+        message: `Product removed from "${categoryToRemove}" category`,
+        remainingCategories: updatedCategories.length,
+      });
+    } else {
+      // Full product deletion (original behavior)
+      await prisma.product.delete({
+        where: { id },
+      });
+
+      // Delete all product image files if they exist and are local uploads
+      if (product.images && product.images.length > 0) {
+        for (const imageUrl of product.images) {
+          if (imageUrl.startsWith("/uploads/")) {
+            try {
+              const imagePath = path.join(process.cwd(), "public", imageUrl);
+              await unlink(imagePath);
+            } catch (error) {
+              // Continue even if file deletion fails - not critical
+            }
           }
         }
       }
-    }
 
-    return NextResponse.json({ success: true });
+      return NextResponse.json({
+        success: true,
+        action: "deleted_completely",
+        message: "Product deleted completely",
+      });
+    }
   } catch (error) {
     // Security: Log error without exposing details
     return NextResponse.json(
