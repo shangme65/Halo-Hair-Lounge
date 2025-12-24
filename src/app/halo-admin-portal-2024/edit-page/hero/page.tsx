@@ -726,16 +726,17 @@ export default function HeroEditor() {
                             </Button>
                           )}
                         </div>
-                        {slide.secondaryCta && (
-                          <div>
-                            <Button
-                              variant="outline"
-                              className="text-sm py-2 px-4 sm:py-3 sm:px-6"
-                            >
-                              {slide.secondaryCta?.text || "Explore Services"}
-                            </Button>
-                          </div>
-                        )}
+                        {slide.secondaryCta?.text &&
+                          slide.secondaryCta?.href && (
+                            <div>
+                              <Button
+                                variant="outline"
+                                className="text-sm py-2 px-4 sm:py-3 sm:px-6"
+                              >
+                                {slide.secondaryCta.text}
+                              </Button>
+                            </div>
+                          )}
                       </div>
 
                       {/* Color Scheme Selector */}

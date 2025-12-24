@@ -1406,18 +1406,25 @@ export default function AdminProductsPage() {
               onClick={(e) => e.stopPropagation()}
               className="bg-white dark:bg-dark-800 rounded-2xl shadow-2xl max-w-md w-full p-6"
             >
-              <div className="flex items-start gap-4 mb-6">
+              {/* Icon and Title Row */}
+              <div className="flex items-center gap-3 mb-4">
                 <div className="w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center flex-shrink-0">
                   <AlertTriangle className="w-6 h-6 text-red-600 dark:text-red-400" />
                 </div>
-                <div className="flex-1">
-                  <h3 className="text-lg font-bold text-dark-900 dark:text-white mb-2">
-                    {deletionType === "remove"
+                <h3 className="text-lg font-bold text-dark-900 dark:text-white">
+                  {deletingProduct.categories.length > 1
+                    ? deletionType === "remove"
                       ? "Remove Product from Category"
-                      : "Delete Product"}
-                  </h3>
-                  <p className="text-sm text-dark-600 dark:text-dark-400">
-                    {deletionType === "remove" ? (
+                      : "Delete Product"
+                    : "Delete Product"}
+                </h3>
+              </div>
+
+              {/* Description */}
+              <div className="mb-6">
+                <p className="text-sm text-dark-600 dark:text-dark-400">
+                  {deletingProduct.categories.length > 1 ? (
+                    deletionType === "remove" ? (
                       <>
                         Remove{" "}
                         <span className="font-semibold text-dark-900 dark:text-white">
@@ -1439,24 +1446,34 @@ export default function AdminProductsPage() {
                         ? This will remove it from all categories. This action
                         cannot be undone.
                       </>
-                    )}
-                  </p>
-                  {deletionType === "remove" &&
-                    deletingProduct.categories.length > 1 && (
-                      <div className="mt-2 p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                        <p className="text-xs text-blue-700 dark:text-blue-300">
-                          <strong>Current categories:</strong>{" "}
-                          {deletingProduct.categories
-                            .map(
-                              (cat) =>
-                                categories.find((c) => c.value === cat)
-                                  ?.label || cat
-                            )
-                            .join(", ")}
-                        </p>
-                      </div>
-                    )}
-                  {deletionType === "remove" && (
+                    )
+                  ) : (
+                    <>
+                      Are you sure you want to delete{" "}
+                      <span className="font-semibold text-dark-900 dark:text-white">
+                        {deletingProduct.name}
+                      </span>
+                      ? This action cannot be undone.
+                    </>
+                  )}
+                </p>
+                {deletionType === "remove" &&
+                  deletingProduct.categories.length > 1 && (
+                    <div className="mt-2 p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                      <p className="text-xs text-blue-700 dark:text-blue-300">
+                        <strong>Current categories:</strong>{" "}
+                        {deletingProduct.categories
+                          .map(
+                            (cat) =>
+                              categories.find((c) => c.value === cat)?.label ||
+                              cat
+                          )
+                          .join(", ")}
+                      </p>
+                    </div>
+                  )}
+                {deletingProduct.categories.length > 1 && (
+                  <>
                     <div className="mt-3 flex gap-2">
                       <label className="flex items-center">
                         <input
@@ -1472,25 +1489,27 @@ export default function AdminProductsPage() {
                         </span>
                       </label>
                     </div>
-                  )}
-                  <div className="mt-2 flex gap-2">
-                    <label className="flex items-center">
-                      <input
-                        type="radio"
-                        name="deletionType"
-                        value="delete"
-                        checked={deletionType === "delete"}
-                        onChange={() => setDeletionType("delete")}
-                        className="mr-2"
-                      />
-                      <span className="text-xs text-red-600 dark:text-red-400">
-                        Delete product completely from all categories
-                      </span>
-                    </label>
-                  </div>
-                </div>
+                    <div className="mt-2 flex gap-2">
+                      <label className="flex items-center">
+                        <input
+                          type="radio"
+                          name="deletionType"
+                          value="delete"
+                          checked={deletionType === "delete"}
+                          onChange={() => setDeletionType("delete")}
+                          className="mr-2"
+                        />
+                        <span className="text-xs text-red-600 dark:text-red-400">
+                          Delete product completely from all categories
+                        </span>
+                      </label>
+                    </div>
+                  </>
+                )}
               </div>
-              <div className="flex gap-3">
+
+              {/* Buttons - Full Width */}
+              <div className="flex flex-col gap-3">
                 <button
                   onClick={() => {
                     setShowDeleteProductModal(false);
@@ -1498,25 +1517,28 @@ export default function AdminProductsPage() {
                     setCurrentCategory(null);
                     setDeletionType("remove");
                   }}
-                  className="flex-1 px-4 py-2.5 text-sm font-medium text-dark-700 dark:text-dark-300 bg-dark-100 dark:bg-dark-700 hover:bg-dark-200 dark:hover:bg-dark-600 rounded-lg transition-colors"
+                  className="w-full px-4 py-2.5 text-sm font-medium text-dark-700 dark:text-dark-300 bg-dark-100 dark:bg-dark-700 hover:bg-dark-200 dark:hover:bg-dark-600 rounded-lg transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={confirmDeleteProduct}
-                  className={`flex-1 px-4 py-2.5 text-sm font-medium text-white rounded-lg shadow-lg hover:shadow-xl transition-all active:scale-95 ${
+                  className={`w-full px-4 py-2.5 text-sm font-medium text-white rounded-lg shadow-lg hover:shadow-xl transition-all active:scale-95 ${
+                    deletingProduct.categories.length > 1 &&
                     deletionType === "remove"
                       ? "bg-gradient-to-b from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700"
                       : "bg-gradient-to-b from-red-500 to-red-600 hover:from-red-600 hover:to-red-700"
                   }`}
                   style={{
                     boxShadow:
+                      deletingProduct.categories.length > 1 &&
                       deletionType === "remove"
                         ? "0 4px 6px rgba(249, 115, 22, 0.4), inset 0 -2px 4px rgba(0, 0, 0, 0.2)"
                         : "0 4px 6px rgba(239, 68, 68, 0.4), inset 0 -2px 4px rgba(0, 0, 0, 0.2)",
                   }}
                 >
-                  {deletionType === "remove"
+                  {deletingProduct.categories.length > 1 &&
+                  deletionType === "remove"
                     ? "Remove from Category"
                     : "Delete Product"}
                 </button>
