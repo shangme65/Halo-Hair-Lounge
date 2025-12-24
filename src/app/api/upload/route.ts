@@ -1,10 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
 import sharp from "sharp";
-import { uploadTypeSchema, sanitizeFilename } from "@/lib/validations";
+import { uploadTypeSchema } from "@/lib/validations";
+import { v2 as cloudinary } from "cloudinary";
+
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 // Magic bytes for image validation
 const MAGIC_BYTES: Record<string, number[][]> = {
@@ -36,7 +42,10 @@ export async function POST(req: NextRequest) {
         hasSession: !!session,
         role: session?.user?.role,
       });
-      return NextResponse.json({ error: "Unauthorized - Admin access required" }, { status: 401 });
+      return NextResponse.json(
+        { error: "Unauthorized - Admin access required" },
+        { status: 401 }
+      );
     }
 
     const formData = await req.formData();
@@ -71,8 +80,8 @@ export async function POST(req: NextRequest) {
 
     // Validate file type (MIME type)
     const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
-    const fileExtension = file.name.split('.').pop()?.toLowerCase();
-    
+    const fileExtension = file.name.split(".").pop()?.toLowerCase();
+
     // Fallback for mobile devices that might not set proper MIME type
     let detectedType = file.type;
     if (!detectedType || detectedType === "application/octet-stream") {
@@ -84,9 +93,13 @@ export async function POST(req: NextRequest) {
         detectedType = "image/webp";
       }
     }
-    
+
     if (!allowedTypes.includes(detectedType)) {
-      console.error("Invalid MIME type:", { original: file.type, detected: detectedType, extension: fileExtension });
+      console.error("Invalid MIME type:", {
+        original: file.type,
+        detected: detectedType,
+        extension: fileExtension,
+      });
       return NextResponse.json(
         {
           error: `Invalid file type '${detectedType}'. Only JPEG, PNG, and WebP are allowed`,
@@ -120,45 +133,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Security: Generate safe filename (prevent path traversal)
-    const timestamp = Date.now();
-    const randomSuffix = Math.random().toString(36).substring(2, 8);
-    const sanitizedName = sanitizeFilename(file.name);
-    const baseName = path.basename(sanitizedName, path.extname(sanitizedName));
-    const fileName = `${timestamp}-${randomSuffix}-${baseName}.jpg`; // Always output as jpg
-
-    // Determine upload directory (using validated type)
-    const uploadDir = path.join(
-      process.cwd(),
-      "public",
-      "uploads",
-      typeValidation.data === "service"
-        ? "services"
-        : typeValidation.data === "product"
-        ? "products"
-        : "testimonials"
-    );
-
-    // Ensure directory exists
-    try {
-      await mkdir(uploadDir, { recursive: true });
-    } catch (error) {
-      // Directory might already exist, ignore error
-    }
-
-    const filePath = path.join(uploadDir, fileName);
-
-    // Security: Ensure file path is within expected directory (prevent path traversal)
-    const resolvedPath = path.resolve(filePath);
-    const resolvedUploadDir = path.resolve(uploadDir);
-    if (!resolvedPath.startsWith(resolvedUploadDir)) {
-      return NextResponse.json({ error: "Invalid file path" }, { status: 400 });
-    }
-
     // Process image with sharp (also strips EXIF data for privacy)
+    let processedBuffer: Buffer;
     if (enhanceHD) {
       // Enhance image quality and resize if necessary
-      const processedBuffer = await sharp(buffer)
+      processedBuffer = await sharp(buffer)
         .rotate() // Auto-rotate based on EXIF
         .resize(1920, 1080, {
           fit: "inside",
@@ -167,10 +146,9 @@ export async function POST(req: NextRequest) {
         .sharpen()
         .jpeg({ quality: 95, mozjpeg: true })
         .toBuffer();
-      await writeFile(filePath, processedBuffer);
     } else {
       // Standard quality
-      const processedBuffer = await sharp(buffer)
+      processedBuffer = await sharp(buffer)
         .rotate() // Auto-rotate based on EXIF
         .resize(1200, 800, {
           fit: "inside",
@@ -178,22 +156,31 @@ export async function POST(req: NextRequest) {
         })
         .jpeg({ quality: 85 })
         .toBuffer();
-      await writeFile(filePath, processedBuffer);
     }
 
-    // Return the public URL
-    const publicUrl = `/uploads/${
-      typeValidation.data === "service"
-        ? "services"
-        : typeValidation.data === "product"
-        ? "products"
-        : "testimonials"
-    }/${fileName}`;
+    // Upload to Cloudinary
+    const uploadResult = await new Promise<any>((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        {
+          folder: `halo-hair-lounge/${typeValidation.data}s`,
+          resource_type: "image",
+          format: "jpg",
+          transformation: [
+            { quality: "auto", fetch_format: "auto" },
+          ],
+        },
+        (error, result) => {
+          if (error) reject(error);
+          else resolve(result);
+        }
+      );
+      uploadStream.end(processedBuffer);
+    });
 
     return NextResponse.json({
       success: true,
-      url: publicUrl,
-      fileName,
+      url: uploadResult.secure_url,
+      fileName: uploadResult.public_id,
     });
   } catch (error: any) {
     // Log detailed error for debugging
@@ -202,12 +189,9 @@ export async function POST(req: NextRequest) {
       stack: error?.stack,
       name: error?.name,
     });
-    
+
     // Return more specific error message
     const errorMessage = error?.message || "Failed to upload file";
-    return NextResponse.json(
-      { error: errorMessage },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }
