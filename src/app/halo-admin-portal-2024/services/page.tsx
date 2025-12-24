@@ -20,6 +20,7 @@ import {
   DollarSign,
 } from "lucide-react";
 import AdminSidebar from "@/components/admin/AdminSidebar";
+import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import toast from "react-hot-toast";
 import Image from "next/image";
@@ -285,7 +286,7 @@ export default function AdminServicesPage() {
           {/* Header */}
           <div className="mb-2">
             <div className="flex justify-between items-center">
-              <h1 className="text-3xl font-bold text-dark-900 dark:text-white leading-tight">
+              <h1 className="text-3xl font-bold text-primary-600 dark:text-primary-400 leading-tight">
                 Services
               </h1>
               <div className="flex gap-1.5">
@@ -313,7 +314,7 @@ export default function AdminServicesPage() {
                 </button>
               </div>
             </div>
-            <p className="text-[13px] text-dark-600 dark:text-dark-400 mt-1">
+            <p className="text-[13px] text-primary-700 dark:text-primary-300 mt-1">
               Manage services by category
             </p>
           </div>
@@ -368,10 +369,16 @@ export default function AdminServicesPage() {
                             />
                           )}
                         </button>
-                        <h2 className="text-lg font-bold text-primary-900 dark:text-primary-100 -ml-1">
+                        <h2 className="text-lg font-bold text-primary-900 dark:text-primary-100 ml-1">
                           {category.label}
                         </h2>
-                        <span className="px-2 py-0.5 text-xs font-medium bg-primary-200 dark:bg-primary-800 text-primary-800 dark:text-primary-200 rounded-full">
+                        <span
+                          className="ml-2 px-2 py-0.5 text-xs font-medium bg-gradient-to-b from-primary-100 to-primary-200 dark:from-primary-800 dark:to-primary-900 text-primary-900 dark:text-primary-100 rounded-full shadow-md"
+                          style={{
+                            boxShadow:
+                              "0 2px 4px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.3), inset 0 -1px 2px rgba(0, 0, 0, 0.15)",
+                          }}
+                        >
                           {categoryServices.length}{" "}
                           {categoryServices.length === 1
                             ? "service"
@@ -557,9 +564,18 @@ export default function AdminServicesPage() {
                                             size={12}
                                             className="text-dark-500"
                                           />
-                                          <span className="text-base font-bold text-dark-900 dark:text-white">
-                                            ${service.price}
-                                          </span>
+                                          <div className="flex items-center gap-1.5">
+                                            <span className="text-base font-bold text-dark-900 dark:text-white">
+                                              ${service.price}
+                                            </span>
+                                            {service.compareAtPrice &&
+                                              service.compareAtPrice >
+                                                service.price && (
+                                                <span className="text-xs text-dark-500 dark:text-dark-400 line-through">
+                                                  ${service.compareAtPrice}
+                                                </span>
+                                              )}
+                                          </div>
                                         </div>
                                         <div className="flex items-center gap-1">
                                           <Clock
@@ -648,22 +664,23 @@ export default function AdminServicesPage() {
               onChange={(e) => setNewCategoryName(e.target.value)}
               className="w-full px-3 py-2 text-sm bg-dark-50 dark:bg-dark-700 border border-dark-200 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent mb-4"
             />
-            <div className="flex gap-3">
-              <button
+            <div className="flex gap-2 justify-between">
+              <Button
+                variant="outline"
                 onClick={() => {
                   setShowAddCategoryModal(false);
                   setNewCategoryName("");
                 }}
-                className="flex-1 px-4 py-2 text-sm bg-dark-100 dark:bg-dark-700 text-dark-700 dark:text-dark-300 rounded-lg hover:bg-dark-200 dark:hover:bg-dark-600 transition-colors"
+                className="py-1 px-8 text-xs h-8 flex items-center justify-center"
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={handleAddCategory}
-                className="flex-1 px-4 py-2 text-sm bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+                className="py-1 px-8 text-xs h-8 flex items-center justify-center"
               >
                 Add
-              </button>
+              </Button>
             </div>
           </motion.div>
         </div>
@@ -671,49 +688,63 @@ export default function AdminServicesPage() {
 
       {/* Delete Category Confirmation Modal */}
       {showDeleteCategoryModal && deletingCategory && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+          onClick={() => {
+            setShowDeleteCategoryModal(false);
+            setDeletingCategory(null);
+          }}
+        >
           <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="bg-white dark:bg-dark-800 rounded-lg p-6 max-w-md w-full"
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.9, opacity: 0 }}
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white dark:bg-dark-800 rounded-2xl shadow-2xl max-w-md w-full p-6"
           >
-            <div className="flex items-center gap-3 mb-4">
-              <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-full">
+            <div className="flex items-start gap-4 mb-6">
+              <div className="w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center flex-shrink-0">
                 <AlertTriangle className="w-6 h-6 text-red-600 dark:text-red-400" />
               </div>
-              <h2 className="text-lg font-bold text-dark-900 dark:text-white">
-                Delete Category
-              </h2>
+              <div className="flex-1">
+                <h3 className="text-lg font-bold text-dark-900 dark:text-white mb-2">
+                  Delete Category
+                </h3>
+                <p className="text-sm text-dark-600 dark:text-dark-400">
+                  Are you sure you want to delete the{" "}
+                  <span className="font-semibold text-dark-900 dark:text-white">
+                    {deletingCategory.label}
+                  </span>{" "}
+                  category? This action cannot be undone.
+                </p>
+              </div>
             </div>
-            <p className="text-sm text-dark-600 dark:text-dark-400 mb-4">
-              Are you sure you want to delete "{deletingCategory.label}"
-              category?
-              {deletingCategory.count > 0 && (
-                <span className="block mt-2 text-red-600 dark:text-red-400 font-medium">
-                  Warning: This category has {deletingCategory.count} service
-                  {deletingCategory.count !== 1 ? "s" : ""}.
-                </span>
-              )}
-            </p>
             <div className="flex gap-3">
               <button
                 onClick={() => {
                   setShowDeleteCategoryModal(false);
                   setDeletingCategory(null);
                 }}
-                className="flex-1 px-4 py-2 text-sm bg-dark-100 dark:bg-dark-700 text-dark-700 dark:text-dark-300 rounded-lg hover:bg-dark-200 dark:hover:bg-dark-600 transition-colors"
+                className="flex-1 px-4 py-2.5 text-sm font-medium text-dark-700 dark:text-dark-300 bg-dark-100 dark:bg-dark-700 hover:bg-dark-200 dark:hover:bg-dark-600 rounded-lg transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={confirmDeleteCategory}
-                className="flex-1 px-4 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                className="flex-1 px-4 py-2.5 text-sm font-medium text-white bg-gradient-to-b from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 rounded-lg shadow-lg hover:shadow-xl transition-all active:scale-95"
+                style={{
+                  boxShadow:
+                    "0 4px 6px rgba(239, 68, 68, 0.4), inset 0 -2px 4px rgba(0, 0, 0, 0.2)",
+                }}
               >
-                Delete
+                Delete Category
               </button>
             </div>
           </motion.div>
-        </div>
+        </motion.div>
       )}
 
       {/* Delete Service Confirmation Modal */}

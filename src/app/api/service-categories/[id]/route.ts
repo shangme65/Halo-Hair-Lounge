@@ -45,7 +45,7 @@ export async function DELETE(
           const updatedCategories = service.categories.filter(
             (cat: string) => cat !== category.value
           );
-          
+
           await prisma.service.update({
             where: { id: service.id },
             data: { categories: updatedCategories },
@@ -59,9 +59,9 @@ export async function DELETE(
       where: { id },
     });
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       message: "Category deleted successfully",
-      servicesUpdated: servicesWithCategory.length 
+      servicesUpdated: servicesWithCategory.length,
     });
   } catch (error: any) {
     console.error("Error deleting category:", error);

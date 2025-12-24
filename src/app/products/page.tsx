@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, Loader2, ChevronDown, ChevronRight, Star } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 import Card from "@/components/ui/Card";
 import Image from "next/image";
 import ImageLightbox from "@/components/ui/ImageLightbox";
@@ -28,7 +29,28 @@ interface CategoryInfo {
   productCount: number;
 }
 
+// Wrapper component to handle Suspense for useSearchParams
 export default function ProductsPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-gradient-to-br from-dark-50 via-white to-primary-50 dark:from-dark-950 dark:via-dark-900 dark:to-dark-950">
+          <div className="pt-20 px-3 pb-4 sm:pt-24 sm:px-4 container mx-auto max-w-7xl flex items-center justify-center">
+            <Loader2 className="w-8 h-8 animate-spin text-primary-600" />
+          </div>
+        </div>
+      }
+    >
+      <ProductsPageContent />
+    </Suspense>
+  );
+}
+
+function ProductsPageContent() {
+  const searchParams = useSearchParams();
+  const categoryFromUrl = searchParams.get("category");
+  const categoryRefs = useRef<Record<string, HTMLDivElement | null>>({});
+
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<CategoryInfo[]>([]);
   const [expandedCategories, setExpandedCategories] = useState<string[]>([]);
@@ -38,6 +60,7 @@ export default function ProductsPage() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [mounted, setMounted] = useState(false);
+  const [initialScrollDone, setInitialScrollDone] = useState(false);
 
   // Lightbox state
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -50,6 +73,36 @@ export default function ProductsPage() {
     fetchProducts();
     fetchCategories();
   }, []);
+
+  // Auto-expand category from URL and scroll to it
+  useEffect(() => {
+    if (
+      categoryFromUrl &&
+      categories.length > 0 &&
+      !loading &&
+      !initialScrollDone
+    ) {
+      // Expand the category
+      if (!expandedCategories.includes(categoryFromUrl)) {
+        setExpandedCategories((prev) => [...prev, categoryFromUrl]);
+      }
+
+      // Scroll to the category after a short delay to let DOM update
+      setTimeout(() => {
+        const element = categoryRefs.current[categoryFromUrl];
+        if (element) {
+          element.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+        setInitialScrollDone(true);
+      }, 100);
+    }
+  }, [
+    categoryFromUrl,
+    categories,
+    loading,
+    initialScrollDone,
+    expandedCategories,
+  ]);
 
   const fetchProducts = async () => {
     try {
@@ -74,11 +127,27 @@ export default function ProductsPage() {
   };
 
   const toggleCategory = (categoryValue: string) => {
-    setExpandedCategories((prev) =>
-      prev.includes(categoryValue)
-        ? prev.filter((c) => c !== categoryValue)
-        : [...prev, categoryValue]
-    );
+    setExpandedCategories((prev) => {
+      const isCurrentlyExpanded = prev.includes(categoryValue);
+
+      if (isCurrentlyExpanded) {
+        // Collapse if already expanded
+        return prev.filter((c) => c !== categoryValue);
+      } else {
+        // Expand and collapse others (accordion behavior)
+        const newExpanded = [categoryValue];
+
+        // Auto-scroll to the category being expanded
+        setTimeout(() => {
+          const element = categoryRefs.current[categoryValue];
+          if (element) {
+            element.scrollIntoView({ behavior: "smooth", block: "center" });
+          }
+        }, 100);
+
+        return newExpanded;
+      }
+    });
   };
 
   const filteredProducts = products.filter((product) =>
@@ -122,18 +191,17 @@ export default function ProductsPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
           >
-            {/* Header */}
-            <div className="mb-2">
-              <h1 className="text-2xl font-bold text-dark-900 dark:text-white leading-tight">
-                Our Products
-              </h1>
-              <p className="text-xs text-dark-600 dark:text-dark-400">
-                Premium hair care products for professional results
-              </p>
-            </div>
+            {/* Header and Search Combined */}
+            <Card className="p-4 mb-4">
+              <div className="mb-3">
+                <h1 className="text-4xl font-bold text-primary-600 dark:text-primary-400 leading-tight">
+                  Our Products
+                </h1>
+                <p className="text-xs text-primary-700 dark:text-primary-300">
+                  Premium hair care products for professional results
+                </p>
+              </div>
 
-            {/* Search */}
-            <Card className="p-2 mb-2">
               <div className="relative">
                 <Search
                   className="absolute left-2 top-1/2 transform -translate-y-1/2 text-dark-400"
@@ -167,239 +235,243 @@ export default function ProductsPage() {
                     if (categoryProducts.length === 0) return null;
 
                     return (
-                      <Card
+                      <div
                         key={category.value}
-                        className="overflow-hidden !p-0"
+                        ref={(el) => {
+                          categoryRefs.current[category.value] = el;
+                        }}
                       >
-                        {/* Category Header */}
-                        <div
-                          className="flex items-center justify-between py-2 px-3 bg-primary-50 dark:bg-primary-900/20 border-b border-dark-200 dark:border-dark-700 cursor-pointer hover:bg-primary-100 dark:hover:bg-primary-900/30 transition-colors"
-                          onClick={() => toggleCategory(category.value)}
-                        >
-                          <div className="flex items-center gap-2">
-                            <button className="p-0.5 hover:bg-primary-200 dark:hover:bg-primary-800 transition-colors">
-                              {isExpanded ? (
-                                <ChevronDown
-                                  size={20}
-                                  className="text-primary-700 dark:text-primary-300"
-                                />
-                              ) : (
-                                <ChevronRight
-                                  size={20}
-                                  className="text-primary-700 dark:text-primary-300"
-                                />
-                              )}
-                            </button>
-                            <h2 className="text-lg font-bold text-primary-900 dark:text-primary-100">
-                              {category.label}
-                            </h2>
-                            <span className="px-2 py-0.5 text-xs font-medium bg-primary-200 dark:bg-primary-800 text-primary-800 dark:text-primary-200 rounded-full">
-                              {categoryProducts.length}{" "}
-                              {categoryProducts.length === 1
-                                ? "product"
-                                : "products"}
-                            </span>
-                          </div>
-                        </div>
-
-                        {/* Category Products */}
-                        {isExpanded && (
-                          <motion.div
-                            initial={{ height: 0, opacity: 0 }}
-                            animate={{ height: "auto", opacity: 1 }}
-                            exit={{ height: 0, opacity: 0 }}
-                            transition={{ duration: 0.3 }}
-                            className="p-2"
+                        <Card className="overflow-hidden !p-0">
+                          {/* Category Header */}
+                          <div
+                            className="flex items-center justify-between py-2 px-3 bg-primary-50 dark:bg-primary-900/20 border-b border-dark-200 dark:border-dark-700 cursor-pointer hover:bg-primary-100 dark:hover:bg-primary-900/30 transition-colors"
+                            onClick={() => toggleCategory(category.value)}
                           >
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-                              {categoryProducts.map((product) => (
-                                <div
-                                  key={product.id}
-                                  className="overflow-hidden border border-dark-200 dark:border-dark-700 rounded-lg bg-white dark:bg-dark-800 hover:shadow-lg transition-shadow duration-300"
-                                >
+                            <div className="flex items-center gap-2">
+                              <button className="p-0.5 hover:bg-primary-200 dark:hover:bg-primary-800 transition-colors">
+                                {isExpanded ? (
+                                  <ChevronDown
+                                    size={20}
+                                    className="text-primary-700 dark:text-primary-300"
+                                  />
+                                ) : (
+                                  <ChevronRight
+                                    size={20}
+                                    className="text-primary-700 dark:text-primary-300"
+                                  />
+                                )}
+                              </button>
+                              <h2 className="text-lg font-bold text-primary-900 dark:text-primary-100">
+                                {category.label}
+                              </h2>
+                              <span className="px-2 py-0.5 text-xs font-medium bg-primary-200 dark:bg-primary-800 text-primary-800 dark:text-primary-200 rounded-full">
+                                {categoryProducts.length}{" "}
+                                {categoryProducts.length === 1
+                                  ? "product"
+                                  : "products"}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Category Products */}
+                          {isExpanded && (
+                            <motion.div
+                              initial={{ height: 0, opacity: 0 }}
+                              animate={{ height: "auto", opacity: 1 }}
+                              exit={{ height: 0, opacity: 0 }}
+                              transition={{ duration: 0.3 }}
+                              className="p-2"
+                            >
+                              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                                {categoryProducts.map((product) => (
                                   <div
-                                    className="aspect-[4/3] bg-dark-100 dark:bg-dark-800 relative group cursor-pointer"
-                                    onClick={() =>
-                                      openLightbox(
-                                        product,
-                                        currentImageIndex[product.id] || 0
-                                      )
-                                    }
+                                    key={product.id}
+                                    className="overflow-hidden border border-dark-200 dark:border-dark-700 rounded-lg bg-white dark:bg-dark-800 hover:shadow-lg transition-shadow duration-300"
                                   >
-                                    {product.images.length > 0 ? (
-                                      <>
-                                        <Image
-                                          src={
-                                            product.images[
-                                              currentImageIndex[product.id] || 0
-                                            ]
-                                          }
-                                          alt={product.name}
-                                          fill
-                                          className="object-cover group-hover:scale-105 transition-transform duration-300"
-                                        />
-                                        {product.images.length > 1 && (
-                                          <>
-                                            <button
-                                              onClick={(e) => {
-                                                e.stopPropagation();
-                                                const current =
-                                                  currentImageIndex[
-                                                    product.id
-                                                  ] || 0;
-                                                const newIndex =
-                                                  current === 0
-                                                    ? product.images.length - 1
-                                                    : current - 1;
-                                                setCurrentImageIndex({
-                                                  ...currentImageIndex,
-                                                  [product.id]: newIndex,
-                                                });
-                                              }}
-                                              className="absolute left-1 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-all z-10"
-                                            >
-                                              <ChevronRight
-                                                size={16}
-                                                className="rotate-180"
-                                              />
-                                            </button>
-                                            <button
-                                              onClick={(e) => {
-                                                e.stopPropagation();
-                                                const current =
-                                                  currentImageIndex[
-                                                    product.id
-                                                  ] || 0;
-                                                const newIndex =
-                                                  current ===
-                                                  product.images.length - 1
-                                                    ? 0
-                                                    : current + 1;
-                                                setCurrentImageIndex({
-                                                  ...currentImageIndex,
-                                                  [product.id]: newIndex,
-                                                });
-                                              }}
-                                              className="absolute right-1 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-all z-10"
-                                            >
-                                              <ChevronRight size={16} />
-                                            </button>
-                                            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1 z-10">
-                                              {product.images.map((_, idx) => (
-                                                <div
-                                                  key={idx}
-                                                  className={`w-1.5 h-1.5 rounded-full transition-all ${
-                                                    idx ===
-                                                    (currentImageIndex[
+                                    <div
+                                      className="aspect-[4/3] bg-dark-100 dark:bg-dark-800 relative group cursor-pointer"
+                                      onClick={() =>
+                                        openLightbox(
+                                          product,
+                                          currentImageIndex[product.id] || 0
+                                        )
+                                      }
+                                    >
+                                      {product.images.length > 0 ? (
+                                        <>
+                                          <Image
+                                            src={
+                                              product.images[
+                                                currentImageIndex[product.id] ||
+                                                  0
+                                              ]
+                                            }
+                                            alt={product.name}
+                                            fill
+                                            className="object-cover group-hover:scale-105 transition-transform duration-300"
+                                          />
+                                          {product.images.length > 1 && (
+                                            <>
+                                              <button
+                                                onClick={(e) => {
+                                                  e.stopPropagation();
+                                                  const current =
+                                                    currentImageIndex[
                                                       product.id
-                                                    ] || 0)
-                                                      ? "bg-white w-4"
-                                                      : "bg-white/50"
-                                                  }`}
+                                                    ] || 0;
+                                                  const newIndex =
+                                                    current === 0
+                                                      ? product.images.length -
+                                                        1
+                                                      : current - 1;
+                                                  setCurrentImageIndex({
+                                                    ...currentImageIndex,
+                                                    [product.id]: newIndex,
+                                                  });
+                                                }}
+                                                className="absolute left-1 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-all z-10"
+                                              >
+                                                <ChevronRight
+                                                  size={16}
+                                                  className="rotate-180"
                                                 />
-                                              ))}
-                                            </div>
-                                            {/* Photo count badge */}
-                                            <div className="absolute top-2 left-2 bg-black/60 text-white px-2 py-1 rounded-full text-xs font-medium z-10">
-                                              {product.images.length} photos
-                                            </div>
-                                          </>
-                                        )}
-                                        {/* Hover overlay */}
-                                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center pointer-events-none">
-                                          <span className="text-white opacity-0 group-hover:opacity-100 transition-opacity text-sm font-medium drop-shadow-lg">
-                                            Click to view fullscreen
-                                          </span>
-                                        </div>
-                                      </>
-                                    ) : (
-                                      <div className="flex items-center justify-center h-full text-dark-400">
-                                        No image
-                                      </div>
-                                    )}
-                                    {product.compareAtPrice &&
-                                      product.compareAtPrice >
-                                        product.price && (
-                                        <div className="absolute top-2 left-2 bg-red-600 text-white px-2 py-1 rounded-full text-xs font-bold">
-                                          -
-                                          {Math.round(
-                                            ((product.compareAtPrice -
-                                              product.price) /
-                                              product.compareAtPrice) *
-                                              100
+                                              </button>
+                                              <button
+                                                onClick={(e) => {
+                                                  e.stopPropagation();
+                                                  const current =
+                                                    currentImageIndex[
+                                                      product.id
+                                                    ] || 0;
+                                                  const newIndex =
+                                                    current ===
+                                                    product.images.length - 1
+                                                      ? 0
+                                                      : current + 1;
+                                                  setCurrentImageIndex({
+                                                    ...currentImageIndex,
+                                                    [product.id]: newIndex,
+                                                  });
+                                                }}
+                                                className="absolute right-1 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-all z-10"
+                                              >
+                                                <ChevronRight size={16} />
+                                              </button>
+                                              <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1 z-10">
+                                                {product.images.map(
+                                                  (_, idx) => (
+                                                    <div
+                                                      key={idx}
+                                                      className={`w-1.5 h-1.5 rounded-full transition-all ${
+                                                        idx ===
+                                                        (currentImageIndex[
+                                                          product.id
+                                                        ] || 0)
+                                                          ? "bg-white w-4"
+                                                          : "bg-white/50"
+                                                      }`}
+                                                    />
+                                                  )
+                                                )}
+                                              </div>
+                                              {/* Photo count badge */}
+                                              <div className="absolute top-2 left-2 bg-black/60 text-white px-2 py-1 rounded-full text-xs font-medium z-10">
+                                                {product.images.length} photos
+                                              </div>
+                                            </>
                                           )}
-                                          %
+                                          {/* Hover overlay */}
+                                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center pointer-events-none">
+                                            <span className="text-white opacity-0 group-hover:opacity-100 transition-opacity text-sm font-medium drop-shadow-lg">
+                                              Click to view fullscreen
+                                            </span>
+                                          </div>
+                                        </>
+                                      ) : (
+                                        <div className="flex items-center justify-center h-full text-dark-400">
+                                          No image
                                         </div>
                                       )}
-                                    {product.isFeatured && (
-                                      <div className="absolute top-2 right-2 bg-yellow-500 text-white px-2 py-1 rounded-full text-xs flex items-center gap-1">
-                                        <Star size={12} fill="white" />
-                                        Featured
-                                      </div>
-                                    )}
-                                  </div>
-
-                                  <div className="p-2">
-                                    <h3 className="text-sm font-bold text-dark-900 dark:text-white mb-1 line-clamp-1">
-                                      {product.name}
-                                    </h3>
-                                    <p className="text-xs text-dark-600 dark:text-dark-400 mb-1.5 line-clamp-2">
-                                      {product.description}
-                                    </p>
-
-                                    <div className="flex items-center justify-between mb-1.5">
-                                      <div className="flex items-center gap-2">
-                                        <span className="text-base font-bold text-dark-900 dark:text-white">
-                                          ${product.price}
-                                        </span>
-                                        {product.compareAtPrice && (
-                                          <span className="text-xs text-dark-500 line-through">
-                                            ${product.compareAtPrice}
-                                          </span>
+                                      {product.compareAtPrice &&
+                                        product.compareAtPrice >
+                                          product.price && (
+                                          <div className="absolute top-2 left-2 bg-red-600 text-white px-2 py-1 rounded-full text-xs font-bold">
+                                            -
+                                            {Math.round(
+                                              ((product.compareAtPrice -
+                                                product.price) /
+                                                product.compareAtPrice) *
+                                                100
+                                            )}
+                                            %
+                                          </div>
                                         )}
-                                      </div>
-                                      <span className="text-xs text-dark-600 dark:text-dark-400 font-bold">
-                                        Stock: {product.stock}
-                                      </span>
-                                      <div className="flex flex-wrap gap-1">
-                                        {(
-                                          product.categories ||
-                                          ((product as any).category
-                                            ? [(product as any).category]
-                                            : [])
-                                        ).map((cat: string) => (
-                                          <span
-                                            key={cat}
-                                            className="text-[10px] bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400 px-2 py-0.5 rounded-full font-medium"
-                                          >
-                                            {categories.find(
-                                              (c) => c.value === cat
-                                            )?.label || cat}
-                                          </span>
-                                        ))}
-                                      </div>
+                                      {product.isFeatured && (
+                                        <div className="absolute top-2 right-2 bg-yellow-500 text-white px-2 py-1 rounded-full text-xs flex items-center gap-1">
+                                          <Star size={12} fill="white" />
+                                          Featured
+                                        </div>
+                                      )}
                                     </div>
 
-                                    <div className="flex items-center gap-1.5 mb-1.5">
-                                      <div
-                                        className={`w-full px-2 py-0.5 rounded text-[10px] font-medium text-center ${
-                                          product.isActive
-                                            ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400"
-                                            : "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400"
-                                        }`}
-                                      >
-                                        {product.isActive
-                                          ? "Active"
-                                          : "Inactive"}
+                                    <div className="p-2">
+                                      <h3 className="text-sm font-bold text-dark-900 dark:text-white mb-1 line-clamp-1">
+                                        {product.name}
+                                      </h3>
+                                      <p className="text-xs text-dark-600 dark:text-dark-400 mb-1.5 line-clamp-2">
+                                        {product.description}
+                                      </p>
+
+                                      <div className="flex items-center justify-between mb-1.5">
+                                        <div className="flex items-center gap-2">
+                                          <span className="text-base font-bold text-dark-900 dark:text-white">
+                                            ${product.price}
+                                          </span>
+                                          {product.compareAtPrice && (
+                                            <span className="text-xs text-dark-500 line-through">
+                                              ${product.compareAtPrice}
+                                            </span>
+                                          )}
+                                        </div>
+                                        <span className="text-xs text-dark-600 dark:text-dark-400 font-bold">
+                                          Stock: {product.stock}
+                                        </span>
+                                        <div className="flex flex-wrap gap-1">
+                                          {(
+                                            product.categories ||
+                                            ((product as any).category
+                                              ? [(product as any).category]
+                                              : [])
+                                          ).map((cat: string) => (
+                                            <span
+                                              key={cat}
+                                              className="text-[10px] bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400 px-2 py-0.5 rounded-full font-medium"
+                                            >
+                                              {categories.find(
+                                                (c) => c.value === cat
+                                              )?.label || cat}
+                                            </span>
+                                          ))}
+                                        </div>
                                       </div>
+
+                                      <button
+                                        onClick={() => {
+                                          // Navigate to booking page
+                                          window.location.href = "/book";
+                                        }}
+                                        className="w-full px-3 py-2 text-sm font-medium bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors"
+                                      >
+                                        Book Now
+                                      </button>
                                     </div>
                                   </div>
-                                </div>
-                              ))}
-                            </div>
-                          </motion.div>
-                        )}
-                      </Card>
+                                ))}
+                              </div>
+                            </motion.div>
+                          )}
+                        </Card>
+                      </div>
                     );
                   })}
 

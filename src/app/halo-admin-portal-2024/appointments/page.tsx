@@ -114,6 +114,27 @@ export default function AdminAppointmentsPage() {
     fetchAppointments();
   }, []);
 
+  // Handle browser back button to close modal
+  useEffect(() => {
+    const handlePopState = () => {
+      if (modalStatus) {
+        setModalStatus(null);
+        setModalSearchQuery("");
+        setModalExpandedCard(null);
+      }
+    };
+
+    if (modalStatus) {
+      // Push a new history state when modal opens
+      window.history.pushState({ modalOpen: true }, "");
+      window.addEventListener("popstate", handlePopState);
+    }
+
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+    };
+  }, [modalStatus]);
+
   const fetchAppointments = async () => {
     try {
       const res = await fetch("/api/halo-admin-api/appointments");
@@ -627,7 +648,7 @@ export default function AdminAppointmentsPage() {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               transition={{ type: "spring", duration: 0.3 }}
-              className="fixed inset-4 sm:inset-8 md:inset-12 lg:inset-16 z-50 flex flex-col bg-white dark:bg-dark-900 rounded-2xl shadow-2xl overflow-hidden"
+              className="fixed inset-0 z-50 flex flex-col bg-white dark:bg-dark-900 shadow-2xl overflow-hidden pt-16"
             >
               {(() => {
                 const config = statusConfig[modalStatus];

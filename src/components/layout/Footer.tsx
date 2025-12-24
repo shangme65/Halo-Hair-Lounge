@@ -21,6 +21,12 @@ interface ServiceCategory {
   serviceCount?: number;
 }
 
+interface ProductCategory {
+  value: string;
+  label: string;
+  productCount?: number;
+}
+
 const staticFooterLinks = {
   Company: [
     { name: "About Us", href: "/about" },
@@ -40,10 +46,13 @@ export default function Footer() {
   const [serviceCategories, setServiceCategories] = useState<ServiceCategory[]>(
     []
   );
+  const [productCategories, setProductCategories] = useState<ProductCategory[]>(
+    []
+  );
   const pathname = usePathname();
 
-  // Fetch categories function
-  const fetchCategories = useCallback(async () => {
+  // Fetch service categories function
+  const fetchServiceCategories = useCallback(async () => {
     try {
       const response = await fetch("/api/service-categories");
       if (response.ok) {
@@ -51,28 +60,61 @@ export default function Footer() {
         setServiceCategories(categories);
       }
     } catch (error) {
-      console.error("Error fetching categories:", error);
+      console.error("Error fetching service categories:", error);
+    }
+  }, []);
+
+  // Fetch product categories function
+  const fetchProductCategories = useCallback(async () => {
+    try {
+      const response = await fetch("/api/product-categories");
+      if (response.ok) {
+        const categories = await response.json();
+        setProductCategories(categories);
+      }
+    } catch (error) {
+      console.error("Error fetching product categories:", error);
     }
   }, []);
 
   // Fetch on mount and when pathname changes (e.g., navigating from admin back to public pages)
   useEffect(() => {
-    fetchCategories();
-  }, [fetchCategories, pathname]);
+    fetchServiceCategories();
+    fetchProductCategories();
+  }, [fetchServiceCategories, fetchProductCategories, pathname]);
 
   useEffect(() => {
     // Listen for category updates (for same-page updates)
-    const handleCategoryUpdate = () => {
-      fetchCategories();
+    const handleServiceCategoryUpdate = () => {
+      fetchServiceCategories();
+    };
+
+    const handleProductCategoryUpdate = () => {
+      fetchProductCategories();
     };
 
     // Also check localStorage for cross-page updates (when Footer wasn't mounted during admin changes)
     const checkForUpdates = () => {
-      const lastUpdate = localStorage.getItem("serviceCategoriesLastUpdate");
-      const lastChecked = localStorage.getItem("footerLastChecked");
-      if (lastUpdate && lastUpdate !== lastChecked) {
-        localStorage.setItem("footerLastChecked", lastUpdate);
-        fetchCategories();
+      const lastServiceUpdate = localStorage.getItem(
+        "serviceCategoriesLastUpdate"
+      );
+      const lastServiceChecked = localStorage.getItem(
+        "footerServiceLastChecked"
+      );
+      if (lastServiceUpdate && lastServiceUpdate !== lastServiceChecked) {
+        localStorage.setItem("footerServiceLastChecked", lastServiceUpdate);
+        fetchServiceCategories();
+      }
+
+      const lastProductUpdate = localStorage.getItem(
+        "productCategoriesLastUpdate"
+      );
+      const lastProductChecked = localStorage.getItem(
+        "footerProductLastChecked"
+      );
+      if (lastProductUpdate && lastProductUpdate !== lastProductChecked) {
+        localStorage.setItem("footerProductLastChecked", lastProductUpdate);
+        fetchProductCategories();
       }
     };
 
@@ -82,20 +124,31 @@ export default function Footer() {
     };
 
     checkForUpdates();
-    window.addEventListener("serviceCategoriesUpdated", handleCategoryUpdate);
+    window.addEventListener(
+      "serviceCategoriesUpdated",
+      handleServiceCategoryUpdate
+    );
+    window.addEventListener(
+      "productCategoriesUpdated",
+      handleProductCategoryUpdate
+    );
     window.addEventListener("focus", handleFocus);
 
     return () => {
       window.removeEventListener(
         "serviceCategoriesUpdated",
-        handleCategoryUpdate
+        handleServiceCategoryUpdate
+      );
+      window.removeEventListener(
+        "productCategoriesUpdated",
+        handleProductCategoryUpdate
       );
       window.removeEventListener("focus", handleFocus);
     };
-  }, [fetchCategories]);
+  }, [fetchServiceCategories, fetchProductCategories]);
 
-  // Build footer links dynamically - remove duplicates and only show categories with active services
-  const uniqueCategories = serviceCategories
+  // Build footer links dynamically - remove duplicates and only show categories with active services/products
+  const uniqueServiceCategories = serviceCategories
     .filter((category) => (category.serviceCount ?? 0) > 0) // Only categories with active services
     .reduce((acc, category) => {
       if (!acc.find((c) => c.value === category.value)) {
@@ -104,11 +157,25 @@ export default function Footer() {
       return acc;
     }, [] as ServiceCategory[]);
 
+  const uniqueProductCategories = productCategories
+    .filter((category) => (category.productCount ?? 0) > 0) // Only categories with active products
+    .reduce((acc, category) => {
+      if (!acc.find((c) => c.value === category.value)) {
+        acc.push(category);
+      }
+      return acc;
+    }, [] as ProductCategory[]);
+
   const footerLinks = {
-    Services: uniqueCategories.map((category) => ({
+    Services: uniqueServiceCategories.map((category) => ({
       name: category.label,
       href: `/services?category=${encodeURIComponent(category.value)}`,
       key: category.id || category.value, // Use ID or value as unique key
+    })),
+    Products: uniqueProductCategories.map((category) => ({
+      name: category.label,
+      href: `/products?category=${encodeURIComponent(category.value)}`,
+      key: category.value, // Use value as unique key
     })),
     ...staticFooterLinks,
   };
@@ -159,8 +226,8 @@ export default function Footer() {
             </motion.div>
           </div>
 
-          {/* Links Sections - Services and Company in same row */}
-          <div className="lg:col-span-3 grid grid-cols-2 gap-8">
+          {/* Links Sections - Services, Products, and Company */}
+          <div className="lg:col-span-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
             {Object.entries(footerLinks).map(([category, links], idx) => (
               <motion.div
                 key={category}

@@ -3,6 +3,12 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { z } from "zod";
+import sgMail from "@sendgrid/mail";
+
+// Initialize SendGrid
+if (process.env.SENDGRID_API_KEY) {
+  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+}
 
 const appointmentSchema = z.object({
   serviceId: z.string(),
@@ -139,10 +145,138 @@ export async function POST(req: NextRequest) {
         },
       });
 
+      // Create notification for admin
+      const customerName = session?.user?.name || validatedData.customerName;
+      const hasProducts = updatedAppointment?.products.length || 0;
+
+      await prisma.notification.create({
+        data: {
+          type: "APPOINTMENT",
+          title: "New Appointment Booking",
+          message: `${customerName} booked ${updatedAppointment?.service.name}${
+            hasProducts > 0 ? ` with ${hasProducts} product(s)` : ""
+          } for ${new Date(validatedData.date).toLocaleDateString()}`,
+          link: "/halo-admin-portal-2024/appointments",
+        },
+      });
+
+      // Send email notification to admin
+      if (process.env.SENDGRID_API_KEY && process.env.ADMIN_EMAIL) {
+        try {
+          const productsList =
+            updatedAppointment?.products
+              .map((ap) => ap.product.name)
+              .join(", ") || "None";
+
+          await sgMail.send({
+            to: process.env.ADMIN_EMAIL,
+            from: {
+              email:
+                process.env.SENDGRID_FROM_EMAIL ||
+                "noreply@halohair-lounge.site",
+              name: "Halo Hair Lounge",
+            },
+            subject: "🎉 New Appointment Booking",
+            html: `
+              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <h2 style="color: #16a34a;">New Appointment Booked!</h2>
+                <p><strong>Customer:</strong> ${customerName}</p>
+                <p><strong>Email:</strong> ${
+                  validatedData.customerEmail || session?.user?.email || "N/A"
+                }</p>
+                <p><strong>Phone:</strong> ${
+                  validatedData.customerPhone || "N/A"
+                }</p>
+                <p><strong>Service:</strong> ${
+                  updatedAppointment?.service.name
+                }</p>
+                <p><strong>Date:</strong> ${new Date(
+                  validatedData.date
+                ).toLocaleDateString()}</p>
+                <p><strong>Time:</strong> ${validatedData.startTime}</p>
+                <p><strong>Duration:</strong> ${
+                  updatedAppointment?.service.duration
+                } minutes</p>
+                <p><strong>Products:</strong> ${productsList}</p>
+                ${
+                  validatedData.notes
+                    ? `<p><strong>Notes:</strong> ${validatedData.notes}</p>`
+                    : ""
+                }
+                <a href="${
+                  process.env.NEXTAUTH_URL
+                }/halo-admin-portal-2024/appointments" style="display: inline-block; margin-top: 20px; padding: 12px 24px; background-color: #16a34a; color: white; text-decoration: none; border-radius: 8px;">View Appointment</a>
+              </div>
+            `,
+          });
+        } catch (emailError) {
+          console.error("Failed to send email notification:", emailError);
+        }
+      }
+
       return NextResponse.json(
         { appointment: updatedAppointment },
         { status: 201 }
       );
+    }
+
+    // Create notification for admin (no products case)
+    const customerName = session?.user?.name || validatedData.customerName;
+
+    await prisma.notification.create({
+      data: {
+        type: "APPOINTMENT",
+        title: "New Appointment Booking",
+        message: `${customerName} booked ${
+          appointment.service.name
+        } for ${new Date(validatedData.date).toLocaleDateString()}`,
+        link: "/halo-admin-portal-2024/appointments",
+      },
+    });
+
+    // Send email notification to admin (no products case)
+    if (process.env.SENDGRID_API_KEY && process.env.ADMIN_EMAIL) {
+      try {
+        await sgMail.send({
+          to: process.env.ADMIN_EMAIL,
+          from: {
+            email:
+              process.env.SENDGRID_FROM_EMAIL || "noreply@halohair-lounge.site",
+            name: "Halo Hair Lounge",
+          },
+          subject: "🎉 New Appointment Booking",
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+              <h2 style="color: #16a34a;">New Appointment Booked!</h2>
+              <p><strong>Customer:</strong> ${customerName}</p>
+              <p><strong>Email:</strong> ${
+                validatedData.customerEmail || session?.user?.email || "N/A"
+              }</p>
+              <p><strong>Phone:</strong> ${
+                validatedData.customerPhone || "N/A"
+              }</p>
+              <p><strong>Service:</strong> ${appointment.service.name}</p>
+              <p><strong>Date:</strong> ${new Date(
+                validatedData.date
+              ).toLocaleDateString()}</p>
+              <p><strong>Time:</strong> ${validatedData.startTime}</p>
+              <p><strong>Duration:</strong> ${
+                appointment.service.duration
+              } minutes</p>
+              ${
+                validatedData.notes
+                  ? `<p><strong>Notes:</strong> ${validatedData.notes}</p>`
+                  : ""
+              }
+              <a href="${
+                process.env.NEXTAUTH_URL
+              }/halo-admin-portal-2024/appointments" style="display: inline-block; margin-top: 20px; padding: 12px 24px; background-color: #16a34a; color: white; text-decoration: none; border-radius: 8px;">View Appointment</a>
+            </div>
+          `,
+        });
+      } catch (emailError) {
+        console.error("Failed to send email notification:", emailError);
+      }
     }
 
     return NextResponse.json({ appointment }, { status: 201 });

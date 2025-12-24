@@ -61,7 +61,7 @@ export default function AdminProductsPage() {
   >({});
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
-  const [enhanceHD, setEnhanceHD] = useState(false);
+  const [enhanceHD, setEnhanceHD] = useState(true);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [showModal, setShowModal] = useState(false);
@@ -124,9 +124,7 @@ export default function AdminProductsPage() {
 
   const toggleCategory = (category: string) => {
     setExpandedCategories((prev) =>
-      prev.includes(category)
-        ? prev.filter((c) => c !== category)
-        : [...prev, category]
+      prev.includes(category) ? [] : [category]
     );
   };
 
@@ -156,6 +154,13 @@ export default function AdminProductsPage() {
       setDeletingCategory(null);
       fetchProducts();
       fetchCategories();
+
+      // Notify other components (like Footer) to update
+      localStorage.setItem(
+        "productCategoriesLastUpdate",
+        Date.now().toString()
+      );
+      window.dispatchEvent(new Event("productCategoriesUpdated"));
     } catch (error) {
       toast.error("Failed to delete category");
     }
@@ -184,6 +189,13 @@ export default function AdminProductsPage() {
       setShowAddCategoryModal(false);
       setNewCategoryName("");
       fetchCategories();
+
+      // Notify other components (like Footer) to update
+      localStorage.setItem(
+        "productCategoriesLastUpdate",
+        Date.now().toString()
+      );
+      window.dispatchEvent(new Event("productCategoriesUpdated"));
     } catch (error: any) {
       toast.error(error.message || "Failed to create category");
     }
@@ -243,6 +255,13 @@ export default function AdminProductsPage() {
       setShowModal(false);
       resetForm();
       fetchProducts();
+
+      // Notify other components (like Footer) to update
+      localStorage.setItem(
+        "productCategoriesLastUpdate",
+        Date.now().toString()
+      );
+      window.dispatchEvent(new Event("productCategoriesUpdated"));
     } catch (error) {
       toast.error("Failed to save product");
     } finally {
@@ -296,6 +315,13 @@ export default function AdminProductsPage() {
       fetchProducts();
       setShowDeleteProductModal(false);
       setDeletingProduct(null);
+
+      // Notify other components (like Footer) to update
+      localStorage.setItem(
+        "productCategoriesLastUpdate",
+        Date.now().toString()
+      );
+      window.dispatchEvent(new Event("productCategoriesUpdated"));
     } catch (error) {
       toast.error("Failed to delete product");
     }
@@ -432,44 +458,44 @@ export default function AdminProductsPage() {
           animate={{ opacity: 1, y: 0 }}
         >
           {/* Header */}
-          <div className="flex justify-between items-center mb-2">
-            <div>
-              <h1 className="text-lg font-bold text-dark-900 dark:text-white leading-tight">
+          <div className="mb-2">
+            <div className="flex justify-between items-center">
+              <h1 className="text-3xl font-bold text-primary-600 dark:text-primary-400 leading-tight">
                 Products
               </h1>
-              <p className="text-[10px] text-dark-600 dark:text-dark-400">
-                Manage inventory by category
-              </p>
+              <div className="flex gap-1.5">
+                <button
+                  onClick={() => setShowAddCategoryModal(true)}
+                  className="flex items-center gap-0.5 px-2 py-1 text-[10px] font-medium bg-gradient-to-b from-white to-primary-50 dark:from-dark-700 dark:to-dark-800 border border-primary-200 dark:border-primary-800 text-primary-700 dark:text-primary-400 rounded-lg hover:from-primary-50 hover:to-primary-100 dark:hover:from-dark-600 dark:hover:to-dark-700 transition-all active:scale-95 shadow-[0_2px_4px_rgba(0,0,0,0.1),inset_0_1px_0_rgba(255,255,255,0.5),inset_0_-1px_2px_rgba(0,0,0,0.1)]"
+                  style={{
+                    textShadow: "0 1px 1px rgba(255,255,255,0.5)",
+                  }}
+                >
+                  <FolderPlus size={12} />
+                  Add Category
+                </button>
+                <button
+                  onClick={() => {
+                    resetForm();
+                    setShowModal(true);
+                  }}
+                  className="flex items-center gap-0.5 px-2 py-1 text-[10px] font-medium bg-gradient-to-b from-primary-400 to-primary-600 dark:from-primary-600 dark:to-primary-800 text-white rounded-lg hover:from-primary-500 hover:to-primary-700 dark:hover:from-primary-500 dark:hover:to-primary-700 transition-all active:scale-95 shadow-[0_2px_4px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.2),inset_0_-1px_2px_rgba(0,0,0,0.2)]"
+                  style={{
+                    textShadow: "0 1px 2px rgba(0,0,0,0.3)",
+                  }}
+                >
+                  <Plus size={12} />
+                  Add Product
+                </button>
+              </div>
             </div>
-            <div className="flex gap-1.5">
-              <button
-                onClick={() => setShowAddCategoryModal(true)}
-                className="flex items-center gap-0.5 px-2 py-1 text-[10px] font-medium bg-gradient-to-b from-white to-primary-50 dark:from-dark-700 dark:to-dark-800 border border-primary-200 dark:border-primary-800 text-primary-700 dark:text-primary-400 rounded-lg hover:from-primary-50 hover:to-primary-100 dark:hover:from-dark-600 dark:hover:to-dark-700 transition-all active:scale-95 shadow-[0_2px_4px_rgba(0,0,0,0.1),inset_0_1px_0_rgba(255,255,255,0.5),inset_0_-1px_2px_rgba(0,0,0,0.1)]"
-                style={{
-                  textShadow: "0 1px 1px rgba(255,255,255,0.5)",
-                }}
-              >
-                <FolderPlus size={12} />
-                Add Category
-              </button>
-              <button
-                onClick={() => {
-                  resetForm();
-                  setShowModal(true);
-                }}
-                className="flex items-center gap-0.5 px-2 py-1 text-[10px] font-medium bg-gradient-to-b from-primary-400 to-primary-600 dark:from-primary-600 dark:to-primary-800 text-white rounded-lg hover:from-primary-500 hover:to-primary-700 dark:hover:from-primary-500 dark:hover:to-primary-700 transition-all active:scale-95 shadow-[0_2px_4px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.2),inset_0_-1px_2px_rgba(0,0,0,0.2)]"
-                style={{
-                  textShadow: "0 1px 2px rgba(0,0,0,0.3)",
-                }}
-              >
-                <Plus size={12} />
-                Add Product
-              </button>
-            </div>
+            <p className="text-[13px] text-primary-700 dark:text-primary-300 mt-1">
+              Manage inventory by category
+            </p>
           </div>
 
           {/* Search */}
-          <Card className="p-2 mb-2">
+          <Card className="p-2 mb-6">
             <div className="relative">
               <Search
                 className="absolute left-2 top-1/2 transform -translate-y-1/2 text-dark-400"
@@ -491,326 +517,339 @@ export default function AdminProductsPage() {
               <Loader2 className="w-8 h-8 animate-spin text-primary-600" />
             </div>
           ) : (
-            <div className="space-y-4">
-              {categories.map((category) => {
-                const categoryProducts =
-                  productsByCategory[category.value] || [];
-                const isExpanded = expandedCategories.includes(category.value);
+            <div className="space-y-4 pb-4">
+              {Array.isArray(categories) &&
+                categories.map((category) => {
+                  const categoryProducts =
+                    productsByCategory[category.value] || [];
+                  const isExpanded = expandedCategories.includes(
+                    category.value
+                  );
 
-                return (
-                  <Card key={category.value} className="overflow-hidden !p-0">
-                    {/* Category Header */}
-                    <div
-                      className="flex items-center justify-between py-2 px-3 bg-primary-50 dark:bg-primary-900/20 border-b border-dark-200 dark:border-dark-700 cursor-pointer hover:bg-primary-100 dark:hover:bg-primary-900/30 transition-colors"
-                      onClick={() => toggleCategory(category.value)}
-                    >
-                      <div className="flex items-center gap-2">
-                        <button className="p-0.5 hover:bg-primary-200 dark:hover:bg-primary-800 transition-colors">
-                          {isExpanded ? (
-                            <ChevronDown
-                              size={20}
-                              className="text-primary-700 dark:text-primary-300"
-                            />
-                          ) : (
-                            <ChevronRight
-                              size={20}
-                              className="text-primary-700 dark:text-primary-300"
-                            />
-                          )}
-                        </button>
-                        <h2 className="text-lg font-bold text-primary-900 dark:text-primary-100">
-                          {category.label}
-                        </h2>
-                        <span className="px-2 py-0.5 text-xs font-medium bg-primary-200 dark:bg-primary-800 text-primary-800 dark:text-primary-200 rounded-full">
-                          {categoryProducts.length}{" "}
-                          {categoryProducts.length === 1
-                            ? "product"
-                            : "products"}
-                        </span>
+                  return (
+                    <Card key={category.value} className="overflow-hidden !p-0">
+                      {/* Category Header */}
+                      <div
+                        className="flex items-center justify-between py-2 pl-1 pr-3 bg-primary-50 dark:bg-primary-900/20 border-b border-dark-200 dark:border-dark-700 cursor-pointer hover:bg-primary-100 dark:hover:bg-primary-900/30 transition-colors"
+                        onClick={() => toggleCategory(category.value)}
+                      >
+                        <div className="flex items-center">
+                          <button className="p-0 hover:bg-primary-200 dark:hover:bg-primary-800 transition-colors">
+                            {isExpanded ? (
+                              <ChevronDown
+                                size={20}
+                                className="text-primary-700 dark:text-primary-300"
+                              />
+                            ) : (
+                              <ChevronRight
+                                size={20}
+                                className="text-primary-700 dark:text-primary-300"
+                              />
+                            )}
+                          </button>
+                          <h2 className="text-lg font-bold text-primary-900 dark:text-primary-100 ml-1">
+                            {category.label}
+                          </h2>
+                          <span
+                            className="ml-2 px-2 py-0.5 text-xs font-medium bg-gradient-to-b from-primary-100 to-primary-200 dark:from-primary-800 dark:to-primary-900 text-primary-900 dark:text-primary-100 rounded-full shadow-md"
+                            style={{
+                              boxShadow:
+                                "0 2px 4px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.3), inset 0 -1px 2px rgba(0, 0, 0, 0.15)",
+                            }}
+                          >
+                            {categoryProducts.length}{" "}
+                            {categoryProducts.length === 1
+                              ? "product"
+                              : "products"}
+                          </span>
+                        </div>
+                        {!visibleDeleteButtons.includes(category.value) ? (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setVisibleDeleteButtons([
+                                ...visibleDeleteButtons,
+                                category.value,
+                              ]);
+                            }}
+                            className="flex items-center gap-1 px-3 py-1.5 text-xs bg-gradient-to-b from-dark-200 to-dark-300 hover:from-dark-300 hover:to-dark-400 dark:from-dark-700 dark:to-dark-800 dark:hover:from-dark-600 dark:hover:to-dark-700 text-dark-700 dark:text-dark-300 font-medium rounded-full shadow-md hover:shadow-lg transition-all active:scale-95"
+                            title="Click to reveal delete button"
+                            style={{
+                              boxShadow:
+                                "0 4px 6px rgba(0, 0, 0, 0.1), inset 0 -2px 4px rgba(0, 0, 0, 0.1)",
+                            }}
+                          >
+                            <Trash2 size={14} />?
+                          </button>
+                        ) : (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteCategory(
+                                category.value,
+                                category.label,
+                                categoryProducts.length
+                              );
+                            }}
+                            className="flex items-center gap-1 px-3 py-1.5 text-xs bg-gradient-to-b from-red-400 to-red-500 hover:from-red-500 hover:to-red-600 text-white font-medium rounded-full shadow-md hover:shadow-lg transition-all active:scale-95"
+                            style={{
+                              boxShadow:
+                                "0 4px 6px rgba(239, 68, 68, 0.3), inset 0 -2px 4px rgba(0, 0, 0, 0.2)",
+                            }}
+                          >
+                            <Trash2 size={14} />
+                            Delete
+                          </button>
+                        )}
                       </div>
-                      {!visibleDeleteButtons.includes(category.value) ? (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setVisibleDeleteButtons([
-                              ...visibleDeleteButtons,
-                              category.value,
-                            ]);
-                          }}
-                          className="flex items-center gap-1 px-3 py-1.5 text-xs bg-gradient-to-b from-dark-200 to-dark-300 hover:from-dark-300 hover:to-dark-400 dark:from-dark-700 dark:to-dark-800 dark:hover:from-dark-600 dark:hover:to-dark-700 text-dark-700 dark:text-dark-300 font-medium rounded-full shadow-md hover:shadow-lg transition-all active:scale-95"
-                          title="Click to reveal delete button"
-                          style={{
-                            boxShadow:
-                              "0 4px 6px rgba(0, 0, 0, 0.1), inset 0 -2px 4px rgba(0, 0, 0, 0.1)",
-                          }}
-                        >
-                          <Trash2 size={14} />?
-                        </button>
-                      ) : (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDeleteCategory(
-                              category.value,
-                              category.label,
-                              categoryProducts.length
-                            );
-                          }}
-                          className="flex items-center gap-1 px-3 py-1.5 text-xs bg-gradient-to-b from-red-400 to-red-500 hover:from-red-500 hover:to-red-600 text-white font-medium rounded-full shadow-md hover:shadow-lg transition-all active:scale-95"
-                          style={{
-                            boxShadow:
-                              "0 4px 6px rgba(239, 68, 68, 0.3), inset 0 -2px 4px rgba(0, 0, 0, 0.2)",
-                          }}
-                        >
-                          <Trash2 size={14} />
-                          Delete
-                        </button>
-                      )}
-                    </div>
 
-                    {/* Category Products */}
-                    {isExpanded && (
-                      <AnimatePresence>
-                        <motion.div
-                          initial={{ height: 0, opacity: 0 }}
-                          animate={{ height: "auto", opacity: 1 }}
-                          exit={{ height: 0, opacity: 0 }}
-                          transition={{ duration: 0.3 }}
-                          className="p-2"
-                        >
-                          {categoryProducts.length === 0 ? (
-                            <div className="text-center py-8 text-dark-600 dark:text-dark-400">
-                              <p className="text-sm">
-                                No products in this category
-                              </p>
-                              <button
-                                onClick={() => {
-                                  resetForm();
-                                  setFormData((prev) => ({
-                                    ...prev,
-                                    category: category.value,
-                                  }));
-                                  setShowModal(true);
-                                }}
-                                className="mt-2 text-xs text-primary-600 dark:text-primary-400 hover:underline"
-                              >
-                                Add a product
-                              </button>
-                            </div>
-                          ) : (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-                              {categoryProducts.map((product) => (
-                                <div
-                                  key={product.id}
-                                  className="overflow-hidden border border-dark-200 dark:border-dark-700 rounded-lg bg-white dark:bg-dark-800 hover:shadow-lg transition-shadow duration-300"
+                      {/* Category Products */}
+                      {isExpanded && (
+                        <AnimatePresence>
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: "auto", opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.3 }}
+                            className="p-2"
+                          >
+                            {categoryProducts.length === 0 ? (
+                              <div className="text-center py-8 text-dark-600 dark:text-dark-400">
+                                <p className="text-sm">
+                                  No products in this category
+                                </p>
+                                <button
+                                  onClick={() => {
+                                    resetForm();
+                                    setFormData((prev) => ({
+                                      ...prev,
+                                      category: category.value,
+                                    }));
+                                    setShowModal(true);
+                                  }}
+                                  className="mt-2 text-xs text-primary-600 dark:text-primary-400 hover:underline"
                                 >
-                                  <div className="aspect-[4/3] bg-dark-100 dark:bg-dark-800 relative group">
-                                    {product.images.length > 0 ? (
-                                      <>
-                                        <Image
-                                          src={
-                                            product.images[
-                                              currentImageIndex[product.id] || 0
-                                            ]
-                                          }
-                                          alt={product.name}
-                                          fill
-                                          className="object-cover"
-                                        />
-                                        {product.images.length > 1 && (
-                                          <>
-                                            <button
-                                              onClick={(e) => {
-                                                e.stopPropagation();
-                                                const current =
-                                                  currentImageIndex[
-                                                    product.id
-                                                  ] || 0;
-                                                const newIndex =
-                                                  current === 0
-                                                    ? product.images.length - 1
-                                                    : current - 1;
-                                                setCurrentImageIndex({
-                                                  ...currentImageIndex,
-                                                  [product.id]: newIndex,
-                                                });
-                                              }}
-                                              className="absolute left-1 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-all"
-                                            >
-                                              <ChevronRight
-                                                size={16}
-                                                className="rotate-180"
-                                              />
-                                            </button>
-                                            <button
-                                              onClick={(e) => {
-                                                e.stopPropagation();
-                                                const current =
-                                                  currentImageIndex[
-                                                    product.id
-                                                  ] || 0;
-                                                const newIndex =
-                                                  current ===
-                                                  product.images.length - 1
-                                                    ? 0
-                                                    : current + 1;
-                                                setCurrentImageIndex({
-                                                  ...currentImageIndex,
-                                                  [product.id]: newIndex,
-                                                });
-                                              }}
-                                              className="absolute right-1 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-all"
-                                            >
-                                              <ChevronRight size={16} />
-                                            </button>
-                                            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
-                                              {product.images.map((_, idx) => (
-                                                <div
-                                                  key={idx}
-                                                  className={`w-1.5 h-1.5 rounded-full transition-all ${
-                                                    idx ===
-                                                    (currentImageIndex[
+                                  Add a product
+                                </button>
+                              </div>
+                            ) : (
+                              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                                {categoryProducts.map((product) => (
+                                  <div
+                                    key={product.id}
+                                    className="overflow-hidden border border-dark-200 dark:border-dark-700 rounded-lg bg-white dark:bg-dark-800 hover:shadow-lg transition-shadow duration-300"
+                                  >
+                                    <div className="aspect-[4/3] bg-dark-100 dark:bg-dark-800 relative group">
+                                      {product.images.length > 0 ? (
+                                        <>
+                                          <Image
+                                            src={
+                                              product.images[
+                                                currentImageIndex[product.id] ||
+                                                  0
+                                              ]
+                                            }
+                                            alt={product.name}
+                                            fill
+                                            className="object-cover"
+                                          />
+                                          {product.images.length > 1 && (
+                                            <>
+                                              <button
+                                                onClick={(e) => {
+                                                  e.stopPropagation();
+                                                  const current =
+                                                    currentImageIndex[
                                                       product.id
-                                                    ] || 0)
-                                                      ? "bg-white w-4"
-                                                      : "bg-white/50"
-                                                  }`}
+                                                    ] || 0;
+                                                  const newIndex =
+                                                    current === 0
+                                                      ? product.images.length -
+                                                        1
+                                                      : current - 1;
+                                                  setCurrentImageIndex({
+                                                    ...currentImageIndex,
+                                                    [product.id]: newIndex,
+                                                  });
+                                                }}
+                                                className="absolute left-1 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-all"
+                                              >
+                                                <ChevronRight
+                                                  size={16}
+                                                  className="rotate-180"
                                                 />
-                                              ))}
-                                            </div>
-                                          </>
-                                        )}
-                                      </>
-                                    ) : (
-                                      <div className="flex items-center justify-center h-full">
-                                        <Upload className="w-12 h-12 text-dark-400" />
-                                      </div>
-                                    )}
-                                    {product.compareAtPrice &&
-                                      product.compareAtPrice >
-                                        product.price && (
-                                        <div className="absolute top-2 left-2 bg-red-600 text-white px-2 py-1 rounded-full text-xs font-bold">
-                                          -
-                                          {Math.round(
-                                            ((product.compareAtPrice -
-                                              product.price) /
-                                              product.compareAtPrice) *
-                                              100
+                                              </button>
+                                              <button
+                                                onClick={(e) => {
+                                                  e.stopPropagation();
+                                                  const current =
+                                                    currentImageIndex[
+                                                      product.id
+                                                    ] || 0;
+                                                  const newIndex =
+                                                    current ===
+                                                    product.images.length - 1
+                                                      ? 0
+                                                      : current + 1;
+                                                  setCurrentImageIndex({
+                                                    ...currentImageIndex,
+                                                    [product.id]: newIndex,
+                                                  });
+                                                }}
+                                                className="absolute right-1 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-all"
+                                              >
+                                                <ChevronRight size={16} />
+                                              </button>
+                                              <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
+                                                {product.images.map(
+                                                  (_, idx) => (
+                                                    <div
+                                                      key={idx}
+                                                      className={`w-1.5 h-1.5 rounded-full transition-all ${
+                                                        idx ===
+                                                        (currentImageIndex[
+                                                          product.id
+                                                        ] || 0)
+                                                          ? "bg-white w-4"
+                                                          : "bg-white/50"
+                                                      }`}
+                                                    />
+                                                  )
+                                                )}
+                                              </div>
+                                            </>
                                           )}
-                                          %
+                                        </>
+                                      ) : (
+                                        <div className="flex items-center justify-center h-full">
+                                          <Upload className="w-12 h-12 text-dark-400" />
                                         </div>
                                       )}
-                                    {product.isFeatured && (
-                                      <div className="absolute top-2 right-2 bg-yellow-500 text-white px-2 py-1 rounded-full text-xs flex items-center gap-1">
-                                        <Star size={12} fill="white" />
-                                        Featured
-                                      </div>
-                                    )}
-                                  </div>
-
-                                  <div className="p-2">
-                                    <h3 className="text-sm font-bold text-dark-900 dark:text-white mb-1 line-clamp-1">
-                                      {product.name}
-                                    </h3>
-                                    <p className="text-xs text-dark-600 dark:text-dark-400 mb-1.5 line-clamp-2">
-                                      {product.description}
-                                    </p>
-
-                                    <div className="flex items-center justify-between mb-1.5">
-                                      <div className="flex items-center gap-2">
-                                        <span className="text-base font-bold text-dark-900 dark:text-white">
-                                          ${product.price}
-                                        </span>
-                                        {product.compareAtPrice && (
-                                          <span className="text-xs text-dark-500 line-through">
-                                            ${product.compareAtPrice}
-                                          </span>
+                                      {product.compareAtPrice &&
+                                        product.compareAtPrice >
+                                          product.price && (
+                                          <div className="absolute top-2 left-2 bg-red-600 text-white px-2 py-1 rounded-full text-xs font-bold">
+                                            -
+                                            {Math.round(
+                                              ((product.compareAtPrice -
+                                                product.price) /
+                                                product.compareAtPrice) *
+                                                100
+                                            )}
+                                            %
+                                          </div>
                                         )}
-                                      </div>
-                                      <span className="text-xs text-dark-600 dark:text-dark-400 font-bold">
-                                        Stock: {product.stock}
-                                      </span>
-                                      <div className="flex flex-wrap gap-1">
-                                        {(
-                                          product.categories ||
-                                          ((product as any).category
-                                            ? [(product as any).category]
-                                            : [])
-                                        ).map((cat: string) => (
-                                          <span
-                                            key={cat}
-                                            className="text-[10px] bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400 px-2 py-0.5 rounded-full font-medium"
-                                          >
-                                            {categories.find(
-                                              (c) => c.value === cat
-                                            )?.label || cat}
+                                      {product.isFeatured && (
+                                        <div className="absolute top-2 right-2 bg-yellow-500 text-white px-2 py-1 rounded-full text-xs flex items-center gap-1">
+                                          <Star size={12} fill="white" />
+                                          Featured
+                                        </div>
+                                      )}
+                                    </div>
+
+                                    <div className="p-2">
+                                      <h3 className="text-sm font-bold text-dark-900 dark:text-white mb-1 line-clamp-1">
+                                        {product.name}
+                                      </h3>
+                                      <p className="text-xs text-dark-600 dark:text-dark-400 mb-1.5 line-clamp-2">
+                                        {product.description}
+                                      </p>
+
+                                      <div className="flex items-center justify-between mb-1.5">
+                                        <div className="flex items-center gap-2">
+                                          <span className="text-base font-bold text-dark-900 dark:text-white">
+                                            ${product.price}
                                           </span>
-                                        ))}
+                                          {product.compareAtPrice && (
+                                            <span className="text-xs text-dark-500 line-through">
+                                              ${product.compareAtPrice}
+                                            </span>
+                                          )}
+                                        </div>
+                                        <span className="text-xs text-dark-600 dark:text-dark-400 font-bold">
+                                          Stock: {product.stock}
+                                        </span>
+                                        <div className="flex flex-wrap gap-1">
+                                          {(
+                                            product.categories ||
+                                            ((product as any).category
+                                              ? [(product as any).category]
+                                              : [])
+                                          ).map((cat: string) => (
+                                            <span
+                                              key={cat}
+                                              className="text-[10px] bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400 px-2 py-0.5 rounded-full font-medium"
+                                            >
+                                              {categories.find(
+                                                (c) => c.value === cat
+                                              )?.label || cat}
+                                            </span>
+                                          ))}
+                                        </div>
                                       </div>
-                                    </div>
 
-                                    <div className="flex items-center gap-1.5 mb-1.5">
-                                      <button
-                                        onClick={() =>
-                                          toggleStatus(product, "isActive")
-                                        }
-                                        className={`flex-1 px-2 py-0.5 rounded text-[10px] font-medium ${
-                                          product.isActive
-                                            ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400"
-                                            : "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400"
-                                        }`}
-                                      >
-                                        {product.isActive
-                                          ? "Active"
-                                          : "Inactive"}
-                                      </button>
-                                      <button
-                                        onClick={() =>
-                                          toggleStatus(product, "isFeatured")
-                                        }
-                                        className={`flex-1 px-2 py-0.5 rounded text-[10px] font-medium ${
-                                          product.isFeatured
-                                            ? "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400"
-                                            : "bg-dark-100 dark:bg-dark-700 text-dark-600 dark:text-dark-400"
-                                        }`}
-                                      >
-                                        <Star
-                                          size={10}
-                                          className="inline mr-0.5"
-                                        />
-                                        {product.isFeatured
-                                          ? "Featured"
-                                          : "Feature"}
-                                      </button>
-                                    </div>
+                                      <div className="flex items-center gap-1.5 mb-1.5">
+                                        <button
+                                          onClick={() =>
+                                            toggleStatus(product, "isActive")
+                                          }
+                                          className={`flex-1 px-2 py-0.5 rounded text-[10px] font-medium ${
+                                            product.isActive
+                                              ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400"
+                                              : "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400"
+                                          }`}
+                                        >
+                                          {product.isActive
+                                            ? "Active"
+                                            : "Inactive"}
+                                        </button>
+                                        <button
+                                          onClick={() =>
+                                            toggleStatus(product, "isFeatured")
+                                          }
+                                          className={`flex-1 px-2 py-0.5 rounded text-[10px] font-medium ${
+                                            product.isFeatured
+                                              ? "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400"
+                                              : "bg-dark-100 dark:bg-dark-700 text-dark-600 dark:text-dark-400"
+                                          }`}
+                                        >
+                                          <Star
+                                            size={10}
+                                            className="inline mr-0.5"
+                                          />
+                                          {product.isFeatured
+                                            ? "Featured"
+                                            : "Feature"}
+                                        </button>
+                                      </div>
 
-                                    <div className="flex gap-1.5">
-                                      <button
-                                        onClick={() => handleEdit(product)}
-                                        className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 text-xs bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400 rounded-lg hover:bg-primary-200 dark:hover:bg-primary-900/50 transition-colors"
-                                      >
-                                        <Edit2 size={12} />
-                                        Edit
-                                      </button>
-                                      <button
-                                        onClick={() => handleDelete(product)}
-                                        className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 text-xs bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors"
-                                      >
-                                        <Trash2 size={12} />
-                                        Delete
-                                      </button>
+                                      <div className="flex gap-1.5">
+                                        <button
+                                          onClick={() => handleEdit(product)}
+                                          className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 text-xs bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400 rounded-lg hover:bg-primary-200 dark:hover:bg-primary-900/50 transition-colors"
+                                        >
+                                          <Edit2 size={12} />
+                                          Edit
+                                        </button>
+                                        <button
+                                          onClick={() => handleDelete(product)}
+                                          className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 text-xs bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors"
+                                        >
+                                          <Trash2 size={12} />
+                                          Delete
+                                        </button>
+                                      </div>
                                     </div>
                                   </div>
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                        </motion.div>
-                      </AnimatePresence>
-                    )}
-                  </Card>
-                );
-              })}
+                                ))}
+                              </div>
+                            )}
+                          </motion.div>
+                        </AnimatePresence>
+                      )}
+                    </Card>
+                  );
+                })}
 
               {filteredProducts.length === 0 && categories.length > 0 && (
                 <div className="text-center py-12">
@@ -868,20 +907,23 @@ export default function AdminProductsPage() {
                 />
               </div>
 
-              <div className="flex gap-2">
+              <div className="flex gap-2 justify-between">
                 <Button
                   variant="outline"
-                  onClick={() => setShowAddCategoryModal(false)}
-                  className="flex-1"
+                  onClick={() => {
+                    setShowAddCategoryModal(false);
+                    setNewCategoryName("");
+                  }}
+                  className="py-1 px-8 text-xs h-8 flex items-center justify-center"
                 >
                   Cancel
                 </Button>
                 <Button
                   onClick={handleAddCategory}
-                  className="flex-1"
+                  className="py-1 px-8 text-xs h-8 flex items-center justify-center"
                   disabled={!newCategoryName.trim()}
                 >
-                  Add Category
+                  Add
                 </Button>
               </div>
             </motion.div>

@@ -20,6 +20,7 @@ interface Service {
   name: string;
   description: string;
   price: number;
+  compareAtPrice?: number | null;
   duration: number;
   categories: string[];
   image: string | null;
@@ -91,7 +92,7 @@ function ServicesPageContent() {
       setTimeout(() => {
         const element = categoryRefs.current[categoryFromUrl];
         if (element) {
-          element.scrollIntoView({ behavior: "smooth", block: "start" });
+          element.scrollIntoView({ behavior: "smooth", block: "center" });
         }
         setInitialScrollDone(true);
       }, 100);
@@ -121,11 +122,23 @@ function ServicesPageContent() {
   };
 
   const toggleCategory = (categoryValue: string) => {
-    setExpandedCategories((prev) =>
-      prev.includes(categoryValue)
-        ? prev.filter((c) => c !== categoryValue)
-        : [...prev, categoryValue]
+    const isCurrentlyExpanded = expandedCategories.includes(categoryValue);
+
+    setExpandedCategories(
+      isCurrentlyExpanded
+        ? [] // Close if already open
+        : [categoryValue] // Open only this category, closing all others
     );
+
+    // Scroll to the category after a short delay to let DOM update
+    if (!isCurrentlyExpanded) {
+      setTimeout(() => {
+        const element = categoryRefs.current[categoryValue];
+        if (element) {
+          element.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      }, 100);
+    }
   };
 
   const filteredServices = services.filter((service) =>
@@ -172,18 +185,17 @@ function ServicesPageContent() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
           >
-            {/* Header */}
-            <div className="mb-2">
-              <h1 className="text-4xl font-bold text-dark-900 dark:text-white leading-tight">
-                Our Services
-              </h1>
-              <p className="text-xs text-dark-600 dark:text-dark-400">
-                Professional hair care services for every style
-              </p>
-            </div>
+            {/* Header and Search Combined */}
+            <Card className="p-4 mb-4">
+              <div className="mb-3">
+                <h1 className="text-4xl font-bold text-primary-600 dark:text-primary-400 leading-tight">
+                  Our Services
+                </h1>
+                <p className="text-xs text-primary-700 dark:text-primary-300">
+                  Professional hair care services for every style
+                </p>
+              </div>
 
-            {/* Search */}
-            <Card className="p-2 mb-4">
               <div className="relative">
                 <Search
                   className="absolute left-2 top-1/2 transform -translate-y-1/2 text-dark-400"
@@ -222,16 +234,15 @@ function ServicesPageContent() {
                         ref={(el) => {
                           categoryRefs.current[category.value] = el;
                         }}
-                        className="scroll-mt-24"
                       >
                         <Card className="overflow-hidden !p-0">
                           {/* Category Header */}
                           <div
-                            className="flex items-center justify-between py-2 pl-3 pr-3 bg-primary-50 dark:bg-primary-900/20 border-b border-dark-200 dark:border-dark-700 cursor-pointer hover:bg-primary-100 dark:hover:bg-primary-900/30 transition-colors"
+                            className="flex items-center justify-between py-2 px-3 bg-primary-50 dark:bg-primary-900/20 border-b border-dark-200 dark:border-dark-700 cursor-pointer hover:bg-primary-100 dark:hover:bg-primary-900/30 transition-colors"
                             onClick={() => toggleCategory(category.value)}
                           >
-                            <div className="flex items-center gap-0.5">
-                              <button className="p-0 hover:bg-primary-200 dark:hover:bg-primary-800 transition-colors">
+                            <div className="flex items-center gap-2">
+                              <button className="p-0.5 hover:bg-primary-200 dark:hover:bg-primary-800 transition-colors">
                                 {isExpanded ? (
                                   <ChevronDown
                                     size={20}
@@ -285,6 +296,21 @@ function ServicesPageContent() {
                                             fill
                                             className="object-cover group-hover:scale-105 transition-transform duration-300"
                                           />
+                                          {/* Discount Badge */}
+                                          {service.compareAtPrice &&
+                                            service.compareAtPrice >
+                                              service.price && (
+                                              <div className="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-md shadow-lg z-10">
+                                                -
+                                                {Math.round(
+                                                  ((service.compareAtPrice -
+                                                    service.price) /
+                                                    service.compareAtPrice) *
+                                                    100
+                                                )}
+                                                %
+                                              </div>
+                                            )}
                                           {/* Show image count badge if multiple images */}
                                           {service.image
                                             .split(",")
@@ -326,9 +352,18 @@ function ServicesPageContent() {
                                             size={12}
                                             className="text-primary-600 dark:text-primary-400"
                                           />
-                                          <span className="text-base font-bold text-dark-900 dark:text-white">
-                                            ${service.price}
-                                          </span>
+                                          <div className="flex items-center gap-1.5">
+                                            <span className="text-base font-bold text-dark-900 dark:text-white">
+                                              ${service.price}
+                                            </span>
+                                            {service.compareAtPrice &&
+                                              service.compareAtPrice >
+                                                service.price && (
+                                                <span className="text-xs text-dark-500 dark:text-dark-400 line-through">
+                                                  ${service.compareAtPrice}
+                                                </span>
+                                              )}
+                                          </div>
                                         </div>
                                         <div className="flex items-center gap-1">
                                           <Clock

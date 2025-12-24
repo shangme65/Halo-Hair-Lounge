@@ -232,6 +232,20 @@ model CtaContent {
   @@map("cta_content")
 }
 
+model Notification {
+  id        String   @id @default(cuid())
+  type      NotificationType
+  title     String
+  message   String   @db.Text
+  link      String?
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  
+  @@index([isRead])
+  @@index([createdAt])
+  @@map("notifications")
+}
+
 enum Role {
   USER
   ADMIN
@@ -244,4 +258,10 @@ enum AppointmentStatus {
   COMPLETED
   CANCELLED
   NO_SHOW
+}
+
+enum NotificationType {
+  APPOINTMENT
+  PRODUCT
+  SYSTEM
 }

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Menu,
@@ -17,6 +17,7 @@ import {
   LayoutDashboard,
   ShoppingBag,
   FileEdit,
+  Bell,
 } from "lucide-react";
 import { useSession, signOut } from "next-auth/react";
 import Button from "@/components/ui/Button";
@@ -73,7 +74,11 @@ export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [notificationCount, setNotificationCount] = useState(0);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [notifications, setNotifications] = useState([]);
   const pathname = usePathname();
+  const router = useRouter();
   const { data: session, update } = useSession();
 
   useEffect(() => {
@@ -89,6 +94,19 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Close notification dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element;
+      if (showNotifications && !target.closest(".notification-dropdown")) {
+        setShowNotifications(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [showNotifications]);
+
   // Listen for session updates (e.g., after admin account deletion)
   useEffect(() => {
     const handleSessionUpdate = () => {
@@ -99,6 +117,61 @@ export default function Navbar() {
     return () =>
       window.removeEventListener("sessionUpdated", handleSessionUpdate);
   }, [update]);
+
+  // Fetch notification count for admin users
+  const fetchNotificationCount = async () => {
+    if (!session?.user || session.user.role !== "ADMIN") return;
+
+    try {
+      const res = await fetch("/api/halo-admin-api/notifications/unread-count");
+      if (res.ok) {
+        const data = await res.json();
+        setNotificationCount(data.count);
+      }
+    } catch (error) {
+      console.error("Failed to fetch notification count:", error);
+    }
+  };
+
+  // Fetch notifications for dropdown
+  const fetchNotifications = async () => {
+    if (!session?.user || session.user.role !== "ADMIN") return;
+
+    try {
+      const res = await fetch("/api/halo-admin-api/notifications");
+      if (res.ok) {
+        const data = await res.json();
+        setNotifications(data.slice(0, 5)); // Show only 5 recent notifications
+      }
+    } catch (error) {
+      console.error("Failed to fetch notifications:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (mounted && session?.user?.role === "ADMIN") {
+      fetchNotificationCount();
+
+      // Refresh count every 30 seconds
+      const interval = setInterval(fetchNotificationCount, 30000);
+      return () => clearInterval(interval);
+    }
+  }, [mounted, session]);
+
+  // Mark notifications as read
+  const markAsRead = async (notificationIds: string[]) => {
+    try {
+      await fetch("/api/halo-admin-api/notifications", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ notificationIds }),
+      });
+      fetchNotificationCount();
+      fetchNotifications();
+    } catch (error) {
+      console.error("Failed to mark notifications as read:", error);
+    }
+  };
 
   // Determine which navigation to show based on user role
   const isAdmin =
@@ -179,6 +252,110 @@ export default function Navbar() {
             </div>
             {/* Right Actions */}
             <div className="hidden lg:flex items-center space-x-4">
+              {/* Notification Icon for Admin */}
+              {mounted && session && isAdmin && (
+                <div className="relative notification-dropdown">
+                  <button
+                    onClick={() => {
+                      setShowNotifications(!showNotifications);
+                      if (!showNotifications) {
+                        fetchNotifications();
+                      }
+                    }}
+                    className="p-2 rounded-xl hover:bg-primary-50 dark:hover:bg-primary-950 transition-colors relative"
+                  >
+                    <Bell className="w-5 h-5 text-green-600 dark:text-green-400" />
+                    {notificationCount > 0 && (
+                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-semibold animate-pulse">
+                        {notificationCount > 99 ? "99+" : notificationCount}
+                      </span>
+                    )}
+                  </button>
+
+                  {/* Notification Dropdown */}
+                  <AnimatePresence>
+                    {showNotifications && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                        className="absolute right-0 top-12 w-80 bg-white dark:bg-dark-800 rounded-xl shadow-xl border border-dark-200 dark:border-dark-700 z-50"
+                      >
+                        <div className="p-4 border-b border-dark-200 dark:border-dark-700">
+                          <h3 className="font-semibold text-dark-900 dark:text-white">
+                            Notifications
+                          </h3>
+                        </div>
+                        <div className="max-h-80 overflow-y-auto">
+                          {notifications.length > 0 ? (
+                            notifications.map((notification: any) => (
+                              <div
+                                key={notification.id}
+                                className={`p-3 border-b border-dark-100 dark:border-dark-700 hover:bg-dark-50 dark:hover:bg-dark-700 cursor-pointer ${
+                                  !notification.isRead
+                                    ? "bg-blue-50 dark:bg-blue-900/10"
+                                    : ""
+                                }`}
+                                onClick={() => {
+                                  if (notification.link) {
+                                    router.push(notification.link);
+                                  }
+                                  if (!notification.isRead) {
+                                    markAsRead([notification.id]);
+                                  }
+                                  setShowNotifications(false);
+                                }}
+                              >
+                                <div className="flex items-start space-x-2">
+                                  {!notification.isRead && (
+                                    <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
+                                  )}
+                                  <div className="flex-1">
+                                    <p className="font-medium text-sm text-dark-900 dark:text-white">
+                                      {notification.title}
+                                    </p>
+                                    <p className="text-xs text-dark-600 dark:text-dark-400 mt-1">
+                                      {notification.message}
+                                    </p>
+                                    <p className="text-xs text-dark-500 dark:text-dark-500 mt-1">
+                                      {new Date(
+                                        notification.createdAt
+                                      ).toLocaleDateString()}
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+                            ))
+                          ) : (
+                            <div className="p-4 text-center text-dark-500 dark:text-dark-400">
+                              No notifications
+                            </div>
+                          )}
+                        </div>
+                        {notifications.length > 0 && (
+                          <div className="p-3 border-t border-dark-200 dark:border-dark-700">
+                            <button
+                              onClick={() => {
+                                const unreadIds = notifications
+                                  .filter((n: any) => !n.isRead)
+                                  .map((n: any) => n.id);
+                                if (unreadIds.length > 0) {
+                                  markAsRead(unreadIds);
+                                }
+                                setShowNotifications(false);
+                              }}
+                              className="w-full text-center text-sm text-primary-600 hover:text-primary-700 font-medium"
+                            >
+                              Mark all as read
+                            </button>
+                          </div>
+                        )}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              )}
+
               {/* Admin user actions - only show if logged in as admin */}
               {mounted && session && isAdmin && (
                 <div className="flex items-center space-x-3">
@@ -203,18 +380,39 @@ export default function Navbar() {
                 </div>
               )}
             </div>
-            {/* Mobile Menu Button */}
-            <button
-              className="lg:hidden p-2 rounded-xl hover:bg-green-50 dark:hover:bg-green-950 transition-colors"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              aria-label="Toggle mobile menu"
-            >
-              {mobileMenuOpen ? (
-                <X className="w-6 h-6 text-green-600" />
-              ) : (
-                <Menu className="w-6 h-6 text-green-600" />
+            {/* Mobile Actions */}
+            <div className="lg:hidden flex items-center space-x-2">
+              {/* Mobile Notification Icon for Admin */}
+              {mounted && session && isAdmin && (
+                <button
+                  onClick={() => {
+                    fetchNotifications();
+                    router.push("/halo-admin-portal-2024/notifications");
+                  }}
+                  className="p-2 rounded-xl hover:bg-primary-50 dark:hover:bg-primary-950 transition-colors relative"
+                >
+                  <Bell className="w-5 h-5 text-green-600 dark:text-green-400" />
+                  {notificationCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-semibold animate-pulse">
+                      {notificationCount > 99 ? "99+" : notificationCount}
+                    </span>
+                  )}
+                </button>
               )}
-            </button>
+
+              {/* Mobile Menu Button */}
+              <button
+                className="p-2 rounded-xl hover:bg-green-50 dark:hover:bg-green-950 transition-colors"
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                aria-label="Toggle mobile menu"
+              >
+                {mobileMenuOpen ? (
+                  <X className="w-6 h-6 text-green-600" />
+                ) : (
+                  <Menu className="w-6 h-6 text-green-600" />
+                )}
+              </button>
+            </div>
           </div>
         </div>
       </motion.nav>
