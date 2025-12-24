@@ -71,11 +71,25 @@ export async function POST(req: NextRequest) {
 
     // Validate file type (MIME type)
     const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
-    if (!allowedTypes.includes(file.type)) {
-      console.error("Invalid MIME type:", file.type);
+    const fileExtension = file.name.split('.').pop()?.toLowerCase();
+    
+    // Fallback for mobile devices that might not set proper MIME type
+    let detectedType = file.type;
+    if (!detectedType || detectedType === "application/octet-stream") {
+      if (fileExtension === "jpg" || fileExtension === "jpeg") {
+        detectedType = "image/jpeg";
+      } else if (fileExtension === "png") {
+        detectedType = "image/png";
+      } else if (fileExtension === "webp") {
+        detectedType = "image/webp";
+      }
+    }
+    
+    if (!allowedTypes.includes(detectedType)) {
+      console.error("Invalid MIME type:", { original: file.type, detected: detectedType, extension: fileExtension });
       return NextResponse.json(
         {
-          error: `Invalid file type '${file.type}'. Only JPEG, PNG, and WebP are allowed`,
+          error: `Invalid file type '${detectedType}'. Only JPEG, PNG, and WebP are allowed`,
         },
         { status: 400 }
       );
@@ -95,8 +109,8 @@ export async function POST(req: NextRequest) {
     const buffer = Buffer.from(bytes);
 
     // Security: Validate magic bytes to prevent file type spoofing
-    if (!validateMagicBytes(buffer, file.type)) {
-      console.error("Magic bytes validation failed for type:", file.type);
+    if (!validateMagicBytes(buffer, detectedType)) {
+      console.error("Magic bytes validation failed for type:", detectedType);
       return NextResponse.json(
         {
           error:
