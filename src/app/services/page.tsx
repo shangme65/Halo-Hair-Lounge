@@ -38,7 +38,7 @@ export default function ServicesPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-gradient-to-br from-dark-50 via-white to-primary-50 dark:from-dark-950 dark:via-dark-900 dark:to-dark-950">
+        <div className="bg-gradient-to-br from-dark-50 via-white to-primary-50 dark:from-dark-950 dark:via-dark-900 dark:to-dark-950">
           <div className="pt-20 px-3 pb-4 sm:pt-24 sm:px-4 container mx-auto max-w-7xl flex items-center justify-center">
             <Loader2 className="w-8 h-8 animate-spin text-primary-600" />
           </div>
@@ -174,7 +174,7 @@ function ServicesPageContent() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-dark-50 via-white to-primary-50 dark:from-dark-950 dark:via-dark-900 dark:to-dark-950">
+    <div className="bg-gradient-to-br from-dark-50 via-white to-primary-50 dark:from-dark-950 dark:via-dark-900 dark:to-dark-950">
       <div className="pt-20 px-3 pb-2 sm:pt-24 sm:px-4 container mx-auto max-w-7xl">
         {!mounted ? (
           <div className="flex items-center justify-center p-12">
@@ -238,11 +238,22 @@ function ServicesPageContent() {
                         <Card className="overflow-hidden !p-0">
                           {/* Category Header */}
                           <div
+                            id={`category-${category.value}`}
                             className="flex items-center justify-between py-2 px-3 bg-primary-50 dark:bg-primary-900/20 border-b border-dark-200 dark:border-dark-700 cursor-pointer hover:bg-primary-100 dark:hover:bg-primary-900/30 transition-colors"
-                            onClick={() => toggleCategory(category.value)}
+                            onClick={() => {
+                              toggleCategory(category.value);
+                              setTimeout(() => {
+                                document
+                                  .getElementById(`category-${category.value}`)
+                                  ?.scrollIntoView({
+                                    behavior: "smooth",
+                                    block: "start",
+                                  });
+                              }, 100);
+                            }}
                           >
-                            <div className="flex items-center gap-2">
-                              <button className="p-0.5 hover:bg-primary-200 dark:hover:bg-primary-800 transition-colors">
+                            <div className="flex items-center gap-0">
+                              <button className="-ml-1 hover:bg-primary-200 dark:hover:bg-primary-800 transition-colors">
                                 {isExpanded ? (
                                   <ChevronDown
                                     size={20}
@@ -255,10 +266,16 @@ function ServicesPageContent() {
                                   />
                                 )}
                               </button>
-                              <h2 className="text-lg font-bold text-primary-900 dark:text-primary-100">
+                              <h2 className="text-lg font-bold text-primary-900 dark:text-primary-100 -ml-1">
                                 {category.label}
                               </h2>
-                              <span className="px-2 py-0.5 text-xs font-medium bg-primary-200 dark:bg-primary-800 text-primary-800 dark:text-primary-200 rounded-full">
+                              <span
+                                className="ml-2 px-2 py-0.5 text-xs font-medium bg-gradient-to-b from-primary-100 to-primary-200 dark:from-primary-800 dark:to-primary-900 text-primary-900 dark:text-primary-100 rounded-full shadow-md"
+                                style={{
+                                  boxShadow:
+                                    "0 2px 4px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.3), inset 0 -1px 2px rgba(0, 0, 0, 0.15)",
+                                }}
+                              >
                                 {categoryServices.length}{" "}
                                 {categoryServices.length === 1
                                   ? "service"

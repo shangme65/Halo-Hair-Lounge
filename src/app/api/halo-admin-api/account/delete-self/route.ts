@@ -56,6 +56,7 @@ export async function DELETE(req: NextRequest) {
           title: "Transform Your Look",
           description:
             "Experience luxury styling with our expert stylists and premium products",
+          colorScheme: "green",
           cta: { text: "Book Appointment", href: "/book" },
           secondaryCta: { text: "Explore Services", href: "/services" },
         },
@@ -64,6 +65,7 @@ export async function DELETE(req: NextRequest) {
           title: "Your Beauty, Our Passion",
           description:
             "Discover personalized hair care solutions tailored just for you",
+          colorScheme: "green",
           cta: { text: "View Services", href: "/services" },
           secondaryCta: { text: "Explore Services", href: "/services" },
         },
@@ -72,6 +74,7 @@ export async function DELETE(req: NextRequest) {
           title: "Indulge in Luxury",
           description:
             "Premium hair treatments using the finest products in the industry",
+          colorScheme: "green",
           cta: { text: "Shop Products", href: "/products" },
           secondaryCta: { text: "Explore Services", href: "/services" },
         },
@@ -124,12 +127,36 @@ export async function DELETE(req: NextRequest) {
       throw error;
     }
 
-    return NextResponse.json(
+    // Create response with headers to clear cookies
+    const response = NextResponse.json(
       {
         message: "Account and all associated data deleted successfully",
+        requiresLogout: true,
       },
       { status: 200 }
     );
+
+    // Clear NextAuth cookies
+    response.cookies.set("next-auth.session-token", "", {
+      maxAge: 0,
+      path: "/",
+    });
+    response.cookies.set("__Secure-next-auth.session-token", "", {
+      maxAge: 0,
+      path: "/",
+      secure: true,
+    });
+    response.cookies.set("next-auth.csrf-token", "", {
+      maxAge: 0,
+      path: "/",
+    });
+    response.cookies.set("__Host-next-auth.csrf-token", "", {
+      maxAge: 0,
+      path: "/",
+      secure: true,
+    });
+
+    return response;
   } catch (error: any) {
     console.error("Account deletion error:", error);
     return NextResponse.json(

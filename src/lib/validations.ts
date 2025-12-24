@@ -285,12 +285,30 @@ export const heroSlideSchema = z.object({
     .string()
     .max(500, "Subtitle must be less than 500 characters")
     .trim(),
-  buttonText: z
+  description: z
     .string()
-    .max(50, "Button text must be less than 50 characters")
+    .max(500, "Description must be less than 500 characters")
     .trim()
     .optional(),
-  buttonHref: z.string().max(200).optional(),
+  colorScheme: z.enum(["purple", "gold", "teal", "green"]).optional(),
+  cta: z
+    .object({
+      text: z
+        .string()
+        .max(50, "Button text must be less than 50 characters")
+        .trim(),
+      href: z.string().max(200),
+    })
+    .optional(),
+  secondaryCta: z
+    .object({
+      text: z
+        .string()
+        .max(50, "Button text must be less than 50 characters")
+        .trim(),
+      href: z.string().max(200),
+    })
+    .optional(),
   backgroundImage: z.string().url().optional().or(z.literal("")),
   backgroundGradient: z.string().max(500).optional(),
 });

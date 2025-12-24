@@ -288,7 +288,7 @@ export default function AdminServicesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-dark-50 via-white to-primary-50 dark:from-dark-950 dark:via-dark-900 dark:to-dark-950">
+    <div className="bg-gradient-to-br from-dark-50 via-white to-primary-50 dark:from-dark-950 dark:via-dark-900 dark:to-dark-950">
       <AdminSidebar />
 
       <div className="pt-20 px-3 pb-2 sm:pt-24 sm:px-4">
@@ -311,7 +311,7 @@ export default function AdminServicesPage() {
                   }}
                 >
                   <FolderPlus size={12} />
-                  Add Category
+                  <span className="ml-0.5">Add Category</span>
                 </button>
                 <button
                   onClick={() =>
@@ -362,11 +362,25 @@ export default function AdminServicesPage() {
                 const isExpanded = expandedCategories.includes(category.value);
 
                 return (
-                  <Card key={category.value} className="overflow-hidden !p-0">
-                    {/* Category Header */}
-                    <div
-                      className="flex items-center justify-between py-2 pl-1 pr-3 bg-primary-50 dark:bg-primary-900/20 border-b border-dark-200 dark:border-dark-700 cursor-pointer hover:bg-primary-100 dark:hover:bg-primary-900/30 transition-colors"
-                      onClick={() => toggleCategory(category.value)}
+                  <div key={category.value} id={`category-${category.value}`}>
+                    <Card
+                      className="overflow-hidden !p-0"
+                    >
+                      {/* Category Header */}
+                      <div
+                        className="flex items-center justify-between py-2 pl-1 pr-0 bg-primary-50 dark:bg-primary-900/20 border-b border-dark-200 dark:border-dark-700 cursor-pointer hover:bg-primary-100 dark:hover:bg-primary-900/30 transition-colors"
+                        onClick={() => {
+                          toggleCategory(category.value);
+                          // Scroll to category after a brief delay
+                          setTimeout(() => {
+                            document
+                              .getElementById(`category-${category.value}`)
+                              ?.scrollIntoView({
+                                behavior: "smooth",
+                              block: "start",
+                            });
+                        }, 100);
+                      }}
                     >
                       <div className="flex items-center">
                         <button className="p-0 hover:bg-primary-200 dark:hover:bg-primary-800 transition-colors">
@@ -382,7 +396,7 @@ export default function AdminServicesPage() {
                             />
                           )}
                         </button>
-                        <h2 className="text-lg font-bold text-primary-900 dark:text-primary-100 ml-1">
+                        <h2 className="text-lg font-bold text-primary-900 dark:text-primary-100 -ml-1">
                           {category.label}
                         </h2>
                         <span
@@ -649,6 +663,7 @@ export default function AdminServicesPage() {
                       </AnimatePresence>
                     )}
                   </Card>
+                  </div>
                 );
               })}
 

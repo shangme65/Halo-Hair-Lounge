@@ -63,7 +63,18 @@ export default function AdminSetupPage() {
         throw new Error("Failed to delete account");
       }
 
-      toast.success("Account deleted successfully.");
+      toast.success("Account deleted successfully. Logging out...");
+
+      // Clear all cookies manually
+      document.cookie.split(";").forEach((c) => {
+        document.cookie = c
+          .replace(/^ +/, "")
+          .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+      });
+
+      // Clear all storage
+      localStorage.clear();
+      sessionStorage.clear();
 
       // Clear cache
       if ("caches" in window) {
@@ -71,16 +82,16 @@ export default function AdminSetupPage() {
         await Promise.all(cacheNames.map((name) => caches.delete(name)));
       }
 
-      // Sign out but stay on this page
-      await signOut({ redirect: false });
+      // Sign out with redirect to clear all NextAuth state
+      await signOut({
+        redirect: true,
+        callbackUrl: "/admin-setup",
+      });
 
-      // Dispatch event to notify other components (like Navbar) to update
-      window.dispatchEvent(new Event("sessionUpdated"));
-
-      setShowDeleteModal(false);
-      setIsDeleting(false);
-      setAlreadyInitialized(false); // Reset to show setup form
-      router.refresh();
+      // Fallback: force hard navigation if signOut doesn't redirect
+      setTimeout(() => {
+        window.location.href = "/admin-setup";
+      }, 1000);
     } catch (error) {
       toast.error("Failed to delete account");
       setIsDeleting(false);

@@ -128,10 +128,10 @@ export default function NotificationsPage() {
                   variant="outline"
                   size="sm"
                   onClick={deleteReadNotifications}
-                  className="text-green-600 hover:text-white hover:bg-green-500 border-green-200 hover:border-green-500 text-xs h-7 transition-all duration-200 flex items-center justify-center"
+                  className="flex items-center gap-0.5 py-1 px-1.5 text-xs h-7"
                 >
-                  <Trash2 className="w-3 h-3" />
-                  <span className="ml-1">Clear read</span>
+                  <Trash2 size={12} />
+                  Clear read
                 </Button>
               </div>
             </div>

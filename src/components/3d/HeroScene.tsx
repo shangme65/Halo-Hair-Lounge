@@ -88,7 +88,7 @@ function FloatingRings({
   );
 }
 
-export default function HeroScene({ colorScheme = "purple" }: HeroSceneProps) {
+export default function HeroScene({ colorScheme = "green" }: HeroSceneProps) {
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
