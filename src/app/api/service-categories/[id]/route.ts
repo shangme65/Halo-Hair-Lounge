@@ -28,24 +28,45 @@ export async function DELETE(
       );
     }
 
+    // Check if any services are using this category
+    const servicesWithCategory = await prisma.service.findMany({
+      where: {
+        categories: {
+          has: category.value,
+        },
+      },
+      select: { id: true, categories: true },
+    });
+
     // Remove this category from all services that use it
-    // Use raw query to properly remove the category from arrays
-    await prisma.$executeRaw`
-      UPDATE "Service" 
-      SET categories = array_remove(categories, ${category.value})
-      WHERE ${category.value} = ANY(categories)
-    `;
+    if (servicesWithCategory.length > 0) {
+      await Promise.all(
+        servicesWithCategory.map(async (service) => {
+          const updatedCategories = service.categories.filter(
+            (cat: string) => cat !== category.value
+          );
+          
+          await prisma.service.update({
+            where: { id: service.id },
+            data: { categories: updatedCategories },
+          });
+        })
+      );
+    }
 
     // Delete the category
     await prisma.serviceCategory.delete({
       where: { id },
     });
 
-    return NextResponse.json({ message: "Category deleted successfully" });
-  } catch (error) {
+    return NextResponse.json({ 
+      message: "Category deleted successfully",
+      servicesUpdated: servicesWithCategory.length 
+    });
+  } catch (error: any) {
     console.error("Error deleting category:", error);
     return NextResponse.json(
-      { error: "Failed to delete category" },
+      { error: error?.message || "Failed to delete category" },
       { status: 500 }
     );
   }

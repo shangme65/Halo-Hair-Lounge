@@ -70,8 +70,16 @@ export async function PUT(
       );
     }
 
-    const { name, description, price, compareAtPrice, duration, categories, image, isActive } =
-      validation.data;
+    const {
+      name,
+      description,
+      price,
+      compareAtPrice,
+      duration,
+      categories,
+      image,
+      isActive,
+    } = validation.data;
 
     const service = await prisma.service.update({
       where: { id },
