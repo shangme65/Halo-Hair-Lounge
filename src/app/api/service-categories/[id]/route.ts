@@ -28,23 +28,15 @@ export async function DELETE(
       );
     }
 
-    // Check if there are services using this category
-    const servicesWithCategory = await prisma.service.findMany({
-      where: {
-        categories: {
-          has: category.value,
-        },
-      },
-      take: 1,
-    });
+    // Remove this category from all services that use it
+    // Use raw query to properly remove the category from arrays
+    await prisma.$executeRaw`
+      UPDATE "Service" 
+      SET categories = array_remove(categories, ${category.value})
+      WHERE ${category.value} = ANY(categories)
+    `;
 
-    if (servicesWithCategory.length > 0) {
-      return NextResponse.json(
-        { error: "Cannot delete category with existing services" },
-        { status: 400 }
-      );
-    }
-
+    // Delete the category
     await prisma.serviceCategory.delete({
       where: { id },
     });

@@ -3,7 +3,8 @@
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
+import { usePathname } from "next/navigation";
 import {
   Facebook,
   Instagram,
@@ -39,37 +40,59 @@ export default function Footer() {
   const [serviceCategories, setServiceCategories] = useState<ServiceCategory[]>(
     []
   );
+  const pathname = usePathname();
+
+  // Fetch categories function
+  const fetchCategories = useCallback(async () => {
+    try {
+      const response = await fetch("/api/service-categories");
+      if (response.ok) {
+        const categories = await response.json();
+        setServiceCategories(categories);
+      }
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+    }
+  }, []);
+
+  // Fetch on mount and when pathname changes (e.g., navigating from admin back to public pages)
+  useEffect(() => {
+    fetchCategories();
+  }, [fetchCategories, pathname]);
 
   useEffect(() => {
-    // Fetch dynamic service categories
-    const fetchCategories = async () => {
-      try {
-        const response = await fetch("/api/service-categories");
-        if (response.ok) {
-          const categories = await response.json();
-          setServiceCategories(categories);
-        }
-      } catch (error) {
-        console.error("Error fetching categories:", error);
-      }
-    };
-
-    fetchCategories();
-
-    // Listen for category updates
+    // Listen for category updates (for same-page updates)
     const handleCategoryUpdate = () => {
       fetchCategories();
     };
 
+    // Also check localStorage for cross-page updates (when Footer wasn't mounted during admin changes)
+    const checkForUpdates = () => {
+      const lastUpdate = localStorage.getItem("serviceCategoriesLastUpdate");
+      const lastChecked = localStorage.getItem("footerLastChecked");
+      if (lastUpdate && lastUpdate !== lastChecked) {
+        localStorage.setItem("footerLastChecked", lastUpdate);
+        fetchCategories();
+      }
+    };
+
+    // Check for updates on focus (when user switches back to tab)
+    const handleFocus = () => {
+      checkForUpdates();
+    };
+
+    checkForUpdates();
     window.addEventListener("serviceCategoriesUpdated", handleCategoryUpdate);
+    window.addEventListener("focus", handleFocus);
 
     return () => {
       window.removeEventListener(
         "serviceCategoriesUpdated",
         handleCategoryUpdate
       );
+      window.removeEventListener("focus", handleFocus);
     };
-  }, []);
+  }, [fetchCategories]);
 
   // Build footer links dynamically - remove duplicates and only show categories with active services
   const uniqueCategories = serviceCategories

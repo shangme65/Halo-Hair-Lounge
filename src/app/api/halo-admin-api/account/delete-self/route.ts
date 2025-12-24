@@ -16,6 +16,30 @@ export async function DELETE(req: NextRequest) {
 
     const userId = session.user.id;
 
+    // First verify the user exists
+    const userExists = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!userExists) {
+      // User already deleted - clean up any remaining session data
+      // and return success so they can proceed to create new admin
+      try {
+        await prisma.session.deleteMany({});
+        await prisma.account.deleteMany({});
+      } catch (e) {
+        // Ignore cleanup errors
+      }
+      return NextResponse.json(
+        {
+          message:
+            "Account already deleted. Please sign out and create a new admin account.",
+          alreadyDeleted: true,
+        },
+        { status: 200 }
+      );
+    }
+
     // Delete all data when admin account is deleted
     // Delete items in correct order to avoid foreign key constraint errors
     try {
@@ -39,18 +63,27 @@ export async function DELETE(req: NextRequest) {
       // Delete all services (before anything that references them)
       await prisma.service.deleteMany({});
 
-      // Now delete categories (no more dependencies)
+      // Delete ALL categories (for clean reset)
       await prisma.productCategoryModel.deleteMany({});
       await prisma.serviceCategory.deleteMany({});
 
-      // Delete accounts and sessions for all users
-      await prisma.account.deleteMany({});
-      await prisma.session.deleteMany({});
+      // Delete verification tokens
+      await prisma.verificationToken.deleteMany({});
+
+      // Delete ONLY THIS USER's accounts and sessions (not all users)
+      await prisma.account.deleteMany({
+        where: { userId: userId },
+      });
+      await prisma.session.deleteMany({
+        where: { userId: userId },
+      });
 
       // Finally, delete the admin user
       await prisma.user.delete({
         where: { id: userId },
       });
+
+      console.log("✅ All data deleted successfully, admin account removed");
     } catch (error) {
       console.error("Detailed deletion error:", error);
       throw error;

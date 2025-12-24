@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { motion } from "framer-motion";
-import { Loader2, X, Check } from "lucide-react";
+import { Loader2, X, Check, Info } from "lucide-react";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
@@ -18,7 +18,7 @@ export default function ServiceFormPage() {
 
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [enhanceHD, setEnhanceHD] = useState(false);
+  const [enhanceHD, setEnhanceHD] = useState(true);
   const [categories, setCategories] = useState<
     { id: string; value: string; label: string }[]
   >([]);
@@ -26,6 +26,7 @@ export default function ServiceFormPage() {
     name: "",
     description: "",
     price: "",
+    compareAtPrice: "",
     duration: "",
     categories: [] as string[],
     images: "",
@@ -73,6 +74,7 @@ export default function ServiceFormPage() {
           name: service.name || "",
           description: service.description || "",
           price: service.price?.toString() || "",
+          compareAtPrice: service.compareAtPrice?.toString() || "",
           duration: service.duration?.toString() || "",
           categories: Array.isArray(service.categories)
             ? service.categories
@@ -147,8 +149,9 @@ export default function ServiceFormPage() {
         setFormData((prev) => ({ ...prev, images: currentImages.join(", ") }));
         toast.success(`${uploadedUrls.length} image(s) uploaded successfully!`);
       }
-    } catch (error) {
-      toast.error("Failed to upload image");
+    } catch (error: any) {
+      console.error("Upload error:", error);
+      toast.error(error.message || "Failed to upload image");
     } finally {
       setUploading(false);
       // Reset input
@@ -187,8 +190,11 @@ export default function ServiceFormPage() {
         body: JSON.stringify({
           ...formData,
           price: parseFloat(formData.price),
+          compareAtPrice: formData.compareAtPrice
+            ? parseFloat(formData.compareAtPrice)
+            : null,
           duration: parseInt(formData.duration),
-          image: formData.images.split(",")[0]?.trim() || "",
+          image: formData.images.trim(),
         }),
       });
 
@@ -197,6 +203,10 @@ export default function ServiceFormPage() {
       toast.success(isEdit ? "Service updated!" : "Service created!");
 
       // Notify other components (like Footer) to update categories
+      localStorage.setItem(
+        "serviceCategoriesLastUpdate",
+        Date.now().toString()
+      );
       window.dispatchEvent(new Event("serviceCategoriesUpdated"));
 
       router.push("/halo-admin-portal-2024/services");
@@ -283,35 +293,62 @@ export default function ServiceFormPage() {
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
-                  Price ($) *
-                </label>
-                <Input
-                  type="number"
-                  step="0.01"
-                  value={formData.price}
-                  onChange={(e) =>
-                    setFormData({ ...formData, price: e.target.value })
-                  }
-                  placeholder="0.00"
-                  required
-                />
-              </div>
+              <div className="col-span-2 grid grid-cols-12 gap-1.5">
+                <div className="col-span-3">
+                  <label className="block text-xs font-medium text-dark-700 dark:text-dark-300 mb-2">
+                    Price ($) *
+                  </label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={formData.price}
+                    onChange={(e) =>
+                      setFormData({ ...formData, price: e.target.value })
+                    }
+                    placeholder="0.00"
+                    required
+                  />
+                </div>
 
-              <div>
-                <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
-                  Duration (minutes) *
-                </label>
-                <Input
-                  type="number"
-                  value={formData.duration}
-                  onChange={(e) =>
-                    setFormData({ ...formData, duration: e.target.value })
-                  }
-                  placeholder="30"
-                  required
-                />
+                <div className="col-span-5">
+                  <label className="flex items-center gap-1 text-xs font-medium text-dark-700 dark:text-dark-300 mb-2">
+                    Compare at Price ($)
+                    <div className="group relative">
+                      <Info size={14} className="text-dark-400 cursor-help" />
+                      <div className="absolute left-0 bottom-full mb-2 hidden group-hover:block w-48 p-2 bg-dark-900 text-white text-xs rounded-lg shadow-lg z-10">
+                        Original price (for showing discounts)
+                        <div className="absolute left-2 top-full w-2 h-2 bg-dark-900 transform rotate-45 -mt-1"></div>
+                      </div>
+                    </div>
+                  </label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={formData.compareAtPrice}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        compareAtPrice: e.target.value,
+                      })
+                    }
+                    placeholder="0.00"
+                  />
+                </div>
+
+                <div className="col-span-4">
+                  <label className="block text-xs font-medium text-dark-700 dark:text-dark-300 mb-2">
+                    Duration (minutes) *
+                  </label>
+                  <Input
+                    type="number"
+                    value={formData.duration}
+                    onChange={(e) =>
+                      setFormData({ ...formData, duration: e.target.value })
+                    }
+                    placeholder="30"
+                    required
+                  />
+                </div>
               </div>
 
               <div className="col-span-2">

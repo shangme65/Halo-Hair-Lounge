@@ -162,7 +162,7 @@ function ServicesPageContent() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-dark-50 via-white to-primary-50 dark:from-dark-950 dark:via-dark-900 dark:to-dark-950">
-      <div className="pt-20 px-3 pb-4 sm:pt-24 sm:px-4 container mx-auto max-w-7xl">
+      <div className="pt-20 px-3 pb-2 sm:pt-24 sm:px-4 container mx-auto max-w-7xl">
         {!mounted ? (
           <div className="flex items-center justify-center p-12">
             <Loader2 className="w-8 h-8 animate-spin text-primary-600" />
@@ -174,7 +174,7 @@ function ServicesPageContent() {
           >
             {/* Header */}
             <div className="mb-2">
-              <h1 className="text-2xl font-bold text-dark-900 dark:text-white leading-tight">
+              <h1 className="text-4xl font-bold text-dark-900 dark:text-white leading-tight">
                 Our Services
               </h1>
               <p className="text-xs text-dark-600 dark:text-dark-400">
@@ -183,7 +183,7 @@ function ServicesPageContent() {
             </div>
 
             {/* Search */}
-            <Card className="p-2 mb-2">
+            <Card className="p-2 mb-4">
               <div className="relative">
                 <Search
                   className="absolute left-2 top-1/2 transform -translate-y-1/2 text-dark-400"
@@ -227,11 +227,11 @@ function ServicesPageContent() {
                         <Card className="overflow-hidden !p-0">
                           {/* Category Header */}
                           <div
-                            className="flex items-center justify-between py-2 px-3 bg-primary-50 dark:bg-primary-900/20 border-b border-dark-200 dark:border-dark-700 cursor-pointer hover:bg-primary-100 dark:hover:bg-primary-900/30 transition-colors"
+                            className="flex items-center justify-between py-2 pl-3 pr-3 bg-primary-50 dark:bg-primary-900/20 border-b border-dark-200 dark:border-dark-700 cursor-pointer hover:bg-primary-100 dark:hover:bg-primary-900/30 transition-colors"
                             onClick={() => toggleCategory(category.value)}
                           >
-                            <div className="flex items-center gap-2">
-                              <button className="p-0.5 hover:bg-primary-200 dark:hover:bg-primary-800 transition-colors">
+                            <div className="flex items-center gap-0.5">
+                              <button className="p-0 hover:bg-primary-200 dark:hover:bg-primary-800 transition-colors">
                                 {isExpanded ? (
                                   <ChevronDown
                                     size={20}

@@ -53,7 +53,7 @@ function SignInForm() {
   };
 
   return (
-    <div className="flex items-start justify-center px-4 pt-20 pb-8 bg-gradient-to-br from-primary-50 via-white to-secondary-50 dark:from-dark-950 dark:via-dark-900 dark:to-dark-950">
+    <div className="fixed inset-0 overflow-hidden flex items-center justify-center px-4 -mt-8 bg-gradient-to-br from-primary-50 via-white to-secondary-50 dark:from-dark-950 dark:via-dark-900 dark:to-dark-950">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}

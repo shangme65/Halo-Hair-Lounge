@@ -47,14 +47,24 @@ export async function POST(req: NextRequest) {
     // Validate upload type with Zod
     const typeValidation = uploadTypeSchema.safeParse(type);
     if (!typeValidation.success) {
-      return NextResponse.json({ error: "Invalid type" }, { status: 400 });
+      console.error("Upload type validation failed:", {
+        type,
+        errors: typeValidation.error,
+      });
+      return NextResponse.json(
+        { error: `Invalid type: ${type}` },
+        { status: 400 }
+      );
     }
 
     // Validate file type (MIME type)
     const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
     if (!allowedTypes.includes(file.type)) {
+      console.error("Invalid MIME type:", file.type);
       return NextResponse.json(
-        { error: "Invalid file type. Only JPEG, PNG, and WebP are allowed" },
+        {
+          error: `Invalid file type '${file.type}'. Only JPEG, PNG, and WebP are allowed`,
+        },
         { status: 400 }
       );
     }
@@ -74,8 +84,12 @@ export async function POST(req: NextRequest) {
 
     // Security: Validate magic bytes to prevent file type spoofing
     if (!validateMagicBytes(buffer, file.type)) {
+      console.error("Magic bytes validation failed for type:", file.type);
       return NextResponse.json(
-        { error: "File content does not match declared type" },
+        {
+          error:
+            "File content does not match declared type. Please ensure the file is a valid image.",
+        },
         { status: 400 }
       );
     }
@@ -156,7 +170,8 @@ export async function POST(req: NextRequest) {
       fileName,
     });
   } catch (error) {
-    // Security: Log error without exposing details
+    // Log error for debugging (won't expose details to client)
+    console.error("Upload error:", error);
     return NextResponse.json(
       { error: "Failed to upload file" },
       { status: 500 }

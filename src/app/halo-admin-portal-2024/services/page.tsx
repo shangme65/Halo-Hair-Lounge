@@ -29,6 +29,7 @@ interface Service {
   name: string;
   description: string;
   price: number;
+  compareAtPrice?: number | null;
   duration: number;
   categories: string[];
   image: string | null;
@@ -107,18 +108,17 @@ export default function AdminServicesPage() {
     try {
       const res = await fetch("/api/halo-admin-api/service-categories");
       const data = await res.json();
-      setCategories(data);
+      setCategories(Array.isArray(data) ? data : []);
       setExpandedCategories([]);
     } catch (error) {
       toast.error("Failed to load categories");
+      setCategories([]);
     }
   };
 
   const toggleCategory = (category: string) => {
     setExpandedCategories((prev) =>
-      prev.includes(category)
-        ? prev.filter((c) => c !== category)
-        : [...prev, category]
+      prev.includes(category) ? [] : [category]
     );
   };
 
@@ -151,6 +151,10 @@ export default function AdminServicesPage() {
       fetchCategories();
 
       // Notify other components (like Footer) to update
+      localStorage.setItem(
+        "serviceCategoriesLastUpdate",
+        Date.now().toString()
+      );
       window.dispatchEvent(new Event("serviceCategoriesUpdated"));
     } catch (error) {
       toast.error("Failed to delete category");
@@ -185,6 +189,10 @@ export default function AdminServicesPage() {
       fetchCategories();
 
       // Notify other components (like Footer) to update
+      localStorage.setItem(
+        "serviceCategoriesLastUpdate",
+        Date.now().toString()
+      );
       window.dispatchEvent(new Event("serviceCategoriesUpdated"));
     } catch (error: any) {
       toast.error(error.message || "Failed to create category");
@@ -269,49 +277,49 @@ export default function AdminServicesPage() {
     <div className="min-h-screen bg-gradient-to-br from-dark-50 via-white to-primary-50 dark:from-dark-950 dark:via-dark-900 dark:to-dark-950">
       <AdminSidebar />
 
-      <div className="pt-20 px-3 pb-4 sm:pt-24 sm:px-4">
+      <div className="pt-20 px-3 pb-2 sm:pt-24 sm:px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
         >
           {/* Header */}
-          <div className="flex justify-between items-center mb-2">
-            <div>
-              <h1 className="text-lg font-bold text-dark-900 dark:text-white leading-tight">
+          <div className="mb-2">
+            <div className="flex justify-between items-center">
+              <h1 className="text-3xl font-bold text-dark-900 dark:text-white leading-tight">
                 Services
               </h1>
-              <p className="text-[10px] text-dark-600 dark:text-dark-400">
-                Manage services by category
-              </p>
+              <div className="flex gap-1.5">
+                <button
+                  onClick={() => setShowAddCategoryModal(true)}
+                  className="flex items-center gap-0.5 px-2 py-1 text-[10px] font-medium bg-gradient-to-b from-white to-primary-50 dark:from-dark-700 dark:to-dark-800 border border-primary-200 dark:border-primary-800 text-primary-700 dark:text-primary-400 rounded-lg hover:from-primary-50 hover:to-primary-100 dark:hover:from-dark-600 dark:hover:to-dark-700 transition-all active:scale-95 shadow-[0_2px_4px_rgba(0,0,0,0.1),inset_0_1px_0_rgba(255,255,255,0.5),inset_0_-1px_2px_rgba(0,0,0,0.1)]"
+                  style={{
+                    textShadow: "0 1px 1px rgba(255,255,255,0.5)",
+                  }}
+                >
+                  <FolderPlus size={12} />
+                  Add Category
+                </button>
+                <button
+                  onClick={() =>
+                    router.push("/halo-admin-portal-2024/services/new")
+                  }
+                  className="flex items-center gap-0.5 px-2 py-1 text-[10px] font-medium bg-gradient-to-b from-primary-400 to-primary-600 dark:from-primary-600 dark:to-primary-800 text-white rounded-lg hover:from-primary-500 hover:to-primary-700 dark:hover:from-primary-500 dark:hover:to-primary-700 transition-all active:scale-95 shadow-[0_2px_4px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.2),inset_0_-1px_2px_rgba(0,0,0,0.2)]"
+                  style={{
+                    textShadow: "0 1px 2px rgba(0,0,0,0.3)",
+                  }}
+                >
+                  <Plus size={12} />
+                  Add Service
+                </button>
+              </div>
             </div>
-            <div className="flex gap-1.5">
-              <button
-                onClick={() => setShowAddCategoryModal(true)}
-                className="flex items-center gap-0.5 px-2 py-1 text-[10px] font-medium bg-gradient-to-b from-white to-primary-50 dark:from-dark-700 dark:to-dark-800 border border-primary-200 dark:border-primary-800 text-primary-700 dark:text-primary-400 rounded-lg hover:from-primary-50 hover:to-primary-100 dark:hover:from-dark-600 dark:hover:to-dark-700 transition-all active:scale-95 shadow-[0_2px_4px_rgba(0,0,0,0.1),inset_0_1px_0_rgba(255,255,255,0.5),inset_0_-1px_2px_rgba(0,0,0,0.1)]"
-                style={{
-                  textShadow: "0 1px 1px rgba(255,255,255,0.5)",
-                }}
-              >
-                <FolderPlus size={12} />
-                Add Category
-              </button>
-              <button
-                onClick={() =>
-                  router.push("/halo-admin-portal-2024/services/new")
-                }
-                className="flex items-center gap-0.5 px-2 py-1 text-[10px] font-medium bg-gradient-to-b from-primary-400 to-primary-600 dark:from-primary-600 dark:to-primary-800 text-white rounded-lg hover:from-primary-500 hover:to-primary-700 dark:hover:from-primary-500 dark:hover:to-primary-700 transition-all active:scale-95 shadow-[0_2px_4px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.2),inset_0_-1px_2px_rgba(0,0,0,0.2)]"
-                style={{
-                  textShadow: "0 1px 2px rgba(0,0,0,0.3)",
-                }}
-              >
-                <Plus size={12} />
-                Add Service
-              </button>
-            </div>
+            <p className="text-[13px] text-dark-600 dark:text-dark-400 mt-1">
+              Manage services by category
+            </p>
           </div>
 
           {/* Search */}
-          <Card className="p-2 mb-2">
+          <Card className="p-2 mb-6">
             <div className="relative">
               <Search
                 className="absolute left-2 top-1/2 transform -translate-y-1/2 text-dark-400"
@@ -333,7 +341,7 @@ export default function AdminServicesPage() {
               <Loader2 className="w-8 h-8 animate-spin text-primary-600" />
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-4 pb-4">
               {categories.map((category) => {
                 const categoryServices =
                   servicesByCategory[category.value] || [];
@@ -343,11 +351,11 @@ export default function AdminServicesPage() {
                   <Card key={category.value} className="overflow-hidden !p-0">
                     {/* Category Header */}
                     <div
-                      className="flex items-center justify-between py-2 px-3 bg-primary-50 dark:bg-primary-900/20 border-b border-dark-200 dark:border-dark-700 cursor-pointer hover:bg-primary-100 dark:hover:bg-primary-900/30 transition-colors"
+                      className="flex items-center justify-between py-2 pl-1 pr-3 bg-primary-50 dark:bg-primary-900/20 border-b border-dark-200 dark:border-dark-700 cursor-pointer hover:bg-primary-100 dark:hover:bg-primary-900/30 transition-colors"
                       onClick={() => toggleCategory(category.value)}
                     >
-                      <div className="flex items-center gap-2">
-                        <button className="p-0.5 hover:bg-primary-200 dark:hover:bg-primary-800 transition-colors">
+                      <div className="flex items-center">
+                        <button className="p-0 hover:bg-primary-200 dark:hover:bg-primary-800 transition-colors">
                           {isExpanded ? (
                             <ChevronDown
                               size={20}
@@ -360,7 +368,7 @@ export default function AdminServicesPage() {
                             />
                           )}
                         </button>
-                        <h2 className="text-lg font-bold text-primary-900 dark:text-primary-100">
+                        <h2 className="text-lg font-bold text-primary-900 dark:text-primary-100 -ml-1">
                           {category.label}
                         </h2>
                         <span className="px-2 py-0.5 text-xs font-medium bg-primary-200 dark:bg-primary-800 text-primary-800 dark:text-primary-200 rounded-full">
@@ -464,6 +472,21 @@ export default function AdminServicesPage() {
                                             fill
                                             className="object-cover"
                                           />
+                                          {/* Discount Badge */}
+                                          {service.compareAtPrice &&
+                                            service.compareAtPrice >
+                                              service.price && (
+                                              <div className="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-md shadow-lg z-10">
+                                                -
+                                                {Math.round(
+                                                  ((service.compareAtPrice -
+                                                    service.price) /
+                                                    service.compareAtPrice) *
+                                                    100
+                                                )}
+                                                %
+                                              </div>
+                                            )}
                                           {hasMultipleImages && (
                                             <>
                                               {/* Previous button */}

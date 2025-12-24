@@ -1,11 +1,10 @@
 import type { Metadata } from "next";
 import { Roboto } from "next/font/google";
 import "./globals.css";
-import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
 import { Providers } from "./providers";
 import { Toaster } from "react-hot-toast";
 import CookieConsent from "@/components/ui/CookieConsent";
+import LayoutContent from "./LayoutContent";
 
 const roboto = Roboto({
   subsets: ["latin"],
@@ -104,9 +103,7 @@ export default function RootLayout({
         className={`${roboto.className} antialiased bg-gradient-to-br from-dark-50 via-white to-primary-50 dark:from-dark-950 dark:via-dark-900 dark:to-dark-950 min-h-screen`}
       >
         <Providers>
-          <Navbar />
-          <main>{children}</main>
-          <Footer />
+          <LayoutContent>{children}</LayoutContent>
           <Toaster
             position="top-right"
             toastOptions={{
