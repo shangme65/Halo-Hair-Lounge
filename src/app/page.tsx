@@ -175,6 +175,7 @@ export default function Home() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [currentTestimonialIndex, setCurrentTestimonialIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+  const [isLoadingHero, setIsLoadingHero] = useState(true);
   const [heroSlides, setHeroSlides] = useState([
     {
       title: "Transform Your Look",
@@ -206,13 +207,20 @@ export default function Home() {
     // Fetch hero content from database
     const fetchHeroContent = async () => {
       try {
+        setIsLoadingHero(true);
         const response = await fetch("/api/hero");
         const data = await response.json();
-        if (data.heroContent && data.heroContent.slides) {
+        if (
+          data.heroContent &&
+          data.heroContent.slides &&
+          data.heroContent.slides.length > 0
+        ) {
           setHeroSlides(data.heroContent.slides);
         }
       } catch (error) {
         console.error("Error loading hero content:", error);
+      } finally {
+        setIsLoadingHero(false);
       }
     };
     fetchHeroContent();
@@ -237,6 +245,25 @@ export default function Home() {
   }, [isPaused]);
 
   const slide = heroSlides[currentSlide];
+
+  // Show loading only during initial data fetch
+  if (isLoadingHero) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white dark:bg-dark-950">
+        <img
+          src="/Halologo1.png"
+          alt="Halo Hair Lounge"
+          className="h-24 animate-pulse object-contain"
+        />
+      </div>
+    );
+  }
+
+  // If no slide data after loading, show error or default
+  if (!slide) {
+    console.error("No slide data available");
+    return null;
+  }
 
   return (
     <div className="min-h-screen -mt-16 dark:bg-dark-950">
@@ -304,12 +331,14 @@ export default function Home() {
                 transition={{ duration: 0.5, delay: 0.3 }}
                 className="flex flex-col items-center justify-center gap-6"
               >
-                <Link href={slide.cta.href}>
-                  <Button size="md" className="group flex items-center">
-                    <span>{slide.cta.text}</span>
-                    <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
-                  </Button>
-                </Link>
+                {slide.cta && slide.cta.href && (
+                  <Link href={slide.cta.href}>
+                    <Button size="md" className="group flex items-center">
+                      <span>{slide.cta.text}</span>
+                      <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                    </Button>
+                  </Link>
+                )}
                 {slide.secondaryCta && (
                   <Link href={slide.secondaryCta.href}>
                     <Button size="md" variant="outline">

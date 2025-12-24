@@ -48,8 +48,12 @@ interface HeroSlide {
   title: string;
   subtitle: string;
   description: string;
-  colorScheme: "purple" | "gold" | "teal" | "rose" | "green";
+  colorScheme: "purple" | "gold" | "teal" | "green";
   cta: {
+    text: string;
+    href: string;
+  };
+  secondaryCta?: {
     text: string;
     href: string;
   };
@@ -93,36 +97,25 @@ function SortableSlide({
     <div
       ref={setNodeRef}
       style={style}
-      className="p-6 rounded-xl border-2 border-dark-200 dark:border-dark-700 hover:border-primary-400 transition-all bg-white dark:bg-dark-800"
+      className="p-3 sm:p-6 rounded-lg border border-dark-200 dark:border-dark-700 hover:border-primary-400 transition-all bg-white dark:bg-dark-800 shadow-sm hover:shadow-md"
     >
       {/* Slide Header */}
-      <div className="flex items-center justify-between mb-4 pb-3 border-b border-dark-200 dark:border-dark-700">
-        <div className="flex items-center gap-3">
+      <div className="flex items-center justify-between gap-1 sm:gap-2 mb-3 sm:mb-4 pb-2 sm:pb-3 border-b border-dark-200 dark:border-dark-700">
+        <div className="flex items-center gap-1 sm:gap-3 flex-1 min-w-0">
           <div
             {...attributes}
             {...listeners}
-            className="cursor-grab active:cursor-grabbing p-2 hover:bg-dark-100 dark:hover:bg-dark-700 rounded-lg transition-colors"
+            className="cursor-grab active:cursor-grabbing p-1 sm:p-2 hover:bg-dark-100 dark:hover:bg-dark-700 rounded-lg transition-colors flex-shrink-0"
           >
-            <GripVertical size={20} className="text-dark-400" />
+            <GripVertical size={14} className="sm:w-5 sm:h-5 text-dark-400" />
           </div>
-          <div className="px-3 py-1 bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 rounded-full text-sm font-semibold">
+          <div className="px-1.5 py-0.5 sm:px-3 sm:py-1 bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 rounded-full text-xs font-semibold flex-shrink-0">
             Slide {index + 1}
           </div>
-          <h3 className="text-lg font-semibold text-dark-900 dark:text-white truncate max-w-md">
+          <h3 className="text-sm sm:text-lg font-semibold text-dark-900 dark:text-white truncate flex-1 min-w-0">
             {slide.title}
           </h3>
         </div>
-        {slidesLength > 1 && (
-          <Button
-            onClick={() => deleteSlide(index)}
-            size="sm"
-            variant="outline"
-            className="text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-900/20"
-          >
-            <Trash2 size={16} className="mr-1" />
-            Delete
-          </Button>
-        )}
       </div>
 
       {/* Slide Content Editor */}
@@ -139,7 +132,7 @@ function SortableSlide({
             onChange={(e) =>
               updateSlideField(index, "subtitle", e.target.value)
             }
-            placeholder="e.g., Premium Hair Care Excellence"
+            placeholder={slide.subtitle || "e.g., Premium Hair Care Excellence"}
             className="w-full px-4 py-3 rounded-lg border border-dark-300 dark:border-dark-600 bg-white dark:bg-dark-900 text-dark-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all"
           />
         </div>
@@ -154,7 +147,7 @@ function SortableSlide({
             type="text"
             value={slide.title}
             onChange={(e) => updateSlideField(index, "title", e.target.value)}
-            placeholder="e.g., Transform Your Look"
+            placeholder={slide.title || "e.g., Transform Your Look"}
             className="w-full px-4 py-3 rounded-lg border border-dark-300 dark:border-dark-600 bg-white dark:bg-dark-900 text-dark-900 dark:text-white text-lg font-semibold focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all"
           />
         </div>
@@ -170,7 +163,10 @@ function SortableSlide({
             onChange={(e) =>
               updateSlideField(index, "description", e.target.value)
             }
-            placeholder="e.g., Experience luxury styling with our expert stylists"
+            placeholder={
+              slide.description ||
+              "e.g., Experience luxury styling with our expert stylists"
+            }
             rows={3}
             className="w-full px-4 py-3 rounded-lg border border-dark-300 dark:border-dark-600 bg-white dark:bg-dark-900 text-dark-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all resize-none"
           />
@@ -185,11 +181,11 @@ function SortableSlide({
             </label>
             <input
               type="text"
-              value={slide.cta.text}
+              value={slide.cta?.text || ""}
               onChange={(e) =>
                 updateSlideField(index, "cta.text", e.target.value)
               }
-              placeholder="e.g., Book Appointment"
+              placeholder={slide.cta?.text || "e.g., Book Appointment"}
               className="w-full px-4 py-2 rounded-lg border border-dark-300 dark:border-dark-600 bg-white dark:bg-dark-900 text-dark-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
             />
           </div>
@@ -200,31 +196,52 @@ function SortableSlide({
             </label>
             <input
               type="text"
-              value={slide.cta.href}
+              value={slide.cta?.href || ""}
               onChange={(e) =>
                 updateSlideField(index, "cta.href", e.target.value)
               }
-              placeholder="e.g., /book"
+              placeholder={
+                slide.cta?.href || "e.g., /book or https://example.com"
+              }
               className="w-full px-4 py-2 rounded-lg border border-dark-300 dark:border-dark-600 bg-white dark:bg-dark-900 text-dark-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
             />
           </div>
         </div>
 
-        {/* Secondary Button (Fixed to Explore Services) */}
-        <div className="p-4 bg-dark-50 dark:bg-dark-900/50 rounded-lg border border-dark-200 dark:border-dark-700">
-          <div className="flex items-center justify-between">
-            <div>
-              <label className="flex items-center gap-2 text-sm font-medium text-dark-700 dark:text-dark-300 mb-1">
-                <Sparkles size={16} className="text-dark-500" />
-                Secondary Button (Fixed)
-              </label>
-              <p className="text-xs text-dark-500 dark:text-dark-400">
-                This button always links to /services
-              </p>
-            </div>
-            <div className="px-4 py-2 bg-white dark:bg-dark-800 border border-dark-300 dark:border-dark-600 rounded-lg text-sm text-dark-700 dark:text-dark-300">
-              Explore Services → /services
-            </div>
+        {/* Secondary CTA Button */}
+        <div className="grid sm:grid-cols-2 gap-4 p-4 bg-dark-50 dark:bg-dark-900/50 rounded-lg border border-dark-200 dark:border-dark-700">
+          <div>
+            <label className="flex items-center gap-2 text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
+              <MousePointer size={16} className="text-dark-600" />
+              Secondary Button Text
+            </label>
+            <input
+              type="text"
+              value={slide.secondaryCta?.text || ""}
+              onChange={(e) =>
+                updateSlideField(index, "secondaryCta.text", e.target.value)
+              }
+              placeholder={slide.secondaryCta?.text || "e.g., Explore Services"}
+              className="w-full px-4 py-2 rounded-lg border border-dark-300 dark:border-dark-600 bg-white dark:bg-dark-900 text-dark-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
+            />
+          </div>
+          <div>
+            <label className="flex items-center gap-2 text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
+              <LinkIcon size={16} className="text-dark-600" />
+              Secondary Button Link
+            </label>
+            <input
+              type="text"
+              value={slide.secondaryCta?.href || ""}
+              onChange={(e) =>
+                updateSlideField(index, "secondaryCta.href", e.target.value)
+              }
+              placeholder={
+                slide.secondaryCta?.href ||
+                "e.g., /services or https://example.com"
+              }
+              className="w-full px-4 py-2 rounded-lg border border-dark-300 dark:border-dark-600 bg-white dark:bg-dark-900 text-dark-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
+            />
           </div>
         </div>
 
@@ -234,13 +251,12 @@ function SortableSlide({
             <Palette size={16} className="text-primary-500" />
             Color Scheme
           </label>
-          <div className="flex gap-3 flex-wrap">
+          <div className="flex gap-2">
             {(
               [
                 { name: "purple", label: "Purple" },
                 { name: "gold", label: "Gold" },
                 { name: "teal", label: "Teal" },
-                { name: "rose", label: "Rose" },
                 { name: "green", label: "Green" },
               ] as const
             ).map((color) => (
@@ -249,14 +265,14 @@ function SortableSlide({
                 onClick={() =>
                   updateSlideField(index, "colorScheme", color.name)
                 }
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg border-2 transition-all ${
+                className={`flex items-center gap-1 px-1.5 py-0.5 rounded border transition-all text-xs ${
                   slide.colorScheme === color.name
-                    ? "border-primary-500 bg-primary-50 dark:bg-primary-900/20 scale-105"
+                    ? "border-primary-500 bg-primary-50 dark:bg-primary-900/20"
                     : "border-dark-300 dark:border-dark-600 hover:border-primary-300"
                 }`}
               >
                 <div
-                  className="w-6 h-6 rounded-full"
+                  className="w-3 h-3 rounded-full"
                   style={{
                     background:
                       color.name === "purple"
@@ -265,32 +281,45 @@ function SortableSlide({
                         ? "linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)"
                         : color.name === "teal"
                         ? "linear-gradient(135deg, #14b8a6 0%, #0d9488 100%)"
-                        : color.name === "rose"
-                        ? "linear-gradient(135deg, #fb7185 0%, #f43f5e 100%)"
                         : "linear-gradient(135deg, #22c55e 0%, #16a34a 100%)",
                   }}
                 />
-                <span className="text-sm font-medium text-dark-700 dark:text-dark-300">
+                <span className="text-xs font-medium text-dark-700 dark:text-dark-300">
                   {color.label}
                 </span>
                 {slide.colorScheme === color.name && (
-                  <CheckCircle className="w-4 h-4 text-primary-600" />
+                  <CheckCircle className="w-3 h-3 text-primary-600" />
                 )}
               </button>
             ))}
           </div>
         </div>
 
-        {/* Preview Button */}
-        <Button
-          onClick={() => setCurrentSlide(index)}
-          size="sm"
-          variant="outline"
-          className="w-full flex items-center justify-center gap-2"
-        >
-          <Eye size={16} />
-          Preview This Slide
-        </Button>
+        {/* Action Buttons */}
+        <div className="flex items-center justify-center gap-2">
+          {slidesLength > 1 && (
+            <Button
+              onClick={() => deleteSlide(index)}
+              variant="outline"
+              className="flex items-center gap-0.5 py-1 text-xs h-7 text-red-600 hover:text-red-700 !w-auto"
+            >
+              <Trash2 size={12} />
+              Delete
+            </Button>
+          )}
+
+          <Button
+            onClick={() => {
+              setCurrentSlide(index);
+              // Scroll to top to view the preview section
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            }}
+            className="flex items-center gap-2 py-1 text-xs h-7 bg-gradient-to-r from-primary-600 to-primary-700 !w-auto"
+          >
+            <Eye size={12} />
+            Preview This Slide
+          </Button>
+        </div>
       </div>
     </div>
   );
@@ -452,56 +481,80 @@ export default function HeroEditor() {
     );
   }
 
+  if (!slide) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <p className="text-dark-600 dark:text-dark-400">
+          No slides available. Click "Add Slide" to create one.
+        </p>
+      </div>
+    );
+  }
+
+  if (!slide) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <p className="text-dark-600 dark:text-dark-400">
+          No slides available. Click "Add Slide" to create one.
+        </p>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-dark-50 via-white to-primary-50 dark:from-dark-950 dark:via-dark-900 dark:to-dark-950 pt-16 px-2 pb-4">
-      <div className="pb-4">
+    <div className="min-h-screen bg-gradient-to-br from-dark-50 via-white to-primary-50 dark:from-dark-950 dark:via-dark-900 dark:to-dark-950 pt-24">
+      <div className="px-4 pb-8 max-w-7xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
         >
           {/* Header */}
-          <div className="flex flex-col gap-2 mb-3">
-            <div className="flex items-center gap-2">
-              <Button
-                onClick={() => router.push("/halo-admin-portal-2024/edit-page")}
-                className="flex items-center gap-1 text-xs py-1.5 px-2"
-                variant="outline"
-              >
-                <ArrowLeft size={14} />
-                Back
-              </Button>
-              <div>
-                <h1 className="text-lg sm:text-2xl font-bold text-dark-900 dark:text-white">
-                  Hero Editor
-                </h1>
-                <p className="text-xs text-dark-600 dark:text-dark-400">
-                  Click to edit
-                </p>
+          <div className="mb-6 mt-4">
+            <div className="flex items-center justify-between mb-2">
+              <h1 className="text-2xl sm:text-3xl font-bold text-green-600 dark:text-green-400">
+                Hero Editor
+              </h1>
+
+              <div className="flex items-center gap-1">
+                <Button
+                  onClick={() =>
+                    router.push("/halo-admin-portal-2024/edit-page")
+                  }
+                  className="flex items-center gap-0.5 py-1 px-1.5 text-xs h-7"
+                  variant="outline"
+                >
+                  <ArrowLeft size={12} />
+                  Back
+                </Button>
+
+                <Button
+                  onClick={handleSave}
+                  disabled={saving}
+                  className="flex items-center gap-0.5 py-1 px-1.5 text-xs h-7 bg-gradient-to-r from-primary-600 to-primary-700"
+                >
+                  {saving ? (
+                    <>
+                      <Loader2 size={12} className="animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <Save size={12} />
+                      Save
+                    </>
+                  )}
+                </Button>
               </div>
             </div>
 
-            <Button
-              onClick={handleSave}
-              disabled={saving}
-              className="flex items-center gap-1.5 text-xs py-1.5 px-2 bg-gradient-to-r from-primary-600 to-primary-700 w-full"
-            >
-              {saving ? (
-                <>
-                  <Loader2 size={14} className="animate-spin" />
-                  Saving...
-                </>
-              ) : (
-                <>
-                  <Save size={14} />
-                  Save
-                </>
-              )}
-            </Button>
+            <p className="text-sm text-green-600 dark:text-green-400">
+              Edit and manage your hero slides
+            </p>
           </div>
 
           {/* Preview Section */}
-          <Card className="mb-3 overflow-hidden">
-            <div className="relative min-h-[300px] sm:min-h-[400px] flex items-center justify-center">
+          <div className="mb-8 overflow-hidden rounded-lg bg-white dark:bg-dark-800 shadow-sm border border-dark-200 dark:border-dark-700">
+            <div className="relative min-h-[250px] sm:min-h-[350px] flex items-center justify-center">
               {/* 3D Background */}
               <div className="absolute inset-0 z-0">
                 <HeroScene colorScheme={slide.colorScheme} />
@@ -511,19 +564,19 @@ export default function HeroEditor() {
               <div className="absolute inset-0 bg-gradient-to-b from-transparent via-dark-900/50 to-dark-900/80 z-10" />
 
               {/* Content */}
-              <div className="container mx-auto px-4 relative z-20">
-                <div className="text-center max-w-5xl mx-auto">
+              <div className="w-full px-3 sm:px-6 py-4 sm:py-6 relative z-20">
+                <div className="text-center max-w-4xl mx-auto h-full flex flex-col justify-center">
                   <AnimatePresence mode="wait">
                     <motion.div
                       key={`preview-${currentSlide}`}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -20 }}
-                      className="space-y-6"
+                      className="space-y-3 sm:space-y-4"
                     >
                       {/* Subtitle */}
                       <div
-                        className={`inline-block px-6 py-3 glass rounded-full cursor-pointer hover:ring-2 hover:ring-primary-500 transition-all ${
+                        className={`inline-block px-3 py-1.5 sm:px-4 sm:py-2 glass rounded-full cursor-pointer hover:ring-2 hover:ring-primary-500 transition-all ${
                           editMode === `subtitle-${currentSlide}`
                             ? "ring-2 ring-primary-500"
                             : ""
@@ -543,13 +596,13 @@ export default function HeroEditor() {
                             }
                             onBlur={() => setEditMode(null)}
                             autoFocus
-                            className="bg-transparent text-primary-300 font-semibold text-sm outline-none text-center min-w-[200px]"
+                            className="bg-transparent text-primary-300 font-semibold text-xs sm:text-sm outline-none text-center min-w-[150px] sm:min-w-[200px]"
                           />
                         ) : (
-                          <span className="text-primary-300 font-semibold text-sm flex items-center">
-                            <Sparkles className="w-4 h-4 mr-2" />
+                          <span className="text-primary-300 font-semibold text-xs sm:text-sm flex items-center">
+                            <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                             {slide.subtitle}
-                            <Edit2 className="w-3 h-3 ml-2 opacity-0 group-hover:opacity-100" />
+                            <Edit2 className="w-2 h-2 sm:w-3 sm:h-3 ml-1 sm:ml-2 opacity-0 group-hover:opacity-100" />
                           </span>
                         )}
                       </div>
@@ -576,10 +629,10 @@ export default function HeroEditor() {
                             }
                             onBlur={() => setEditMode(null)}
                             autoFocus
-                            className="bg-transparent text-white text-6xl font-display font-bold outline-none text-center w-full"
+                            className="bg-transparent text-white text-2xl sm:text-3xl font-display font-bold outline-none text-center w-full"
                           />
                         ) : (
-                          <h1 className="text-6xl md:text-7xl lg:text-8xl font-display font-bold text-white mb-6 leading-tight drop-shadow-2xl">
+                          <h1 className="text-2xl sm:text-3xl md:text-4xl font-display font-bold text-white mb-2 sm:mb-3 leading-tight drop-shadow-2xl">
                             {slide.title}
                           </h1>
                         )}
@@ -609,17 +662,17 @@ export default function HeroEditor() {
                             }
                             onBlur={() => setEditMode(null)}
                             autoFocus
-                            className="bg-transparent text-dark-200 text-xl outline-none text-center w-full"
+                            className="bg-transparent text-dark-200 text-sm sm:text-base outline-none text-center w-full"
                           />
                         ) : (
-                          <p className="text-xl md:text-2xl text-dark-200 mb-8 max-w-3xl mx-auto">
+                          <p className="text-sm sm:text-base text-dark-200 mb-3 sm:mb-4 max-w-2xl mx-auto">
                             {slide.description}
                           </p>
                         )}
                       </div>
 
                       {/* CTA Button */}
-                      <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                      <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 justify-center">
                         <div
                           className={`cursor-pointer hover:ring-2 hover:ring-primary-500 rounded-lg transition-all inline-block ${
                             editMode === `cta-${currentSlide}`
@@ -629,10 +682,10 @@ export default function HeroEditor() {
                           onClick={() => setEditMode(`cta-${currentSlide}`)}
                         >
                           {editMode === `cta-${currentSlide}` ? (
-                            <div className="flex gap-2">
+                            <div className="flex gap-1 sm:gap-2">
                               <input
                                 type="text"
-                                value={slide.cta.text}
+                                value={slide.cta?.text || ""}
                                 onChange={(e) =>
                                   updateSlideField(
                                     currentSlide,
@@ -641,11 +694,11 @@ export default function HeroEditor() {
                                   )
                                 }
                                 placeholder="Button Text"
-                                className="bg-dark-800 text-white px-4 py-2 rounded-lg outline-none"
+                                className="bg-dark-800 text-white px-2 py-1 sm:px-3 sm:py-2 rounded text-xs sm:text-sm outline-none"
                               />
                               <input
                                 type="text"
-                                value={slide.cta.href}
+                                value={slide.cta?.href || ""}
                                 onChange={(e) =>
                                   updateSlideField(
                                     currentSlide,
@@ -654,120 +707,131 @@ export default function HeroEditor() {
                                   )
                                 }
                                 placeholder="Link URL"
-                                className="bg-dark-800 text-white px-4 py-2 rounded-lg outline-none"
+                                className="bg-dark-800 text-white px-2 py-1 sm:px-3 sm:py-2 rounded text-xs sm:text-sm outline-none"
                               />
                               <button
                                 onClick={() => setEditMode(null)}
-                                className="bg-green-600 text-white px-4 py-2 rounded-lg"
+                                className="bg-green-600 text-white px-2 py-1 sm:px-3 sm:py-2 rounded text-xs sm:text-sm"
                               >
-                                <CheckCircle size={18} />
+                                <CheckCircle
+                                  size={14}
+                                  className="sm:w-4 sm:h-4"
+                                />
                               </button>
                             </div>
                           ) : (
-                            <Button size="lg" className="group">
-                              {slide.cta.text}
-                              <Edit2 className="w-4 h-4 ml-2 opacity-0 group-hover:opacity-100" />
+                            <Button className="group text-sm py-2 px-4 sm:py-3 sm:px-6">
+                              {slide.cta?.text || "Button"}
+                              <Edit2 className="w-3 h-3 sm:w-4 sm:h-4 ml-1 sm:ml-2 opacity-0 group-hover:opacity-100" />
                             </Button>
                           )}
                         </div>
+                        {slide.secondaryCta && (
+                          <div>
+                            <Button
+                              variant="outline"
+                              className="text-sm py-2 px-4 sm:py-3 sm:px-6"
+                            >
+                              {slide.secondaryCta?.text || "Explore Services"}
+                            </Button>
+                          </div>
+                        )}
                       </div>
 
                       {/* Color Scheme Selector */}
-                      <div className="mt-8 flex justify-center gap-3">
-                        {(
-                          ["purple", "gold", "teal", "rose", "green"] as const
-                        ).map((color) => (
-                          <button
-                            key={color}
-                            onClick={() =>
-                              updateSlideField(
-                                currentSlide,
-                                "colorScheme",
-                                color
-                              )
-                            }
-                            className={`w-10 h-10 rounded-full border-2 transition-all ${
-                              slide.colorScheme === color
-                                ? "border-white scale-110"
-                                : "border-dark-600 hover:scale-105"
-                            }`}
-                            style={{
-                              background:
-                                color === "purple"
-                                  ? "linear-gradient(135deg, #a855f7 0%, #7c3aed 100%)"
-                                  : color === "gold"
-                                  ? "linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)"
-                                  : color === "teal"
-                                  ? "linear-gradient(135deg, #14b8a6 0%, #0d9488 100%)"
-                                  : color === "rose"
-                                  ? "linear-gradient(135deg, #fb7185 0%, #f43f5e 100%)"
-                                  : "linear-gradient(135deg, #22c55e 0%, #16a34a 100%)",
-                            }}
-                          />
-                        ))}
+                      <div className="mt-4 sm:mt-6 flex justify-center gap-1.5 sm:gap-2">
+                        {(["purple", "gold", "teal", "green"] as const).map(
+                          (color) => (
+                            <button
+                              key={color}
+                              onClick={() =>
+                                updateSlideField(
+                                  currentSlide,
+                                  "colorScheme",
+                                  color
+                                )
+                              }
+                              className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full border-2 transition-all ${
+                                slide.colorScheme === color
+                                  ? "border-white scale-110"
+                                  : "border-dark-600 hover:scale-105"
+                              }`}
+                              style={{
+                                background:
+                                  color === "purple"
+                                    ? "linear-gradient(135deg, #a855f7 0%, #7c3aed 100%)"
+                                    : color === "gold"
+                                    ? "linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)"
+                                    : color === "teal"
+                                    ? "linear-gradient(135deg, #14b8a6 0%, #0d9488 100%)"
+                                    : "linear-gradient(135deg, #22c55e 0%, #16a34a 100%)",
+                              }}
+                            />
+                          )
+                        )}
                       </div>
                     </motion.div>
                   </AnimatePresence>
                 </div>
               </div>
             </div>
-          </Card>
+          </div>
 
-          {/* All Slides Editor */}
-          <Card className="p-6">
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h2 className="text-xl font-bold text-dark-900 dark:text-white">
-                  Manage Slides ({slides.length})
-                </h2>
-                <p className="text-sm text-dark-600 dark:text-dark-400 mt-1">
-                  <GripVertical size={14} className="inline mr-1" />
-                  Drag to reorder slides • {slides.length} slide
-                  {slides.length !== 1 ? "s" : ""} loaded
-                </p>
-              </div>
+          {/* Manage Slides Header */}
+          <div className="mb-6">
+            <div className="flex flex-row items-center justify-between gap-2 mb-1">
+              <h2 className="text-2xl font-bold text-dark-900 dark:text-white">
+                Manage Slides ({slides.length})
+              </h2>
               <Button
                 onClick={addSlide}
-                size="sm"
-                className="flex items-center gap-2"
+                className="flex flex-row items-center gap-0.5 py-1 text-xs h-7 bg-gradient-to-r from-primary-600 to-primary-700 !w-auto whitespace-nowrap flex-shrink-0"
               >
-                <Plus size={16} />
+                <Plus size={12} />
                 Add Slide
               </Button>
             </div>
+            <p className="text-sm text-dark-600 dark:text-dark-400">
+              <GripVertical size={14} className="inline mr-1" />
+              Drag to reorder slides • {slides.length} slide
+              {slides.length !== 1 ? "s" : ""} loaded
+            </p>
+          </div>
 
-            {slides.length === 0 ? (
-              <div className="text-center py-8 text-dark-500 dark:text-dark-400">
+          {/* Individual Slide Cards */}
+          {slides.length === 0 ? (
+            <div className="bg-white dark:bg-dark-800 rounded-lg border border-dark-200 dark:border-dark-700 p-8 shadow-sm">
+              <div className="text-center text-dark-500 dark:text-dark-400">
                 No slides found. Click "Add Slide" to create your first slide.
               </div>
-            ) : (
-              <DndContext
-                sensors={sensors}
-                collisionDetection={closestCenter}
-                onDragEnd={handleDragEnd}
+            </div>
+          ) : (
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
+            >
+              <SortableContext
+                items={slides.map((_, i) => i.toString())}
+                strategy={verticalListSortingStrategy}
               >
-                <SortableContext
-                  items={slides.map((_, i) => i.toString())}
-                  strategy={verticalListSortingStrategy}
-                >
-                  <div className="space-y-6">
-                    {slides.map((s, index) => (
-                      <SortableSlide
-                        key={index}
-                        slide={s}
-                        index={index}
-                        currentSlide={currentSlide}
-                        updateSlideField={updateSlideField}
-                        deleteSlide={deleteSlide}
-                        setCurrentSlide={setCurrentSlide}
-                        slidesLength={slides.length}
-                      />
-                    ))}
-                  </div>
-                </SortableContext>
-              </DndContext>
-            )}
-          </Card>
+                <div className="space-y-4">
+                  {slides.map((s, index) => (
+                    <SortableSlide
+                      key={index}
+                      slide={s}
+                      index={index}
+                      currentSlide={currentSlide}
+                      updateSlideField={updateSlideField}
+                      deleteSlide={deleteSlide}
+                      setCurrentSlide={setCurrentSlide}
+                      slidesLength={slides.length}
+                    />
+                  ))}
+                </div>
+              </SortableContext>
+            </DndContext>
+          )}
         </motion.div>
       </div>
     </div>

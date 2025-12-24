@@ -87,8 +87,11 @@ export default function Navbar() {
 
   useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
+      setScrolled(window.scrollY > 0);
     };
+
+    // Set initial state immediately
+    handleScroll();
 
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
@@ -98,7 +101,8 @@ export default function Navbar() {
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Element;
-      if (showNotifications && !target.closest(".notification-dropdown")) {
+      const notificationDropdown = target.closest(".notification-dropdown");
+      if (showNotifications && !notificationDropdown) {
         setShowNotifications(false);
       }
     };
@@ -186,10 +190,11 @@ export default function Navbar() {
   return (
     <>
       <motion.nav
-        className="fixed top-0 left-0 right-0 z-[100] transition-all duration-300"
+        className="fixed top-0 left-0 right-0 z-[100]"
         style={{
           backgroundColor: scrolled ? "rgba(255, 255, 255, 1)" : "transparent",
           backdropFilter: scrolled ? "blur(10px)" : "none",
+          transition: "none",
         }}
         initial={{ y: -100 }}
         animate={{ y: 0 }}
@@ -257,12 +262,14 @@ export default function Navbar() {
                 <div className="relative notification-dropdown">
                   <button
                     onClick={() => {
-                      setShowNotifications(!showNotifications);
-                      if (!showNotifications) {
+                      if (showNotifications) {
+                        setShowNotifications(false);
+                      } else {
+                        setShowNotifications(true);
                         fetchNotifications();
                       }
                     }}
-                    className="p-2 rounded-xl hover:bg-primary-50 dark:hover:bg-primary-950 transition-colors relative"
+                    className="p-2 rounded-xl hover:bg-primary-50 dark:hover:bg-primary-950 transition-colors relative cursor-pointer"
                   >
                     <Bell className="w-5 h-5 text-green-600 dark:text-green-400" />
                     {notificationCount > 0 && (
@@ -275,82 +282,95 @@ export default function Navbar() {
                   {/* Notification Dropdown */}
                   <AnimatePresence>
                     {showNotifications && (
-                      <motion.div
-                        initial={{ opacity: 0, y: -10, scale: 0.95 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                        className="absolute right-0 top-12 w-80 bg-white dark:bg-dark-800 rounded-xl shadow-xl border border-dark-200 dark:border-dark-700 z-50"
-                      >
-                        <div className="p-4 border-b border-dark-200 dark:border-dark-700">
-                          <h3 className="font-semibold text-dark-900 dark:text-white">
-                            Notifications
-                          </h3>
-                        </div>
-                        <div className="max-h-80 overflow-y-auto">
-                          {notifications.length > 0 ? (
-                            notifications.map((notification: any) => (
-                              <div
-                                key={notification.id}
-                                className={`p-3 border-b border-dark-100 dark:border-dark-700 hover:bg-dark-50 dark:hover:bg-dark-700 cursor-pointer ${
-                                  !notification.isRead
-                                    ? "bg-blue-50 dark:bg-blue-900/10"
-                                    : ""
-                                }`}
+                      <>
+                        {/* Backdrop */}
+                        <div
+                          className="fixed inset-0 z-40"
+                          onClick={() => setShowNotifications(false)}
+                        />
+                        <motion.div
+                          initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                          className="absolute right-0 top-12 w-80 bg-white dark:bg-dark-800 rounded-xl shadow-xl border border-dark-200 dark:border-dark-700 z-50"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <div className="p-4 border-b border-dark-200 dark:border-dark-700">
+                            <h3 className="font-semibold text-dark-900 dark:text-white">
+                              Notifications
+                            </h3>
+                          </div>
+                          <div className="max-h-80 overflow-y-auto">
+                            {notifications.length > 0 ? (
+                              notifications.map((notification: any) => (
+                                <div
+                                  key={notification.id}
+                                  className={`p-3 border-b border-dark-100 dark:border-dark-700 hover:bg-dark-50 dark:hover:bg-dark-700 cursor-pointer ${
+                                    !notification.isRead
+                                      ? "bg-blue-50 dark:bg-blue-900/10"
+                                      : ""
+                                  }`}
+                                  onClick={() => {
+                                    if (notification.link) {
+                                      router.push(notification.link);
+                                    }
+                                    if (!notification.isRead) {
+                                      markAsRead([notification.id]);
+                                    }
+                                    setShowNotifications(false);
+                                  }}
+                                >
+                                  <div className="flex items-start space-x-2">
+                                    {!notification.isRead && (
+                                      <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
+                                    )}
+                                    <div className="flex-1">
+                                      <p className="font-medium text-sm text-dark-900 dark:text-white">
+                                        {notification.title}
+                                      </p>
+                                      <p className="text-xs text-dark-600 dark:text-dark-400 mt-1">
+                                        {notification.message}
+                                      </p>
+                                      <p className="text-xs text-dark-500 dark:text-dark-500 mt-1">
+                                        {new Date(
+                                          notification.createdAt
+                                        ).toLocaleDateString()}
+                                      </p>
+                                    </div>
+                                  </div>
+                                </div>
+                              ))
+                            ) : (
+                              <div className="p-4 text-center text-dark-500 dark:text-dark-400">
+                                No notifications
+                              </div>
+                            )}
+                          </div>
+                          {notifications.length > 0 && (
+                            <div className="p-3 border-t border-dark-200 dark:border-dark-700">
+                              <button
                                 onClick={() => {
-                                  if (notification.link) {
-                                    router.push(notification.link);
-                                  }
-                                  if (!notification.isRead) {
-                                    markAsRead([notification.id]);
+                                  const unreadIds = notifications
+                                    .filter((n: any) => !n.isRead)
+                                    .map((n: any) => n.id);
+                                  if (unreadIds.length > 0) {
+                                    markAsRead(unreadIds);
                                   }
                                   setShowNotifications(false);
                                 }}
+                                className="w-full text-center text-sm text-primary-600 hover:text-primary-700 font-medium focus:outline-none focus:ring-0 border-0 active:outline-none hover:border-0 active:border-0 focus:border-0"
+                                style={{
+                                  outline: "none",
+                                  border: "none",
+                                  boxShadow: "none",
+                                }}
                               >
-                                <div className="flex items-start space-x-2">
-                                  {!notification.isRead && (
-                                    <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
-                                  )}
-                                  <div className="flex-1">
-                                    <p className="font-medium text-sm text-dark-900 dark:text-white">
-                                      {notification.title}
-                                    </p>
-                                    <p className="text-xs text-dark-600 dark:text-dark-400 mt-1">
-                                      {notification.message}
-                                    </p>
-                                    <p className="text-xs text-dark-500 dark:text-dark-500 mt-1">
-                                      {new Date(
-                                        notification.createdAt
-                                      ).toLocaleDateString()}
-                                    </p>
-                                  </div>
-                                </div>
-                              </div>
-                            ))
-                          ) : (
-                            <div className="p-4 text-center text-dark-500 dark:text-dark-400">
-                              No notifications
+                                Mark all as read
+                              </button>
                             </div>
                           )}
-                        </div>
-                        {notifications.length > 0 && (
-                          <div className="p-3 border-t border-dark-200 dark:border-dark-700">
-                            <button
-                              onClick={() => {
-                                const unreadIds = notifications
-                                  .filter((n: any) => !n.isRead)
-                                  .map((n: any) => n.id);
-                                if (unreadIds.length > 0) {
-                                  markAsRead(unreadIds);
-                                }
-                                setShowNotifications(false);
-                              }}
-                              className="w-full text-center text-sm text-primary-600 hover:text-primary-700 font-medium"
-                            >
-                              Mark all as read
-                            </button>
-                          </div>
-                        )}
-                      </motion.div>
+                        </motion.div>
+                      </>
                     )}
                   </AnimatePresence>
                 </div>
@@ -371,6 +391,7 @@ export default function Navbar() {
                   <Button
                     variant="outline"
                     size="sm"
+                    className="w-32 text-sm whitespace-nowrap flex items-center justify-center"
                     onClick={() =>
                       signOut({ callbackUrl: "/admin-setup", redirect: true })
                     }
@@ -489,7 +510,7 @@ export default function Navbar() {
                     </Link>
                     <Button
                       variant="outline"
-                      className="w-full"
+                      className="w-36 mx-auto text-sm whitespace-nowrap flex items-center justify-center"
                       onClick={() => {
                         setMobileMenuOpen(false);
                         signOut({

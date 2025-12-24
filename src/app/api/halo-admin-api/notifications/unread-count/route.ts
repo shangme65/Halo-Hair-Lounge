@@ -3,7 +3,6 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 
-// GET - Get unread notification count
 export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);

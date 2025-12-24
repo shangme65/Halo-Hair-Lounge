@@ -128,7 +128,7 @@ export default function NotificationsPage() {
                   variant="outline"
                   size="sm"
                   onClick={deleteReadNotifications}
-                  className="text-red-600 hover:text-white hover:bg-red-500 border-red-200 hover:border-red-500 text-xs h-7 transition-all duration-200 flex items-center justify-center"
+                  className="text-green-600 hover:text-white hover:bg-green-500 border-green-200 hover:border-green-500 text-xs h-7 transition-all duration-200 flex items-center justify-center"
                 >
                   <Trash2 className="w-3 h-3" />
                   <span className="ml-1">Clear read</span>

@@ -51,10 +51,10 @@ const Button = forwardRef<HTMLButtonElement, AnimatedButtonProps>(
       ),
       secondary: clsx(
         "bg-gradient-to-b from-secondary-300 via-secondary-400 via-50% to-secondary-600",
-        "shadow-[inset_0_1px_0_0_rgba(255,255,255,0.4),inset_0_-2px_4px_0_rgba(0,0,0,0.15),0_8px_0_0_#92400e,0_10px_8px_-2px_rgba(0,0,0,0.4),0_15px_25px_-5px_rgba(0,0,0,0.3)]",
-        "hover:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.5),inset_0_-2px_4px_0_rgba(0,0,0,0.15),0_6px_0_0_#92400e,0_8px_6px_-2px_rgba(0,0,0,0.4),0_12px_20px_-5px_rgba(0,0,0,0.3)]",
+        "shadow-[inset_0_1px_0_0_rgba(255,255,255,0.4),inset_0_-2px_4px_0_rgba(0,0,0,0.15),0_8px_0_0_#000000,0_10px_8px_-2px_rgba(0,0,0,0.4),0_15px_25px_-5px_rgba(0,0,0,0.3)]",
+        "hover:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.5),inset_0_-2px_4px_0_rgba(0,0,0,0.15),0_6px_0_0_#000000,0_8px_6px_-2px_rgba(0,0,0,0.4),0_12px_20px_-5px_rgba(0,0,0,0.3)]",
         "hover:translate-y-[2px]",
-        "active:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1),inset_0_2px_8px_0_rgba(0,0,0,0.25),0_1px_0_0_#92400e,0_2px_3px_-1px_rgba(0,0,0,0.4)]",
+        "active:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1),inset_0_2px_8px_0_rgba(0,0,0,0.25),0_1px_0_0_#000000,0_2px_3px_-1px_rgba(0,0,0,0.4)]",
         "active:translate-y-[7px]",
         "text-dark-900 border-t border-secondary-200/50"
       ),

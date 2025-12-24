@@ -49,8 +49,43 @@ export async function DELETE(req: NextRequest) {
       // Delete appointments (references users and services)
       await prisma.appointment.deleteMany({});
 
-      // Delete all page content sections (no foreign keys)
+      // Reset hero content to default instead of deleting
+      const defaultHeroSlides = [
+        {
+          subtitle: "Premium Hair Care Excellence",
+          title: "Transform Your Look",
+          description:
+            "Experience luxury styling with our expert stylists and premium products",
+          cta: { text: "Book Appointment", href: "/book" },
+          secondaryCta: { text: "Explore Services", href: "/services" },
+        },
+        {
+          subtitle: "Expert Stylists",
+          title: "Your Beauty, Our Passion",
+          description:
+            "Discover personalized hair care solutions tailored just for you",
+          cta: { text: "View Services", href: "/services" },
+          secondaryCta: { text: "Explore Services", href: "/services" },
+        },
+        {
+          subtitle: "Quality Products",
+          title: "Indulge in Luxury",
+          description:
+            "Premium hair treatments using the finest products in the industry",
+          cta: { text: "Shop Products", href: "/products" },
+          secondaryCta: { text: "Explore Services", href: "/services" },
+        },
+      ];
+
+      // Delete existing hero content and create default
       await prisma.heroContent.deleteMany({});
+      await prisma.heroContent.create({
+        data: {
+          slides: defaultHeroSlides,
+        },
+      });
+
+      // Delete other content sections
       await prisma.ctaContent.deleteMany({});
       await prisma.featuresContent.deleteMany({});
       await prisma.faqContent.deleteMany({});
