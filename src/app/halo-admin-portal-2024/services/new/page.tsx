@@ -100,23 +100,26 @@ export default function ServiceFormPage() {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
-    try {
-      setUploading(true);
-      const uploadedUrls: string[] = [];
+    setUploading(true);
+    const uploadedUrls: string[] = [];
+    const failedFiles: string[] = [];
 
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
 
-        if (!file.type.startsWith("image/")) {
-          toast.error(`${file.name} is not an image file`);
-          continue;
-        }
+      if (!file.type.startsWith("image/")) {
+        toast.error(`${file.name} is not an image file`);
+        failedFiles.push(file.name);
+        continue;
+      }
 
-        if (file.size > 10 * 1024 * 1024) {
-          toast.error(`${file.name} is too large (max 10MB)`);
-          continue;
-        }
+      if (file.size > 10 * 1024 * 1024) {
+        toast.error(`${file.name} is too large (max 10MB)`);
+        failedFiles.push(file.name);
+        continue;
+      }
 
+      try {
         const formDataUpload = new FormData();
         formDataUpload.append("file", file);
         formDataUpload.append("type", "service");
@@ -129,34 +132,46 @@ export default function ServiceFormPage() {
 
         if (!res.ok) {
           const error = await res.json();
-          throw new Error(error.error || "Upload failed");
+          toast.error(`${file.name}: ${error.error || "Upload failed"}`);
+          failedFiles.push(file.name);
+          continue;
         }
 
         const data = await res.json();
         uploadedUrls.push(data.url);
+      } catch (error: any) {
+        console.error(`Upload error for ${file.name}:`, error);
+        toast.error(`${file.name}: ${error.message || "Failed to upload"}`);
+        failedFiles.push(file.name);
       }
-
-      if (uploadedUrls.length > 0) {
-        // Add uploaded images to existing images
-        const currentImages = formData.images
-          ? formData.images
-              .split(",")
-              .map((s) => s.trim())
-              .filter(Boolean)
-          : [];
-        currentImages.push(...uploadedUrls);
-
-        setFormData((prev) => ({ ...prev, images: currentImages.join(", ") }));
-        toast.success(`${uploadedUrls.length} image(s) uploaded successfully!`);
-      }
-    } catch (error: any) {
-      console.error("Upload error:", error);
-      toast.error(error.message || "Failed to upload image");
-    } finally {
-      setUploading(false);
-      // Reset input
-      e.target.value = "";
     }
+
+    // Update form data with successfully uploaded images
+    if (uploadedUrls.length > 0) {
+      const currentImages = formData.images
+        ? formData.images
+            .split(",")
+            .map((s) => s.trim())
+            .filter(Boolean)
+        : [];
+      currentImages.push(...uploadedUrls);
+
+      setFormData((prev) => ({ ...prev, images: currentImages.join(", ") }));
+      toast.success(`${uploadedUrls.length} image(s) uploaded successfully!`);
+    }
+
+    // Show summary if there were failures
+    if (failedFiles.length > 0 && uploadedUrls.length === 0) {
+      toast.error(`All uploads failed (${failedFiles.length} files)`);
+    } else if (failedFiles.length > 0) {
+      toast.warning(
+        `${uploadedUrls.length} succeeded, ${failedFiles.length} failed`
+      );
+    }
+
+    setUploading(false);
+    // Reset input
+    e.target.value = "";
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
