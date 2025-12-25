@@ -2,17 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Heart, Award, Clock, Users, Plus, Trash2, Save } from "lucide-react";
+import { Plus, Trash2, Save } from "lucide-react";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
+import IconSelector, { renderIcon } from "@/components/admin/IconSelector";
 import { toast } from "react-hot-toast";
-
-const iconOptions = [
-  { name: "Heart", icon: Heart },
-  { name: "Award", icon: Award },
-  { name: "Clock", icon: Clock },
-  { name: "Users", icon: Users },
-];
 
 interface Reason {
   icon: string;
@@ -118,11 +112,6 @@ export default function WhyChooseUsEditorPage() {
     }
   };
 
-  const getIconComponent = (iconName: string) => {
-    const iconOption = iconOptions.find((opt) => opt.name === iconName);
-    return iconOption ? iconOption.icon : Heart;
-  };
-
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -169,8 +158,6 @@ export default function WhyChooseUsEditorPage() {
         {/* Reasons Grid */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
           {reasons.map((reason, index) => {
-            const IconComponent = getIconComponent(reason.icon);
-
             return (
               <Card
                 key={index}
@@ -190,25 +177,18 @@ export default function WhyChooseUsEditorPage() {
                     <label className="block text-xs font-medium mb-1.5 text-gray-700 dark:text-gray-300">
                       Icon
                     </label>
-                    <select
+                    <IconSelector
                       value={reason.icon}
-                      onChange={(e) =>
-                        updateReasonField(index, "icon", e.target.value)
+                      onChange={(value) =>
+                        updateReasonField(index, "icon", value)
                       }
-                      className="w-full px-2 py-1.5 text-sm rounded-lg border border-gray-300 dark:border-dark-700 bg-white dark:bg-dark-800 text-dark-900 dark:text-white"
-                    >
-                      {iconOptions.map((opt) => (
-                        <option key={opt.name} value={opt.name}>
-                          {opt.name}
-                        </option>
-                      ))}
-                    </select>
+                    />
                   </div>
 
                   {/* Icon Preview */}
                   <div className="flex justify-center">
                     <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center">
-                      <IconComponent className="w-6 h-6 text-white" />
+                      {renderIcon(reason.icon, "w-6 h-6 text-white")}
                     </div>
                   </div>
 

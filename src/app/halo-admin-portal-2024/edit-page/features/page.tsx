@@ -2,24 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  Sparkles,
-  Calendar,
-  ShoppingBag,
-  Scissors,
-  Plus,
-  Trash2,
-  Save,
-} from "lucide-react";
+import { Plus, Trash2, Save } from "lucide-react";
 import Button from "@/components/ui/Button";
+import IconSelector, { renderIcon } from "@/components/admin/IconSelector";
 import { toast } from "react-hot-toast";
-
-const iconOptions = [
-  { name: "Scissors", icon: Scissors },
-  { name: "Sparkles", icon: Sparkles },
-  { name: "Calendar", icon: Calendar },
-  { name: "ShoppingBag", icon: ShoppingBag },
-];
 
 interface Feature {
   icon: string;
@@ -169,11 +155,6 @@ export default function FeaturesEditorPage() {
     }
   };
 
-  const getIconComponent = (iconName: string) => {
-    const iconOption = iconOptions.find((opt) => opt.name === iconName);
-    return iconOption ? iconOption.icon : Sparkles;
-  };
-
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -314,8 +295,6 @@ export default function FeaturesEditorPage() {
         {/* Features Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {features.map((feature, index) => {
-            const IconComponent = getIconComponent(feature.icon);
-
             return (
               <motion.div
                 key={index}
@@ -353,19 +332,12 @@ export default function FeaturesEditorPage() {
                       <label className="block text-xs font-medium mb-1 text-gray-600 dark:text-gray-400">
                         Icon
                       </label>
-                      <select
+                      <IconSelector
                         value={feature.icon}
-                        onChange={(e) =>
-                          updateFeatureField(index, "icon", e.target.value)
+                        onChange={(value) =>
+                          updateFeatureField(index, "icon", value)
                         }
-                        className="w-full px-2 py-1 text-xs rounded-lg border border-gray-300 dark:border-dark-700 bg-white dark:bg-dark-800 text-dark-900 dark:text-white focus:ring-2 focus:ring-primary-500"
-                      >
-                        {iconOptions.map((opt) => (
-                          <option key={opt.name} value={opt.name}>
-                            {opt.name}
-                          </option>
-                        ))}
-                      </select>
+                      />
                     </div>
 
                     {/* Icon and Title Row */}
@@ -379,7 +351,10 @@ export default function FeaturesEditorPage() {
                           transition: { duration: 0.5 },
                         }}
                       >
-                        <IconComponent className="w-6 h-6 text-white relative z-10 drop-shadow-lg" />
+                        {renderIcon(
+                          feature.icon,
+                          "w-6 h-6 text-white relative z-10 drop-shadow-lg"
+                        )}
                       </motion.div>
 
                       {/* Title */}
