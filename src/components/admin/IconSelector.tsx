@@ -1,63 +1,33 @@
 "use client";
 
 import { useState } from "react";
-import {
-  Heart,
-  Award,
-  Clock,
-  Users,
-  Scissors,
-  Sparkles,
-  Calendar,
-  ShoppingBag,
-  Star,
-  Zap,
-  Trophy,
-  Gift,
-  Crown,
-  Gem,
-  Palette,
-  Smile,
-  ThumbsUp,
-  Check,
-  Shield,
-  Target,
-  TrendingUp,
-  Layers,
-  Box,
-  Package,
-  X,
-  Link as LinkIcon,
-  Image as ImageIcon,
-} from "lucide-react";
+import * as LucideIcons from "lucide-react";
 
-// Extended icon library
-const iconLibrary = [
-  { name: "Heart", icon: Heart },
-  { name: "Award", icon: Award },
-  { name: "Clock", icon: Clock },
-  { name: "Users", icon: Users },
-  { name: "Scissors", icon: Scissors },
-  { name: "Sparkles", icon: Sparkles },
-  { name: "Calendar", icon: Calendar },
-  { name: "ShoppingBag", icon: ShoppingBag },
-  { name: "Star", icon: Star },
-  { name: "Zap", icon: Zap },
-  { name: "Trophy", icon: Trophy },
-  { name: "Gift", icon: Gift },
-  { name: "Crown", icon: Crown },
-  { name: "Gem", icon: Gem },
-  { name: "Palette", icon: Palette },
-  { name: "Smile", icon: Smile },
-  { name: "ThumbsUp", icon: ThumbsUp },
-  { name: "Check", icon: Check },
-  { name: "Shield", icon: Shield },
-  { name: "Target", icon: Target },
-  { name: "TrendingUp", icon: TrendingUp },
-  { name: "Layers", icon: Layers },
-  { name: "Box", icon: Box },
-  { name: "Package", icon: Package },
-];
+// Get all Lucide icons dynamically
+const getAllLucideIcons = () => {
+  const iconLibrary: Array<{ name: string; icon: any }> = [];
+  
+  // Filter out non-icon exports from lucide-react
+  const excludeKeys = [
+    'createLucideIcon',
+    'default',
+    'Icon',
+    'icons'
+  ];
+
+  Object.keys(LucideIcons).forEach((key) => {
+    if (!excludeKeys.includes(key) && typeof (LucideIcons as any)[key] === 'function') {
+      iconLibrary.push({
+        name: key,
+        icon: (LucideIcons as any)[key],
+      });
+    }
+  });
+
+  return iconLibrary.sort((a, b) => a.name.localeCompare(b.name));
+};
+
+const iconLibrary = getAllLucideIcons();
 
 interface IconSelectorProps {
   value: string;
@@ -86,7 +56,7 @@ export default function IconSelector({
       return null;
     }
     const iconOption = iconLibrary.find((opt) => opt.name === value);
-    return iconOption ? iconOption.icon : Heart;
+    return iconOption ? iconOption.icon : (LucideIcons as any).Heart;
   };
 
   const CurrentIcon = getCurrentIcon();
@@ -179,7 +149,7 @@ export default function IconSelector({
                     : "bg-gray-50 dark:bg-dark-900 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-dark-800"
                 }`}
               >
-                <ImageIcon className="w-4 h-4" />
+                <LucideIcons.ImageIcon className="w-4 h-4" />
                 Icon Library
               </button>
               <button
@@ -191,7 +161,7 @@ export default function IconSelector({
                     : "bg-gray-50 dark:bg-dark-900 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-dark-800"
                 }`}
               >
-                <LinkIcon className="w-4 h-4" />
+                <LucideIcons.Link className="w-4 h-4" />
                 Custom URL
               </button>
             </div>
@@ -208,9 +178,14 @@ export default function IconSelector({
                   className="w-full px-3 py-2 mb-3 text-sm border border-gray-300 dark:border-dark-700 rounded-lg bg-white dark:bg-dark-900 text-dark-900 dark:text-white focus:ring-2 focus:ring-primary-500"
                 />
 
+                {/* Icon count */}
+                <p className="text-xs text-gray-500 dark:text-gray-400 mb-2 px-1">
+                  {filteredIcons.length} icon{filteredIcons.length !== 1 ? 's' : ''} available
+                </p>
+
                 {/* Icon Grid */}
-                <div className="max-h-80 overflow-y-auto">
-                  <div className="grid grid-cols-4 gap-2">
+                <div className="max-h-96 overflow-y-auto pr-2">
+                  <div className="grid grid-cols-5 gap-2">{filteredIcons.map((iconOption) => {
                     {filteredIcons.map((iconOption) => {
                       const IconComp = iconOption.icon;
                       const isSelected = value === iconOption.name;
@@ -220,14 +195,15 @@ export default function IconSelector({
                           key={iconOption.name}
                           type="button"
                           onClick={() => handleIconSelect(iconOption.name)}
-                          className={`p-3 rounded-lg flex flex-col items-center justify-center gap-1 transition-all ${
+                          className={`p-2 rounded-lg flex flex-col items-center justify-center gap-1 transition-all ${
                             isSelected
                               ? "bg-primary-500 text-white shadow-md scale-105"
                               : "bg-gray-50 dark:bg-dark-900 text-gray-700 dark:text-gray-300 hover:bg-primary-100 dark:hover:bg-dark-700 hover:scale-105"
                           }`}
+                          title={iconOption.name}
                         >
-                          <IconComp className="w-6 h-6" />
-                          <span className="text-[10px] text-center leading-tight">
+                          <IconComp className="w-5 h-5" />
+                          <span className="text-[9px] text-center leading-tight truncate max-w-full">
                             {iconOption.name}
                           </span>
                         </button>
@@ -318,6 +294,7 @@ export function renderIcon(iconValue: string, className: string = "w-6 h-6") {
     return <IconComp className={className} />;
   }
 
-  // Fallback
-  return <Heart className={className} />;
+  // Fallback to Heart icon
+  const HeartIcon = (LucideIcons as any).Heart;
+  return <HeartIcon className={className} />;
 }
