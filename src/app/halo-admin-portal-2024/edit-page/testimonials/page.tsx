@@ -232,7 +232,7 @@ export default function TestimonialsEditorPage() {
   const updateTestimonialField = (
     index: number,
     field: keyof Testimonial,
-    value: string | number
+    value: string | number | boolean
   ) => {
     const updated = [...testimonials];
     updated[index] = { ...updated[index], [field]: value };
@@ -602,7 +602,9 @@ export default function TestimonialsEditorPage() {
                       <div className="flex gap-2">
                         <input
                           type="file"
-                          ref={(el) => (fileInputRefs.current[index] = el)}
+                          ref={(el) => {
+                            fileInputRefs.current[index] = el;
+                          }}
                           onChange={(e) => {
                             const file = e.target.files?.[0];
                             if (file) handleImageUpload(index, file);
