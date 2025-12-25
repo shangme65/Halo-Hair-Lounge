@@ -380,9 +380,6 @@ export default function FeaturesEditorPage() {
 
                     {/* Icon Selector and Delete Button Row */}
                     <div className="mb-3 relative z-10">
-                      <label className="block text-xs font-medium mb-1 text-gray-600 dark:text-gray-400">
-                        Icon
-                      </label>
                       <div className="flex gap-2">
                         <div className="flex-1">
                           <IconSelector
@@ -421,9 +418,6 @@ export default function FeaturesEditorPage() {
 
                       {/* Title */}
                       <div className="flex-1">
-                        <label className="block text-xs font-medium mb-1 text-gray-600 dark:text-gray-400">
-                          Title
-                        </label>
                         {editMode === `title-${index}` ? (
                           <input
                             type="text"
@@ -448,9 +442,6 @@ export default function FeaturesEditorPage() {
 
                     {/* Description */}
                     <div className="relative z-10">
-                      <label className="block text-xs font-medium mb-1 text-gray-600 dark:text-gray-400">
-                        Description
-                      </label>
                       {editMode === `description-${index}` ? (
                         <textarea
                           value={feature.description}

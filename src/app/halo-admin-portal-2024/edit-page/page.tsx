@@ -95,101 +95,70 @@ export default function EditPageDashboard() {
 
   return (
     <div className="bg-gradient-to-br from-dark-50 via-white to-primary-50 dark:from-dark-950 dark:via-dark-900 dark:to-dark-950">
-      <div className="pt-20 px-0 pb-4">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="px-4"
-        >
-          {/* Edit Page Header - No Card */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="mb-3"
-          >
-            <div className="flex items-center space-x-2 sm:space-x-3">
-              <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
-                <FileEdit className="w-4 h-4 sm:w-5 sm:h-5 text-green-600" />
-              </div>
-              <div>
-                <h1 className="text-2xl sm:text-3xl font-bold text-green-600 dark:text-green-400">
-                  Edit Page
-                </h1>
-                <p className="text-xs sm:text-sm text-green-600 dark:text-green-400">
-                  Manage and customize all homepage sections
-                </p>
-              </div>
-            </div>
-          </motion.div>
-        </motion.div>
-
-        {/* Homepage Sections Card */}
+      <div className="pt-20 px-4 pb-4">
+        {/* Homepage Sections */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
           className="mb-6"
         >
-          <Card className="!px-4 sm:!px-6 py-4 bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 !rounded-none">
-            <div className="flex items-center space-x-3 mb-3">
-              <div className="p-2 bg-green-600 rounded-lg flex-shrink-0">
-                <Home className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
-              </div>
-              <h3 className="text-xl sm:text-2xl font-bold text-dark-900 dark:text-white">
-                Homepage Sections
-              </h3>
+          <div className="flex items-center space-x-3 mb-3">
+            <div className="p-2 bg-green-600 rounded-lg flex-shrink-0">
+              <Home className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
             </div>
-            <p className="text-sm sm:text-base text-dark-600 dark:text-dark-400 mb-4">
-              Click on any section below to edit its content, images, and
-              settings. Changes will be reflected immediately on the live site.
-            </p>
+            <h3 className="text-xl sm:text-2xl font-bold text-dark-900 dark:text-white">
+              Homepage Sections
+            </h3>
+          </div>
+          <p className="text-sm sm:text-base text-dark-600 dark:text-dark-400 mb-4">
+            Click on any section below to edit its content, images, and
+            settings. Changes will be reflected immediately on the live site.
+          </p>
 
-            {/* Sections Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {homepageSections.map((section, index) => {
-                const Icon = section.icon;
-                return (
-                  <motion.div
-                    key={section.name}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: 0.1 * (index + 2) }}
-                    onClick={() => router.push(section.path)}
-                    className="cursor-pointer"
-                  >
-                    <Card className="group hover:shadow-xl transition-all duration-300 overflow-hidden bg-white dark:bg-dark-800 !p-0">
-                      {/* Icon and Title in same row */}
-                      <div className="pb-0 pr-2 pl-1 pt-1 sm:pr-2.5 sm:pl-1 sm:pt-1.5 flex items-center justify-between">
-                        <div className="flex items-center space-x-1 flex-1">
-                          <div
-                            className={`p-0.5 sm:p-1 bg-gradient-to-br ${section.color} rounded-md group-hover:scale-110 transition-transform duration-300 flex-shrink-0`}
-                          >
-                            <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" />
-                          </div>
-                          <h3 className="text-base sm:text-lg font-bold text-dark-900 dark:text-white group-hover:text-primary-600 transition-colors">
-                            {section.name}
-                          </h3>
+          {/* Sections Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {homepageSections.map((section, index) => {
+              const Icon = section.icon;
+              return (
+                <motion.div
+                  key={section.name}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.1 * (index + 2) }}
+                  onClick={() => router.push(section.path)}
+                  className="cursor-pointer"
+                >
+                  <Card className="group hover:shadow-xl transition-all duration-300 overflow-hidden bg-white dark:bg-dark-800 !p-0">
+                    {/* Icon and Title in same row */}
+                    <div className="pb-0 pr-2 pl-1 pt-1 sm:pr-2.5 sm:pl-1 sm:pt-1.5 flex items-center justify-between">
+                      <div className="flex items-center space-x-1 flex-1">
+                        <div
+                          className={`p-0.5 sm:p-1 bg-gradient-to-br ${section.color} rounded-md group-hover:scale-110 transition-transform duration-300 flex-shrink-0`}
+                        >
+                          <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" />
                         </div>
-                        <ChevronRight className="w-4 h-4 text-dark-400 group-hover:text-primary-600 group-hover:translate-x-1 transition-all flex-shrink-0" />
+                        <h3 className="text-base sm:text-lg font-bold text-dark-900 dark:text-white group-hover:text-primary-600 transition-colors">
+                          {section.name}
+                        </h3>
                       </div>
+                      <ChevronRight className="w-4 h-4 text-dark-400 group-hover:text-primary-600 group-hover:translate-x-1 transition-all flex-shrink-0" />
+                    </div>
 
-                      {/* Description under title */}
-                      <p className="text-sm sm:text-base text-dark-600 dark:text-dark-400 line-clamp-1 px-1 sm:px-1 pb-1.5 sm:pb-2">
-                        {section.description}
-                      </p>
+                    {/* Description under title */}
+                    <p className="text-sm sm:text-base text-dark-600 dark:text-dark-400 line-clamp-1 px-1 sm:px-1 pb-1.5 sm:pb-2">
+                      {section.description}
+                    </p>
 
-                      {/* Bottom Bar under description */}
-                      <div
-                        className={`h-1 bg-gradient-to-r ${section.color} transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left`}
-                      />
-                    </Card>
-                  </motion.div>
-                );
-              })}
-            </div>
-          </Card>
+                    {/* Bottom Bar under description */}
+                    <div
+                      className={`h-1 bg-gradient-to-r ${section.color} transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left`}
+                    />
+                  </Card>
+                </motion.div>
+              );
+            })}
+          </div>
         </motion.div>
 
         {/* Footer Sections Card */}
