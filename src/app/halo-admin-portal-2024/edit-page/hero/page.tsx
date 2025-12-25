@@ -355,6 +355,10 @@ export default function HeroEditor() {
   ]);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [editMode, setEditMode] = useState<string | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<{
+    show: boolean;
+    index: number | null;
+  }>({ show: false, index: null });
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -461,17 +465,25 @@ export default function HeroEditor() {
       toast.error("You must have at least one slide");
       return;
     }
-    const newSlides = slides.filter((_, i) => i !== index);
-    setSlides(newSlides);
-    if (currentSlide >= newSlides.length) {
-      setCurrentSlide(newSlides.length - 1);
+
+    setDeleteConfirm({ show: true, index });
+  };
+
+  const confirmDeleteSlide = () => {
+    if (deleteConfirm.index !== null) {
+      const newSlides = slides.filter((_, i) => i !== deleteConfirm.index);
+      setSlides(newSlides);
+      if (currentSlide >= newSlides.length) {
+        setCurrentSlide(newSlides.length - 1);
+      }
+
+      // Show success message
+      toast.success("Slide deleted successfully!");
+
+      // Scroll to preview section
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
-
-    // Show success message
-    toast.success("Slide deleted successfully!");
-
-    // Scroll to preview section
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    setDeleteConfirm({ show: false, index: null });
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -821,6 +833,40 @@ export default function HeroEditor() {
           )}
         </div>
       </motion.div>
+
+      {/* Delete Confirmation Dialog */}
+      {deleteConfirm.show && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[10000]">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white dark:bg-dark-800 rounded-lg p-6 max-w-md mx-4 shadow-2xl"
+          >
+            <h3 className="text-xl font-bold text-dark-900 dark:text-white mb-2">
+              Delete Slide
+            </h3>
+            <p className="text-dark-600 dark:text-dark-400 mb-6">
+              Are you sure you want to delete this slide? This action cannot be
+              undone.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <Button
+                onClick={() => setDeleteConfirm({ show: false, index: null })}
+                className="px-4 py-2 text-sm"
+                variant="outline"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={confirmDeleteSlide}
+                className="px-4 py-2 text-sm bg-red-600 hover:bg-red-700"
+              >
+                Delete
+              </Button>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 }

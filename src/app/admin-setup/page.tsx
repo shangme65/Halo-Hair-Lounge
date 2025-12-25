@@ -173,7 +173,7 @@ export default function AdminSetupPage() {
     // Only admins can access this page after initialization
     if (!session || session.user.role !== "ADMIN") {
       return (
-        <div className="h-screen overflow-hidden flex items-center justify-center px-4 bg-gray-50 dark:bg-dark-900 -mt-16">
+        <div className="min-h-screen pt-20 pb-12 flex items-center justify-center px-4">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -212,8 +212,8 @@ export default function AdminSetupPage() {
     }
 
     return (
-      <>
-        <div className="h-screen overflow-hidden flex items-center justify-center px-4 sm:px-6 lg:px-8 bg-gray-50 dark:bg-dark-900 -mt-16">
+      <div className="min-h-screen pt-20 pb-12 flex items-center justify-center px-4 sm:px-6 lg:px-8">
+        <div>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -309,12 +309,12 @@ export default function AdminSetupPage() {
             </motion.div>
           )}
         </AnimatePresence>
-      </>
+      </div>
     );
   }
 
   return (
-    <div className="h-screen overflow-hidden flex items-center justify-center px-4 sm:px-6 lg:px-8 bg-gray-50 dark:bg-dark-900 -mt-16">
+    <div className="min-h-screen pt-20 pb-12 flex items-center justify-center px-4 sm:px-6 lg:px-8">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}

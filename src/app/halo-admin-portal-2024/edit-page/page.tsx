@@ -36,13 +36,6 @@ const homepageSections = [
     color: "from-blue-500 to-blue-600",
   },
   {
-    name: "Why Choose Us",
-    description: "Highlight unique value propositions",
-    icon: Users,
-    path: "/halo-admin-portal-2024/edit-page/why-choose-us",
-    color: "from-green-500 to-green-600",
-  },
-  {
     name: "Client Reviews",
     description: "Testimonials and customer feedback carousel",
     icon: MessageSquare,

@@ -20,27 +20,38 @@ import {
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import HeroScene from "@/components/3d/HeroScene";
+import { renderIcon } from "@/components/admin/IconSelector";
 
-const features = [
+const defaultFeatures = [
   {
-    icon: Scissors,
+    icon: "Scissors",
     title: "Expert Stylists",
     description: "Highly trained professionals with years of experience",
   },
   {
-    icon: Sparkles,
+    icon: "Sparkles",
     title: "Premium Products",
     description: "Only the finest hair care products and tools",
   },
   {
-    icon: Calendar,
+    icon: "Calendar",
     title: "Easy Booking",
     description: "Book appointments online 24/7 with instant confirmation",
   },
   {
-    icon: ShoppingBag,
+    icon: "ShoppingBag",
     title: "Online Store",
     description: "Shop professional-grade products from home",
+  },
+  {
+    icon: "Clock",
+    title: "Flexible Hours",
+    description: "Open when you need us",
+  },
+  {
+    icon: "Users",
+    title: "Community Focused",
+    description: "Building relationships",
   },
 ];
 
@@ -176,6 +187,14 @@ export default function Home() {
   const [currentTestimonialIndex, setCurrentTestimonialIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [isLoadingHero, setIsLoadingHero] = useState(true);
+  const [features, setFeatures] = useState(defaultFeatures);
+  const [featuresContent, setFeaturesContent] = useState({
+    badgeText: "Our Commitment",
+    headingPrefix: "Why Choose ",
+    headingHighlight: "Halo Hair Lounge",
+    description:
+      "Experience the perfect blend of luxury, expertise, and innovation at our premier salon",
+  });
   const [heroSlides, setHeroSlides] = useState([
     {
       title: "Transform Your Look",
@@ -224,6 +243,42 @@ export default function Home() {
       }
     };
     fetchHeroContent();
+  }, []);
+
+  useEffect(() => {
+    // Fetch features content from database
+    const fetchFeatures = async () => {
+      try {
+        const response = await fetch("/api/features");
+        const data = await response.json();
+        if (data.features && data.features.length > 0) {
+          setFeatures(data.features);
+        }
+        if (data.badgeText)
+          setFeaturesContent((prev) => ({
+            ...prev,
+            badgeText: data.badgeText,
+          }));
+        if (data.headingPrefix)
+          setFeaturesContent((prev) => ({
+            ...prev,
+            headingPrefix: data.headingPrefix,
+          }));
+        if (data.headingHighlight)
+          setFeaturesContent((prev) => ({
+            ...prev,
+            headingHighlight: data.headingHighlight,
+          }));
+        if (data.description)
+          setFeaturesContent((prev) => ({
+            ...prev,
+            description: data.description,
+          }));
+      } catch (error) {
+        console.error("Error loading features:", error);
+      }
+    };
+    fetchFeatures();
   }, []);
 
   useEffect(() => {
@@ -391,7 +446,7 @@ export default function Home() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="text-center mb-16 max-w-4xl mx-auto"
+            className="text-center mb-8 w-full mx-auto"
           >
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
@@ -401,26 +456,26 @@ export default function Home() {
               className="inline-block mb-4 px-6 py-2 bg-gradient-to-r from-green-100 to-primary-100 dark:from-green-950 dark:to-primary-950 rounded-full border border-green-200 dark:border-green-800 shadow-lg shadow-green-500/20"
             >
               <span className="text-sm font-semibold text-green-700 dark:text-green-400 tracking-wider">
-                Our Commitment
+                {featuresContent.badgeText}
               </span>
             </motion.div>
 
             <h2 className="text-2xl sm:text-3xl lg:text-4xl font-display font-bold mb-5 leading-tight">
-              <span className="text-gray-900 dark:text-white">Why Choose </span>
+              <span className="text-gray-900 dark:text-white">
+                {featuresContent.headingPrefix}
+              </span>{" "}
               <span className="bg-gradient-to-r from-green-600 via-primary-600 to-green-700 dark:from-green-400 dark:via-primary-400 dark:to-green-500 bg-clip-text text-transparent">
-                Halo Hair Lounge
+                {featuresContent.headingHighlight}
               </span>
             </h2>
 
             <p className="text-lg sm:text-xl text-dark-600 dark:text-dark-400 leading-relaxed max-w-3xl mx-auto">
-              Experience the perfect blend of luxury, expertise, and innovation
-              at our premier salon
+              {featuresContent.description}
             </p>
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {features.map((feature, idx) => {
-              const Icon = feature.icon;
               return (
                 <motion.div
                   key={feature.title}
@@ -467,10 +522,10 @@ export default function Home() {
                       </div>
 
                       {/* Icon and Title Row */}
-                      <div className="flex items-center gap-3 mb-3 relative">
+                      <div className="flex items-center gap-3 mb-1.5 relative">
                         {/* Icon Container with 3D Effect */}
                         <motion.div
-                          className="relative flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-primary-500 via-primary-600 to-primary-700 shadow-lg flex-shrink-0"
+                          className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 via-primary-600 to-primary-700 shadow-lg flex-shrink-0"
                           style={{
                             transformStyle: "preserve-3d",
                             transform: "translateZ(75px)",
@@ -481,7 +536,10 @@ export default function Home() {
                             transition: { duration: 0.5 },
                           }}
                         >
-                          <Icon className="w-6 h-6 text-white relative z-10 drop-shadow-lg" />
+                          {renderIcon(
+                            feature.icon,
+                            "w-5 h-5 text-white relative z-10 drop-shadow-lg"
+                          )}
                         </motion.div>
 
                         {/* Title */}

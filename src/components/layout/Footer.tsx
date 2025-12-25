@@ -197,7 +197,7 @@ export default function Footer() {
       {/* Top gradient border */}
       <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-green-500 to-transparent" />
 
-      <div className="relative container mx-auto px-4 sm:px-6 lg:px-8 pb-12 pt-4">
+      <div className="relative container mx-auto px-4 sm:px-6 lg:px-8 pt-4">
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
           {/* Brand Section */}
           <div className="lg:col-span-2">
@@ -206,7 +206,7 @@ export default function Footer() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
             >
-              <div className="relative h-24 w-64 mb-4">
+              <div className="relative h-24 w-64">
                 <Image
                   src="/Halologo2.png"
                   alt="Halo Hair Lounge"
@@ -260,7 +260,7 @@ export default function Footer() {
         </div>
 
         {/* Social Links & Copyright */}
-        <div className="mt-16 pt-8 border-t border-dark-800/50 bg-gradient-to-r from-transparent via-green-950/30 to-transparent">
+        <div className="pt-4 pb-4 border-t border-dark-800/50 bg-gradient-to-r from-transparent via-green-950/30 to-transparent">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <div className="flex space-x-4">
               {socialLinks.map((social) => {
@@ -280,7 +280,7 @@ export default function Footer() {
               })}
             </div>
 
-            <p className="text-dark-400 text-sm">
+            <p className="text-dark-400 text-sm mb-8">
               © {new Date().getFullYear()} Halo Hair Lounge. All rights
               reserved.
             </p>

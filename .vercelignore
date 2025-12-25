@@ -42,9 +42,6 @@ __mocks__/
 # Vercel
 .vercel/
 
-# Prisma
-prisma/migrations/
-
 # Documentation
 README.md
 CHANGELOG.md

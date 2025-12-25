@@ -398,6 +398,10 @@ export const featureSchema = z.object({
 });
 
 export const featuresContentSchema = z.object({
+  badgeText: z.string().min(1).max(50).trim().optional(),
+  headingPrefix: z.string().min(1).max(100).trim().optional(),
+  headingHighlight: z.string().min(1).max(100).trim().optional(),
+  description: z.string().min(1).max(500).trim().optional(),
   features: z.array(featureSchema).max(20, "Maximum 20 features allowed"),
 });
 

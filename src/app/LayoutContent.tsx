@@ -12,7 +12,7 @@ export default function LayoutContent({
   const pathname = usePathname();
 
   // Pages that should not have navbar/footer
-  const noLayoutPages = ["/admin-setup", "/auth/signin"];
+  const noLayoutPages: string[] = [];
   const hideLayout = noLayoutPages.includes(pathname);
 
   if (hideLayout) {

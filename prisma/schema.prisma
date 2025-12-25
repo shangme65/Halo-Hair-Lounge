@@ -185,10 +185,14 @@ model HeroContent {
 }
 
 model FeaturesContent {
-  id        String   @id @default(cuid())
-  features  Json     // Array of features with icon, title, description
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id               String   @id @default(cuid())
+  badgeText        String?
+  headingPrefix    String?
+  headingHighlight String?
+  description      String?
+  features         Json     // Array of features with icon, title, description
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
   @@map("features_content")
 }

@@ -36,5 +36,18 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# prisma
-prisma/migrations
+# IDE
+.vscode/
+.idea/
+.vs/
+*.swp
+*.swo
+*~
+
+# uploads (user-generated content)
+public/uploads/**
+!public/uploads/.gitkeep
+
+# logs
+logs/
+*.log

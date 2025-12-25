@@ -14,9 +14,17 @@ export async function GET() {
       return NextResponse.json({ features: [] });
     }
 
-    return NextResponse.json({ features: content.features });
+    return NextResponse.json({
+      badgeText: content.badgeText || "Our Commitment",
+      headingPrefix: content.headingPrefix || "Why Choose ",
+      headingHighlight: content.headingHighlight || "Halo Hair Lounge",
+      description:
+        content.description ||
+        "Experience the perfect blend of luxury, expertise, and innovation at our premier salon",
+      features: content.features,
+    });
   } catch (error) {
-    // Security: Log error without exposing details
+    console.error("Error fetching features:", error);
     return NextResponse.json(
       { error: "Failed to fetch features" },
       { status: 500 }
@@ -33,29 +41,66 @@ export async function PUT(request: NextRequest) {
     }
 
     const body = await request.json();
+    console.log("Received body:", JSON.stringify(body, null, 2));
 
     // Validate input with Zod schema
     const validation = validateRequest(featuresContentSchema, body);
     if (!validation.success) {
+      console.error("Validation failed:", validation.errors);
       return NextResponse.json(
         { error: "Validation failed", details: validation.errors },
         { status: 400 }
       );
     }
 
-    const { features } = validation.data;
+    const {
+      badgeText,
+      headingPrefix,
+      headingHighlight,
+      description,
+      features,
+    } = validation.data;
+
+    console.log("Attempting to upsert with data:", {
+      badgeText,
+      headingPrefix,
+      headingHighlight,
+      description,
+      featuresCount: features.length,
+    });
 
     const content = await prisma.featuresContent.upsert({
       where: { id: "default" },
-      update: { features },
-      create: { id: "default", features },
+      update: {
+        badgeText,
+        headingPrefix,
+        headingHighlight,
+        description,
+        features,
+      },
+      create: {
+        id: "default",
+        badgeText,
+        headingPrefix,
+        headingHighlight,
+        description,
+        features,
+      },
     });
 
+    console.log("Successfully saved features");
     return NextResponse.json({ success: true, content });
   } catch (error) {
-    // Security: Log error without exposing details
+    console.error("Error updating features:", error);
+    console.error(
+      "Error details:",
+      error instanceof Error ? error.message : String(error)
+    );
     return NextResponse.json(
-      { error: "Failed to update features" },
+      {
+        error: "Failed to update features",
+        details: error instanceof Error ? error.message : String(error),
+      },
       { status: 500 }
     );
   }
