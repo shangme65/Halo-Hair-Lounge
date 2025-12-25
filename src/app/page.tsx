@@ -447,8 +447,8 @@ export default function Home() {
                 >
                   <div className="relative group cursor-pointer">
                     {/* 3D Shadow Layers */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-primary-600/20 to-primary-800/20 rounded-2xl blur-xl transform translate-y-4 group-hover:translate-y-6 transition-transform duration-300" />
-                    <div className="absolute inset-0 bg-gradient-to-br from-primary-600/10 to-primary-800/10 rounded-2xl blur-2xl transform translate-y-6 group-hover:translate-y-8 transition-transform duration-300" />
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary-600/20 to-primary-800/20 rounded-2xl transform translate-y-4 group-hover:translate-y-6 transition-transform duration-300" />
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary-600/10 to-primary-800/10 rounded-2xl transform translate-y-6 group-hover:translate-y-8 transition-transform duration-300" />
 
                     {/* Main Card */}
                     <motion.div
@@ -481,8 +481,6 @@ export default function Home() {
                             transition: { duration: 0.5 },
                           }}
                         >
-                          {/* Icon Glow */}
-                          <div className="absolute inset-0 bg-primary-400 rounded-xl blur-lg opacity-50 group-hover:opacity-75 transition-opacity duration-300" />
                           <Icon className="w-6 h-6 text-white relative z-10 drop-shadow-lg" />
                         </motion.div>
 

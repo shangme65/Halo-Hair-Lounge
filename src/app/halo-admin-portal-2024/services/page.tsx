@@ -363,9 +363,7 @@ export default function AdminServicesPage() {
 
                 return (
                   <div key={category.value} id={`category-${category.value}`}>
-                    <Card
-                      className="overflow-hidden !p-0"
-                    >
+                    <Card className="overflow-hidden !p-0">
                       {/* Category Header */}
                       <div
                         className="flex items-center justify-between py-2 pl-1 pr-0 bg-primary-50 dark:bg-primary-900/20 border-b border-dark-200 dark:border-dark-700 cursor-pointer hover:bg-primary-100 dark:hover:bg-primary-900/30 transition-colors"
@@ -377,292 +375,293 @@ export default function AdminServicesPage() {
                               .getElementById(`category-${category.value}`)
                               ?.scrollIntoView({
                                 behavior: "smooth",
-                              block: "start",
-                            });
-                        }, 100);
-                      }}
-                    >
-                      <div className="flex items-center">
-                        <button className="p-0 hover:bg-primary-200 dark:hover:bg-primary-800 transition-colors">
-                          {isExpanded ? (
-                            <ChevronDown
-                              size={20}
-                              className="text-primary-700 dark:text-primary-300"
-                            />
-                          ) : (
-                            <ChevronRight
-                              size={20}
-                              className="text-primary-700 dark:text-primary-300"
-                            />
-                          )}
-                        </button>
-                        <h2 className="text-lg font-bold text-primary-900 dark:text-primary-100 -ml-1">
-                          {category.label}
-                        </h2>
-                        <span
-                          className="ml-2 px-2 py-0.5 text-xs font-medium bg-gradient-to-b from-primary-100 to-primary-200 dark:from-primary-800 dark:to-primary-900 text-primary-900 dark:text-primary-100 rounded-full shadow-md"
-                          style={{
-                            boxShadow:
-                              "0 2px 4px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.3), inset 0 -1px 2px rgba(0, 0, 0, 0.15)",
-                          }}
-                        >
-                          {categoryServices.length}{" "}
-                          {categoryServices.length === 1
-                            ? "service"
-                            : "services"}
-                        </span>
+                                block: "start",
+                              });
+                          }, 100);
+                        }}
+                      >
+                        <div className="flex items-center">
+                          <button className="p-0 hover:bg-primary-200 dark:hover:bg-primary-800 transition-colors">
+                            {isExpanded ? (
+                              <ChevronDown
+                                size={20}
+                                className="text-primary-700 dark:text-primary-300"
+                              />
+                            ) : (
+                              <ChevronRight
+                                size={20}
+                                className="text-primary-700 dark:text-primary-300"
+                              />
+                            )}
+                          </button>
+                          <h2 className="text-lg font-bold text-primary-900 dark:text-primary-100 -ml-1">
+                            {category.label}
+                          </h2>
+                          <span
+                            className="ml-2 px-2 py-0.5 text-xs font-medium bg-gradient-to-b from-primary-100 to-primary-200 dark:from-primary-800 dark:to-primary-900 text-primary-900 dark:text-primary-100 rounded-full shadow-md"
+                            style={{
+                              boxShadow:
+                                "0 2px 4px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.3), inset 0 -1px 2px rgba(0, 0, 0, 0.15)",
+                            }}
+                          >
+                            {categoryServices.length}{" "}
+                            {categoryServices.length === 1
+                              ? "service"
+                              : "services"}
+                          </span>
+                        </div>
+
+                        {visibleDeleteButton !== category.value ? (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleDeleteButton(category.value);
+                            }}
+                            className="flex items-center gap-1 px-3 py-1.5 text-xs bg-gradient-to-b from-dark-200 to-dark-300 hover:from-dark-300 hover:to-dark-400 text-dark-700 font-medium rounded-full shadow-md hover:shadow-lg transition-all active:scale-95"
+                            style={{
+                              boxShadow:
+                                "0 4px 6px rgba(0, 0, 0, 0.1), inset 0 -2px 4px rgba(0, 0, 0, 0.1)",
+                            }}
+                          >
+                            <Trash2 size={14} />?
+                          </button>
+                        ) : (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteCategory(
+                                category.id,
+                                category.value,
+                                category.label,
+                                categoryServices.length
+                              );
+                            }}
+                            className="flex items-center gap-1 px-3 py-1.5 text-xs bg-gradient-to-b from-red-400 to-red-500 hover:from-red-500 hover:to-red-600 text-white font-medium rounded-full shadow-md hover:shadow-lg transition-all active:scale-95"
+                            style={{
+                              boxShadow:
+                                "0 4px 6px rgba(239, 68, 68, 0.3), inset 0 -2px 4px rgba(0, 0, 0, 0.2)",
+                            }}
+                          >
+                            <Trash2 size={14} />
+                            Delete
+                          </button>
+                        )}
                       </div>
 
-                      {visibleDeleteButton !== category.value ? (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            toggleDeleteButton(category.value);
-                          }}
-                          className="flex items-center gap-1 px-3 py-1.5 text-xs bg-gradient-to-b from-dark-200 to-dark-300 hover:from-dark-300 hover:to-dark-400 text-dark-700 font-medium rounded-full shadow-md hover:shadow-lg transition-all active:scale-95"
-                          style={{
-                            boxShadow:
-                              "0 4px 6px rgba(0, 0, 0, 0.1), inset 0 -2px 4px rgba(0, 0, 0, 0.1)",
-                          }}
-                        >
-                          <Trash2 size={14} />?
-                        </button>
-                      ) : (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDeleteCategory(
-                              category.id,
-                              category.value,
-                              category.label,
-                              categoryServices.length
-                            );
-                          }}
-                          className="flex items-center gap-1 px-3 py-1.5 text-xs bg-gradient-to-b from-red-400 to-red-500 hover:from-red-500 hover:to-red-600 text-white font-medium rounded-full shadow-md hover:shadow-lg transition-all active:scale-95"
-                          style={{
-                            boxShadow:
-                              "0 4px 6px rgba(239, 68, 68, 0.3), inset 0 -2px 4px rgba(0, 0, 0, 0.2)",
-                          }}
-                        >
-                          <Trash2 size={14} />
-                          Delete
-                        </button>
-                      )}
-                    </div>
+                      {/* Category Services */}
+                      {isExpanded && (
+                        <AnimatePresence>
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: "auto", opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.3 }}
+                            className="p-2"
+                          >
+                            {categoryServices.length === 0 ? (
+                              <div className="text-center py-8 text-dark-600 dark:text-dark-400">
+                                <p className="text-sm">
+                                  No services in this category
+                                </p>
+                                <button
+                                  onClick={() => {
+                                    router.push(
+                                      "/halo-admin-portal-2024/services/new"
+                                    );
+                                  }}
+                                  className="mt-2 text-xs text-primary-600 dark:text-primary-400 hover:underline"
+                                >
+                                  Add a service
+                                </button>
+                              </div>
+                            ) : (
+                              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                                {categoryServices.map((service) => {
+                                  const images = service.image
+                                    ? service.image
+                                        .split(",")
+                                        .map((img) => img.trim())
+                                        .filter(Boolean)
+                                    : [];
+                                  const currentImageIndex =
+                                    serviceImageIndex[service.id] || 0;
+                                  const hasMultipleImages = images.length > 1;
 
-                    {/* Category Services */}
-                    {isExpanded && (
-                      <AnimatePresence>
-                        <motion.div
-                          initial={{ height: 0, opacity: 0 }}
-                          animate={{ height: "auto", opacity: 1 }}
-                          exit={{ height: 0, opacity: 0 }}
-                          transition={{ duration: 0.3 }}
-                          className="p-2"
-                        >
-                          {categoryServices.length === 0 ? (
-                            <div className="text-center py-8 text-dark-600 dark:text-dark-400">
-                              <p className="text-sm">
-                                No services in this category
-                              </p>
-                              <button
-                                onClick={() => {
-                                  router.push(
-                                    "/halo-admin-portal-2024/services/new"
-                                  );
-                                }}
-                                className="mt-2 text-xs text-primary-600 dark:text-primary-400 hover:underline"
-                              >
-                                Add a service
-                              </button>
-                            </div>
-                          ) : (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-                              {categoryServices.map((service) => {
-                                const images = service.image
-                                  ? service.image
-                                      .split(",")
-                                      .map((img) => img.trim())
-                                      .filter(Boolean)
-                                  : [];
-                                const currentImageIndex =
-                                  serviceImageIndex[service.id] || 0;
-                                const hasMultipleImages = images.length > 1;
-
-                                return (
-                                  <div
-                                    key={service.id}
-                                    className="overflow-hidden border border-dark-200 dark:border-dark-700 rounded-lg bg-white dark:bg-dark-800 hover:shadow-lg transition-shadow duration-300"
-                                  >
-                                    <div className="aspect-[4/3] bg-dark-100 dark:bg-dark-800 relative group">
-                                      {images.length > 0 ? (
-                                        <>
-                                          <Image
-                                            src={
-                                              images[currentImageIndex] ||
-                                              images[0]
-                                            }
-                                            alt={service.name}
-                                            fill
-                                            className="object-cover"
-                                          />
-                                          {/* Discount Badge */}
-                                          {service.compareAtPrice &&
-                                            service.compareAtPrice >
-                                              service.price && (
-                                              <div className="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-md shadow-lg z-10">
-                                                -
-                                                {Math.round(
-                                                  ((service.compareAtPrice -
-                                                    service.price) /
-                                                    service.compareAtPrice) *
-                                                    100
-                                                )}
-                                                %
-                                              </div>
-                                            )}
-                                          {hasMultipleImages && (
-                                            <>
-                                              {/* Previous button */}
-                                              <button
-                                                onClick={(e) => {
-                                                  e.stopPropagation();
-                                                  setServiceImageIndex(
-                                                    (prev) => ({
-                                                      ...prev,
-                                                      [service.id]:
-                                                        currentImageIndex === 0
-                                                          ? images.length - 1
-                                                          : currentImageIndex -
-                                                            1,
-                                                    })
-                                                  );
-                                                }}
-                                                className="absolute left-1 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                                              >
-                                                <ChevronLeft size={16} />
-                                              </button>
-                                              {/* Next button */}
-                                              <button
-                                                onClick={(e) => {
-                                                  e.stopPropagation();
-                                                  setServiceImageIndex(
-                                                    (prev) => ({
-                                                      ...prev,
-                                                      [service.id]:
-                                                        currentImageIndex ===
-                                                        images.length - 1
-                                                          ? 0
-                                                          : currentImageIndex +
-                                                            1,
-                                                    })
-                                                  );
-                                                }}
-                                                className="absolute right-1 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                                              >
-                                                <ChevronRight size={16} />
-                                              </button>
-                                              {/* Image counter */}
-                                              <div className="absolute bottom-1 left-1/2 -translate-x-1/2 bg-black/50 text-white text-xs px-2 py-0.5 rounded-full">
-                                                {currentImageIndex + 1} /{" "}
-                                                {images.length}
-                                              </div>
-                                            </>
-                                          )}
-                                        </>
-                                      ) : (
-                                        <div className="flex items-center justify-center h-full text-dark-400">
-                                          No image
-                                        </div>
-                                      )}
-                                    </div>
-
-                                    <div className="p-2">
-                                      <h3 className="text-sm font-bold text-dark-900 dark:text-white mb-1 line-clamp-1">
-                                        {service.name}
-                                      </h3>
-                                      <p className="text-xs text-dark-600 dark:text-dark-400 mb-1.5 line-clamp-2">
-                                        {service.description}
-                                      </p>
-
-                                      <div className="flex items-center justify-between mb-1.5">
-                                        <div className="flex items-center gap-1">
-                                          <DollarSign
-                                            size={12}
-                                            className="text-dark-500"
-                                          />
-                                          <div className="flex items-center gap-1.5">
-                                            <span className="text-base font-bold text-dark-900 dark:text-white">
-                                              ${service.price}
-                                            </span>
+                                  return (
+                                    <div
+                                      key={service.id}
+                                      className="overflow-hidden border border-dark-200 dark:border-dark-700 rounded-lg bg-white dark:bg-dark-800 hover:shadow-lg transition-shadow duration-300"
+                                    >
+                                      <div className="aspect-[4/3] bg-dark-100 dark:bg-dark-800 relative group">
+                                        {images.length > 0 ? (
+                                          <>
+                                            <Image
+                                              src={
+                                                images[currentImageIndex] ||
+                                                images[0]
+                                              }
+                                              alt={service.name}
+                                              fill
+                                              className="object-cover"
+                                            />
+                                            {/* Discount Badge */}
                                             {service.compareAtPrice &&
                                               service.compareAtPrice >
                                                 service.price && (
-                                                <span className="text-xs text-dark-500 dark:text-dark-400 line-through">
-                                                  ${service.compareAtPrice}
-                                                </span>
+                                                <div className="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-md shadow-lg z-10">
+                                                  -
+                                                  {Math.round(
+                                                    ((service.compareAtPrice -
+                                                      service.price) /
+                                                      service.compareAtPrice) *
+                                                      100
+                                                  )}
+                                                  %
+                                                </div>
                                               )}
+                                            {hasMultipleImages && (
+                                              <>
+                                                {/* Previous button */}
+                                                <button
+                                                  onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setServiceImageIndex(
+                                                      (prev) => ({
+                                                        ...prev,
+                                                        [service.id]:
+                                                          currentImageIndex ===
+                                                          0
+                                                            ? images.length - 1
+                                                            : currentImageIndex -
+                                                              1,
+                                                      })
+                                                    );
+                                                  }}
+                                                  className="absolute left-1 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                                                >
+                                                  <ChevronLeft size={16} />
+                                                </button>
+                                                {/* Next button */}
+                                                <button
+                                                  onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setServiceImageIndex(
+                                                      (prev) => ({
+                                                        ...prev,
+                                                        [service.id]:
+                                                          currentImageIndex ===
+                                                          images.length - 1
+                                                            ? 0
+                                                            : currentImageIndex +
+                                                              1,
+                                                      })
+                                                    );
+                                                  }}
+                                                  className="absolute right-1 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                                                >
+                                                  <ChevronRight size={16} />
+                                                </button>
+                                                {/* Image counter */}
+                                                <div className="absolute bottom-1 left-1/2 -translate-x-1/2 bg-black/50 text-white text-xs px-2 py-0.5 rounded-full">
+                                                  {currentImageIndex + 1} /{" "}
+                                                  {images.length}
+                                                </div>
+                                              </>
+                                            )}
+                                          </>
+                                        ) : (
+                                          <div className="flex items-center justify-center h-full text-dark-400">
+                                            No image
+                                          </div>
+                                        )}
+                                      </div>
+
+                                      <div className="p-2">
+                                        <h3 className="text-sm font-bold text-dark-900 dark:text-white mb-1 line-clamp-1">
+                                          {service.name}
+                                        </h3>
+                                        <p className="text-xs text-dark-600 dark:text-dark-400 mb-1.5 line-clamp-2">
+                                          {service.description}
+                                        </p>
+
+                                        <div className="flex items-center justify-between mb-1.5">
+                                          <div className="flex items-center gap-1">
+                                            <DollarSign
+                                              size={12}
+                                              className="text-dark-500"
+                                            />
+                                            <div className="flex items-center gap-1.5">
+                                              <span className="text-base font-bold text-dark-900 dark:text-white">
+                                                ${service.price}
+                                              </span>
+                                              {service.compareAtPrice &&
+                                                service.compareAtPrice >
+                                                  service.price && (
+                                                  <span className="text-xs text-dark-500 dark:text-dark-400 line-through">
+                                                    ${service.compareAtPrice}
+                                                  </span>
+                                                )}
+                                            </div>
+                                          </div>
+                                          <div className="flex items-center gap-1">
+                                            <Clock
+                                              size={12}
+                                              className="text-dark-500"
+                                            />
+                                            <span className="text-xs text-dark-600 dark:text-dark-400 font-bold">
+                                              {service.duration} min
+                                            </span>
                                           </div>
                                         </div>
-                                        <div className="flex items-center gap-1">
-                                          <Clock
-                                            size={12}
-                                            className="text-dark-500"
-                                          />
-                                          <span className="text-xs text-dark-600 dark:text-dark-400 font-bold">
-                                            {service.duration} min
-                                          </span>
+
+                                        <div className="flex items-center gap-1.5 mb-1.5">
+                                          <button
+                                            onClick={() =>
+                                              toggleStatus(service, "isActive")
+                                            }
+                                            className={`flex-1 px-2 py-0.5 rounded text-[10px] font-medium ${
+                                              service.isActive
+                                                ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400"
+                                                : "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400"
+                                            }`}
+                                          >
+                                            {service.isActive
+                                              ? "Active"
+                                              : "Inactive"}
+                                          </button>
+                                        </div>
+
+                                        <div className="flex gap-1.5">
+                                          <button
+                                            onClick={() => handleEdit(service)}
+                                            className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 text-xs bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400 rounded-lg hover:bg-primary-200 dark:hover:bg-primary-900/50 transition-colors"
+                                          >
+                                            <Edit2 size={12} />
+                                            Edit
+                                          </button>
+                                          <button
+                                            onClick={() =>
+                                              handleDelete(
+                                                service,
+                                                category.value
+                                              )
+                                            }
+                                            className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 text-xs bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors"
+                                          >
+                                            <Trash2 size={12} />
+                                            Remove
+                                          </button>
                                         </div>
                                       </div>
-
-                                      <div className="flex items-center gap-1.5 mb-1.5">
-                                        <button
-                                          onClick={() =>
-                                            toggleStatus(service, "isActive")
-                                          }
-                                          className={`flex-1 px-2 py-0.5 rounded text-[10px] font-medium ${
-                                            service.isActive
-                                              ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400"
-                                              : "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400"
-                                          }`}
-                                        >
-                                          {service.isActive
-                                            ? "Active"
-                                            : "Inactive"}
-                                        </button>
-                                      </div>
-
-                                      <div className="flex gap-1.5">
-                                        <button
-                                          onClick={() => handleEdit(service)}
-                                          className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 text-xs bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400 rounded-lg hover:bg-primary-200 dark:hover:bg-primary-900/50 transition-colors"
-                                        >
-                                          <Edit2 size={12} />
-                                          Edit
-                                        </button>
-                                        <button
-                                          onClick={() =>
-                                            handleDelete(
-                                              service,
-                                              category.value
-                                            )
-                                          }
-                                          className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 text-xs bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors"
-                                        >
-                                          <Trash2 size={12} />
-                                          Remove
-                                        </button>
-                                      </div>
                                     </div>
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          )}
-                        </motion.div>
-                      </AnimatePresence>
-                    )}
-                  </Card>
+                                  );
+                                })}
+                              </div>
+                            )}
+                          </motion.div>
+                        </AnimatePresence>
+                      )}
+                    </Card>
                   </div>
                 );
               })}

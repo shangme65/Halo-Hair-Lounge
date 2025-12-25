@@ -1,17 +1,24 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import { Sparkles, Zap, Shield, Star, Plus, Trash2, Save } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Sparkles,
+  Calendar,
+  ShoppingBag,
+  Scissors,
+  Plus,
+  Trash2,
+  Save,
+} from "lucide-react";
 import Button from "@/components/ui/Button";
-import Card from "@/components/ui/Card";
 import { toast } from "react-hot-toast";
 
 const iconOptions = [
+  { name: "Scissors", icon: Scissors },
   { name: "Sparkles", icon: Sparkles },
-  { name: "Zap", icon: Zap },
-  { name: "Shield", icon: Shield },
-  { name: "Star", icon: Star },
+  { name: "Calendar", icon: Calendar },
+  { name: "ShoppingBag", icon: ShoppingBag },
 ];
 
 interface Feature {
@@ -20,8 +27,56 @@ interface Feature {
   description: string;
 }
 
+interface FeaturesContent {
+  badgeText: string;
+  headingPrefix: string;
+  headingHighlight: string;
+  description: string;
+  features: Feature[];
+}
+
+const DEFAULT_CONTENT: FeaturesContent = {
+  badgeText: "Our Commitment",
+  headingPrefix: "Why Choose ",
+  headingHighlight: "Halo Hair Lounge",
+  description:
+    "Experience the perfect blend of luxury, expertise, and innovation at our premier salon",
+  features: [
+    {
+      icon: "Scissors",
+      title: "Expert Stylists",
+      description: "Highly trained professionals with years of experience",
+    },
+    {
+      icon: "Sparkles",
+      title: "Premium Products",
+      description: "Only the finest hair care products and tools",
+    },
+    {
+      icon: "Calendar",
+      title: "Easy Booking",
+      description: "Book appointments online 24/7 with instant confirmation",
+    },
+    {
+      icon: "ShoppingBag",
+      title: "Online Store",
+      description: "Shop professional-grade products from home",
+    },
+  ],
+};
+
+const DEFAULT_FEATURES: Feature[] = DEFAULT_CONTENT.features;
+
 export default function FeaturesEditorPage() {
-  const [features, setFeatures] = useState<Feature[]>([]);
+  const [badgeText, setBadgeText] = useState(DEFAULT_CONTENT.badgeText);
+  const [headingPrefix, setHeadingPrefix] = useState(
+    DEFAULT_CONTENT.headingPrefix
+  );
+  const [headingHighlight, setHeadingHighlight] = useState(
+    DEFAULT_CONTENT.headingHighlight
+  );
+  const [description, setDescription] = useState(DEFAULT_CONTENT.description);
+  const [features, setFeatures] = useState<Feature[]>(DEFAULT_FEATURES);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [editMode, setEditMode] = useState<string | null>(null);
@@ -38,32 +93,18 @@ export default function FeaturesEditorPage() {
       if (data.features && data.features.length > 0) {
         setFeatures(data.features);
       } else {
-        setFeatures([
-          {
-            icon: "Sparkles",
-            title: "Premium Products",
-            description: "Only the finest hair care products",
-          },
-          {
-            icon: "Zap",
-            title: "Expert Stylists",
-            description: "Trained professionals at your service",
-          },
-          {
-            icon: "Shield",
-            title: "Quality Guarantee",
-            description: "100% satisfaction guaranteed",
-          },
-          {
-            icon: "Star",
-            title: "Luxury Experience",
-            description: "Relax in our elegant salon",
-          },
-        ]);
+        setFeatures(DEFAULT_FEATURES);
       }
+
+      // Set section content if available
+      if (data.badgeText) setBadgeText(data.badgeText);
+      if (data.headingPrefix) setHeadingPrefix(data.headingPrefix);
+      if (data.headingHighlight) setHeadingHighlight(data.headingHighlight);
+      if (data.description) setDescription(data.description);
     } catch (error) {
       console.error("Error fetching features:", error);
       toast.error("Failed to load features");
+      setFeatures(DEFAULT_FEATURES);
     } finally {
       setLoading(false);
     }
@@ -75,7 +116,13 @@ export default function FeaturesEditorPage() {
       const response = await fetch("/api/features", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ features }),
+        body: JSON.stringify({
+          badgeText,
+          headingPrefix,
+          headingHighlight,
+          description,
+          features,
+        }),
       });
 
       if (response.ok) {
@@ -130,149 +177,273 @@ export default function FeaturesEditorPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-500"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50 dark:from-dark-950 dark:via-dark-900 dark:to-dark-950 pt-16 px-2 pb-4 sm:p-6">
+    <div className="min-h-screen bg-white dark:bg-dark-900 pt-16 px-4 pb-8">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="max-w-7xl mx-auto"
       >
         {/* Header */}
-        <div className="flex flex-col gap-2 mb-3">
-          <div>
-            <h1 className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-              Edit Features
-            </h1>
-            <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">
-              Click to edit
-            </p>
-          </div>
-          <div className="flex gap-1.5 w-full">
-            <Button
-              onClick={addFeature}
-              className="flex-1 gap-1.5 text-xs py-1.5 px-2"
-            >
-              <Plus className="w-3.5 h-3.5" /> Add
+        <div className="mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-2">
+            Edit Our Commitment Section
+          </h1>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+            Click on any text to edit. Changes will be reflected on the
+            homepage.
+          </p>
+          <div className="flex gap-3">
+            <Button onClick={addFeature} className="gap-2 text-sm">
+              <Plus className="w-4 h-4" /> Add Feature
             </Button>
             <Button
               onClick={handleSave}
               disabled={saving}
-              className="flex-1 gap-1.5 text-xs py-1.5 px-2 bg-gradient-to-r from-purple-600 to-pink-600"
+              className="gap-2 text-sm bg-gradient-to-r from-primary-600 to-green-600"
             >
-              <Save className="w-3.5 h-3.5" />
-              {saving ? "Saving..." : "Save"}
+              <Save className="w-4 h-4" />
+              {saving ? "Saving..." : "Save Changes"}
             </Button>
           </div>
         </div>
 
+        {/* Section Preview/Editor */}
+        <div className="mb-12 bg-gray-50 dark:bg-dark-800/50 rounded-2xl p-8 border border-gray-200 dark:border-dark-700">
+          <div className="text-center mb-8 max-w-4xl mx-auto">
+            {/* Badge Text Editor */}
+            <div className="mb-4">
+              <label className="block text-xs font-medium mb-2 text-gray-600 dark:text-gray-400">
+                Badge Text
+              </label>
+              {editMode === "badge" ? (
+                <input
+                  type="text"
+                  value={badgeText}
+                  onChange={(e) => setBadgeText(e.target.value)}
+                  onBlur={() => setEditMode(null)}
+                  autoFocus
+                  className="inline-block px-6 py-2 text-sm font-semibold text-green-700 dark:text-green-400 bg-gradient-to-r from-green-100 to-primary-100 dark:from-green-950 dark:to-primary-950 rounded-full border-2 border-green-500 focus:outline-none"
+                />
+              ) : (
+                <div
+                  onClick={() => setEditMode("badge")}
+                  className="inline-block px-6 py-2 bg-gradient-to-r from-green-100 to-primary-100 dark:from-green-950 dark:to-primary-950 rounded-full border border-green-200 dark:border-green-800 shadow-lg shadow-green-500/20 cursor-pointer hover:scale-105 transition-transform"
+                >
+                  <span className="text-sm font-semibold text-green-700 dark:text-green-400 tracking-wider">
+                    {badgeText}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* Heading Editor */}
+            <div className="mb-4">
+              <label className="block text-xs font-medium mb-2 text-gray-600 dark:text-gray-400">
+                Heading
+              </label>
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-display font-bold mb-2 leading-tight">
+                {editMode === "headingPrefix" ? (
+                  <input
+                    type="text"
+                    value={headingPrefix}
+                    onChange={(e) => setHeadingPrefix(e.target.value)}
+                    onBlur={() => setEditMode(null)}
+                    autoFocus
+                    className="inline-block px-3 py-1 text-gray-900 dark:text-white bg-white dark:bg-dark-800 border-2 border-primary-500 rounded-lg focus:outline-none"
+                  />
+                ) : (
+                  <span
+                    onClick={() => setEditMode("headingPrefix")}
+                    className="text-gray-900 dark:text-white cursor-pointer hover:text-primary-600 transition-colors"
+                  >
+                    {headingPrefix}
+                  </span>
+                )}
+                {editMode === "headingHighlight" ? (
+                  <input
+                    type="text"
+                    value={headingHighlight}
+                    onChange={(e) => setHeadingHighlight(e.target.value)}
+                    onBlur={() => setEditMode(null)}
+                    autoFocus
+                    className="inline-block px-3 py-1 bg-gradient-to-r from-green-600 via-primary-600 to-green-700 dark:from-green-400 dark:via-primary-400 dark:to-green-500 text-white rounded-lg border-2 border-primary-500 focus:outline-none"
+                  />
+                ) : (
+                  <span
+                    onClick={() => setEditMode("headingHighlight")}
+                    className="bg-gradient-to-r from-green-600 via-primary-600 to-green-700 dark:from-green-400 dark:via-primary-400 dark:to-green-500 bg-clip-text text-transparent cursor-pointer hover:scale-105 inline-block transition-transform"
+                  >
+                    {headingHighlight}
+                  </span>
+                )}
+              </h2>
+            </div>
+
+            {/* Description Editor */}
+            <div>
+              <label className="block text-xs font-medium mb-2 text-gray-600 dark:text-gray-400">
+                Description
+              </label>
+              {editMode === "description" ? (
+                <textarea
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  onBlur={() => setEditMode(null)}
+                  autoFocus
+                  rows={3}
+                  className="w-full max-w-3xl mx-auto px-4 py-2 text-lg sm:text-xl text-dark-600 dark:text-dark-400 bg-white dark:bg-dark-800 border-2 border-primary-500 rounded-lg focus:outline-none resize-none"
+                />
+              ) : (
+                <p
+                  onClick={() => setEditMode("description")}
+                  className="text-lg sm:text-xl text-dark-600 dark:text-dark-400 leading-relaxed max-w-3xl mx-auto cursor-pointer hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+                >
+                  {description}
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+
         {/* Features Grid */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {features.map((feature, index) => {
             const IconComponent = getIconComponent(feature.icon);
 
             return (
-              <Card
+              <motion.div
                 key={index}
-                className="p-2 hover:shadow-lg transition-all relative group"
+                initial={{ opacity: 0, y: 50 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+                whileHover={{ y: -8 }}
               >
-                {/* Delete Button */}
-                <button
-                  onClick={() => deleteFeature(index)}
-                  className="absolute top-1 right-1 p-0.5 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-10"
-                >
-                  <Trash2 className="w-2.5 h-2.5" />
-                </button>
+                <div className="relative group cursor-pointer">
+                  {/* Delete Button */}
+                  <button
+                    onClick={() => deleteFeature(index)}
+                    className="absolute -top-2 -right-2 p-1.5 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-20 shadow-lg hover:bg-red-600"
+                    title="Delete feature"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
 
-                <div className="space-y-1.5">
-                  {/* Icon Selector */}
-                  <div>
-                    <label className="block text-xs font-medium mb-0.5 text-gray-700 dark:text-gray-300">
-                      Icon
-                    </label>
-                    <select
-                      value={feature.icon}
-                      onChange={(e) =>
-                        updateFeatureField(index, "icon", e.target.value)
-                      }
-                      className="w-full px-1.5 py-0.5 text-xs rounded border border-gray-300 dark:border-dark-700 bg-white dark:bg-dark-800 text-dark-900 dark:text-white"
-                    >
-                      {iconOptions.map((opt) => (
-                        <option key={opt.name} value={opt.name}>
-                          {opt.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+                  {/* 3D Shadow Layers */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary-600/20 to-primary-800/20 rounded-2xl transform translate-y-4 transition-transform duration-300" />
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary-600/10 to-primary-800/10 rounded-2xl transform translate-y-6 transition-transform duration-300" />
 
-                  {/* Icon Preview */}
-                  <div className="flex justify-center">
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
-                      <IconComponent className="w-4 h-4 text-white" />
+                  {/* Main Card */}
+                  <div className="relative bg-gradient-to-br from-white to-gray-50 dark:from-dark-800 dark:to-dark-900 rounded-2xl p-5 border border-dark-200/20 dark:border-dark-700/30 shadow-2xl overflow-hidden">
+                    {/* Animated Background Gradient */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary-500/5 via-transparent to-primary-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+                    {/* Shine Effect */}
+                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700">
+                      <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent transform -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
                     </div>
-                  </div>
 
-                  {/* Title */}
-                  <div>
-                    <label className="block text-xs font-medium mb-0.5 text-gray-700 dark:text-gray-300">
-                      Title
-                    </label>
-                    {editMode === `title-${index}` ? (
-                      <input
-                        type="text"
-                        value={feature.title}
+                    {/* Icon Selector */}
+                    <div className="mb-3 relative z-10">
+                      <label className="block text-xs font-medium mb-1 text-gray-600 dark:text-gray-400">
+                        Icon
+                      </label>
+                      <select
+                        value={feature.icon}
                         onChange={(e) =>
-                          updateFeatureField(index, "title", e.target.value)
+                          updateFeatureField(index, "icon", e.target.value)
                         }
-                        onBlur={() => setEditMode(null)}
-                        autoFocus
-                        className="w-full px-1.5 py-0.5 text-xs font-semibold rounded border border-purple-500 bg-white dark:bg-dark-800 text-dark-900 dark:text-white"
-                      />
-                    ) : (
-                      <h3
-                        onClick={() => setEditMode(`title-${index}`)}
-                        className="text-xs font-semibold text-dark-900 dark:text-white cursor-pointer hover:text-purple-600 dark:hover:text-purple-400 transition-colors line-clamp-1"
+                        className="w-full px-2 py-1 text-xs rounded-lg border border-gray-300 dark:border-dark-700 bg-white dark:bg-dark-800 text-dark-900 dark:text-white focus:ring-2 focus:ring-primary-500"
                       >
-                        {feature.title}
-                      </h3>
-                    )}
-                  </div>
+                        {iconOptions.map((opt) => (
+                          <option key={opt.name} value={opt.name}>
+                            {opt.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
 
-                  {/* Description */}
-                  <div>
-                    <label className="block text-xs font-medium mb-0.5 text-gray-700 dark:text-gray-300">
-                      Desc
-                    </label>
-                    {editMode === `description-${index}` ? (
-                      <textarea
-                        value={feature.description}
-                        onChange={(e) =>
-                          updateFeatureField(
-                            index,
-                            "description",
-                            e.target.value
-                          )
-                        }
-                        onBlur={() => setEditMode(null)}
-                        autoFocus
-                        rows={2}
-                        className="w-full px-1.5 py-0.5 text-xs rounded border border-purple-500 bg-white dark:bg-dark-800 text-gray-700 dark:text-gray-300 resize-none"
-                      />
-                    ) : (
-                      <p
-                        onClick={() => setEditMode(`description-${index}`)}
-                        className="text-xs text-gray-600 dark:text-gray-400 cursor-pointer hover:text-purple-600 dark:hover:text-purple-400 transition-colors line-clamp-2"
+                    {/* Icon and Title Row */}
+                    <div className="flex items-center gap-3 mb-3 relative">
+                      {/* Icon Container with 3D Effect */}
+                      <motion.div
+                        className="relative flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-primary-500 via-primary-600 to-primary-700 shadow-lg flex-shrink-0"
+                        whileHover={{
+                          scale: 1.1,
+                          rotate: [0, -5, 5, 0],
+                          transition: { duration: 0.5 },
+                        }}
                       >
-                        {feature.description}
-                      </p>
-                    )}
+                        <IconComponent className="w-6 h-6 text-white relative z-10 drop-shadow-lg" />
+                      </motion.div>
+
+                      {/* Title */}
+                      <div className="flex-1">
+                        <label className="block text-xs font-medium mb-1 text-gray-600 dark:text-gray-400">
+                          Title
+                        </label>
+                        {editMode === `title-${index}` ? (
+                          <input
+                            type="text"
+                            value={feature.title}
+                            onChange={(e) =>
+                              updateFeatureField(index, "title", e.target.value)
+                            }
+                            onBlur={() => setEditMode(null)}
+                            autoFocus
+                            className="w-full px-2 py-1 text-base font-bold rounded-lg border-2 border-primary-500 bg-white dark:bg-dark-800 text-dark-900 dark:text-white focus:outline-none"
+                          />
+                        ) : (
+                          <h3
+                            onClick={() => setEditMode(`title-${index}`)}
+                            className="text-base font-bold bg-gradient-to-r from-dark-900 to-primary-700 dark:from-white dark:to-primary-400 bg-clip-text text-transparent hover:scale-105 transition-transform duration-300 cursor-pointer"
+                          >
+                            {feature.title}
+                          </h3>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Description */}
+                    <div>
+                      <label className="block text-xs font-medium mb-1 text-gray-600 dark:text-gray-400">
+                        Description
+                      </label>
+                      {editMode === `description-${index}` ? (
+                        <textarea
+                          value={feature.description}
+                          onChange={(e) =>
+                            updateFeatureField(
+                              index,
+                              "description",
+                              e.target.value
+                            )
+                          }
+                          onBlur={() => setEditMode(null)}
+                          autoFocus
+                          rows={2}
+                          className="w-full px-2 py-1 text-sm rounded-lg border-2 border-primary-500 bg-white dark:bg-dark-800 text-dark-600 dark:text-dark-400 resize-none focus:outline-none"
+                        />
+                      ) : (
+                        <p
+                          onClick={() => setEditMode(`description-${index}`)}
+                          className="text-sm text-dark-600 dark:text-dark-400 leading-relaxed cursor-pointer hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+                        >
+                          {feature.description}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Bottom Accent Line */}
+                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-primary-600 to-transparent transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500" />
                   </div>
                 </div>
-              </Card>
+              </motion.div>
             );
           })}
         </div>
