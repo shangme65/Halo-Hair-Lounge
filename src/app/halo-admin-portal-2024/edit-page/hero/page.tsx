@@ -302,7 +302,8 @@ function SortableSlide({
             <Button
               onClick={() => deleteSlide(index)}
               variant="outline"
-              className="flex items-center gap-0.5 py-1 text-xs h-7 text-red-600 hover:text-red-700 !w-auto"
+              className="flex items-center gap-0.5 py-1 text-xs h-7 text-red-600 hover:!text-white !w-auto"
+              style={{ color: undefined }}
             >
               <Trash2 size={12} />
               Delete
@@ -852,14 +853,14 @@ export default function HeroEditor() {
             <div className="flex gap-3 justify-end">
               <Button
                 onClick={() => setDeleteConfirm({ show: false, index: null })}
-                className="px-4 py-2 text-sm"
+                className="flex items-center justify-center px-4 py-1 text-xs h-7"
                 variant="outline"
               >
                 Cancel
               </Button>
               <Button
                 onClick={confirmDeleteSlide}
-                className="px-4 py-2 text-sm bg-red-600 hover:bg-red-700"
+                className="flex items-center justify-center px-4 py-1 text-xs h-7 bg-red-600 hover:bg-red-700"
               >
                 Delete
               </Button>

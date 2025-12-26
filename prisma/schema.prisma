@@ -217,10 +217,11 @@ model TestimonialsContent {
 }
 
 model FaqContent {
-  id        String   @id @default(cuid())
-  faqs      Json     // Array of FAQs with question, answer
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id            String   @id @default(cuid())
+  faqs          Json     // Array of FAQs with question, answer
+  sectionHeader Json?    // Section header with badge, titlePrefix, titleHighlight, subtitle, ctaText, ctaButtonText, ctaButtonLink
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   @@map("faq_content")
 }

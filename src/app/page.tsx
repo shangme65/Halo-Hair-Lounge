@@ -196,6 +196,17 @@ export default function Home() {
     titleHighlight: "Reviews",
     subtitle: "Feedbacks from our satisfied clients",
   });
+  const [faqsData, setFaqsData] = useState(faqs);
+  const [faqSectionHeader, setFaqSectionHeader] = useState({
+    badge: "Got Questions?",
+    titlePrefix: "Frequently Asked ",
+    titleHighlight: "Questions",
+    subtitle:
+      "Everything you need to know about our services and booking process",
+    ctaText: "Still have questions? We're here to help!",
+    ctaButtonText: "Contact Us",
+    ctaButtonLink: "/contact",
+  });
   const [featuresContent, setFeaturesContent] = useState({
     badgeText: "Our Commitment",
     headingPrefix: "Why Choose ",
@@ -316,6 +327,25 @@ export default function Home() {
       }
     };
     fetchTestimonials();
+  }, []);
+
+  useEffect(() => {
+    // Fetch FAQ content from database
+    const fetchFaqs = async () => {
+      try {
+        const response = await fetch("/api/faq");
+        const data = await response.json();
+        if (data.faqs && data.faqs.length > 0) {
+          setFaqsData(data.faqs);
+        }
+        if (data.sectionHeader) {
+          setFaqSectionHeader(data.sectionHeader);
+        }
+      } catch (error) {
+        console.error("Error loading FAQs:", error);
+      }
+    };
+    fetchFaqs();
   }, []);
 
   useEffect(() => {
@@ -820,24 +850,24 @@ export default function Home() {
                   "0 4px 15px rgba(34, 197, 94, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.5)",
               }}
             >
-              <span className="drop-shadow-sm">Got Questions?</span>
+              <span className="drop-shadow-sm">{faqSectionHeader.badge}</span>
             </motion.div>
             <h2 className="text-2xl sm:text-3xl font-display font-bold mb-2">
               <span className="bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
-                Frequently Asked{" "}
+                {faqSectionHeader.titlePrefix}
               </span>
               <span className="text-green-500 dark:text-green-400">
-                Questions
+                {faqSectionHeader.titleHighlight}
               </span>
             </h2>
             <p className="text-base text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-              Everything you need to know about our services and booking process
+              {faqSectionHeader.subtitle}
             </p>
           </motion.div>
 
           {/* FAQ Items */}
           <div className="space-y-2">
-            {faqs.map((faq, index) => (
+            {faqsData.map((faq, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, y: 20 }}
@@ -915,17 +945,17 @@ export default function Home() {
             className="text-center mt-6"
           >
             <p className="text-gray-600 dark:text-gray-400 mb-4">
-              Still have questions? We're here to help!
+              {faqSectionHeader.ctaText}
             </p>
             <a
-              href="/contact"
+              href={faqSectionHeader.ctaButtonLink}
               className="inline-flex items-center gap-2 px-6 py-3 bg-green-500 text-white rounded-full hover:bg-green-600 transition-all duration-300 hover:scale-105 font-semibold shadow-lg hover:shadow-xl"
               style={{
                 boxShadow:
                   "0 4px 20px rgba(34, 197, 94, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2)",
               }}
             >
-              Contact Us
+              {faqSectionHeader.ctaButtonText}
               <svg
                 className="w-5 h-5"
                 fill="none"
@@ -987,7 +1017,7 @@ export default function Home() {
               transition={{ duration: 0.5, delay: 0.2 }}
               className="inline-block mb-4 px-4 py-1.5 bg-white/10 backdrop-blur-sm rounded-full border border-white/20 shadow-xl"
             >
-              <span className="text-xs font-semibold text-white uppercase tracking-wider flex items-center gap-2">
+              <span className="text-xs font-semibold text-white tracking-wider flex items-center gap-2">
                 <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse" />
                 Book Now & Get Started
               </span>
@@ -999,14 +1029,10 @@ export default function Home() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.3 }}
-              className="text-3xl sm:text-4xl lg:text-5xl font-display font-bold mb-4 leading-tight"
+              className="text-2xl sm:text-3xl lg:text-4xl font-display font-bold mb-4 leading-tight"
             >
               <span className="inline-block bg-gradient-to-r from-white via-green-100 to-white bg-clip-text text-transparent drop-shadow-2xl">
-                Ready for Your
-              </span>
-              <br />
-              <span className="inline-block bg-gradient-to-r from-green-200 via-white to-green-200 bg-clip-text text-transparent drop-shadow-2xl">
-                Transformation?
+                Ready for Your Transformation?
               </span>
             </motion.h2>
 

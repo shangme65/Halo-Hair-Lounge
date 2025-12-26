@@ -78,9 +78,13 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json({ success: true, content });
   } catch (error) {
-    // Security: Log error without exposing details
+    // Log detailed error for debugging
+    console.error("FAQ Update Error:", error);
     return NextResponse.json(
-      { error: "Failed to update FAQs" },
+      {
+        error: "Failed to update FAQs",
+        details: error instanceof Error ? error.message : String(error),
+      },
       { status: 500 }
     );
   }

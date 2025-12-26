@@ -50,13 +50,13 @@ const Button = forwardRef<HTMLButtonElement, AnimatedButtonProps>(
         "text-white border-t border-primary-300/40"
       ),
       secondary: clsx(
-        "bg-gradient-to-b from-secondary-300 via-secondary-400 via-50% to-secondary-600",
-        "shadow-[inset_0_1px_0_0_rgba(255,255,255,0.4),inset_0_-2px_4px_0_rgba(0,0,0,0.15),0_8px_0_0_#000000,0_10px_8px_-2px_rgba(0,0,0,0.4),0_15px_25px_-5px_rgba(0,0,0,0.3)]",
-        "hover:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.5),inset_0_-2px_4px_0_rgba(0,0,0,0.15),0_6px_0_0_#000000,0_8px_6px_-2px_rgba(0,0,0,0.4),0_12px_20px_-5px_rgba(0,0,0,0.3)]",
+        "bg-gradient-to-b from-green-600 via-green-700 via-50% to-green-800",
+        "shadow-[inset_0_1px_0_0_rgba(255,255,255,0.4),inset_0_-2px_4px_0_rgba(0,0,0,0.15),0_8px_0_0_rgba(156,163,175,1),0_10px_8px_-2px_rgba(0,0,0,0.4),0_15px_25px_-5px_rgba(0,0,0,0.3)]",
+        "hover:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.5),inset_0_-2px_4px_0_rgba(0,0,0,0.15),0_6px_0_0_rgba(156,163,175,1),0_8px_6px_-2px_rgba(0,0,0,0.4),0_12px_20px_-5px_rgba(0,0,0,0.3)]",
         "hover:translate-y-[2px]",
-        "active:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1),inset_0_2px_8px_0_rgba(0,0,0,0.25),0_1px_0_0_#000000,0_2px_3px_-1px_rgba(0,0,0,0.4)]",
+        "active:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1),inset_0_2px_8px_0_rgba(0,0,0,0.25),0_1px_0_0_rgba(156,163,175,1),0_2px_3px_-1px_rgba(0,0,0,0.4)]",
         "active:translate-y-[7px]",
-        "text-dark-900 border-t border-secondary-200/50"
+        "text-white border-t border-green-500/50"
       ),
       outline: clsx(
         // Metallic gradient with shine effect

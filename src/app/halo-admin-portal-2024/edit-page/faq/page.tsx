@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown, Plus, Trash2, Save, ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -20,6 +20,12 @@ export default function FaqEditorPage() {
   const [saving, setSaving] = useState(false);
   const [editMode, setEditMode] = useState<string | null>(null);
   const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const [deleteConfirm, setDeleteConfirm] = useState<{
+    show: boolean;
+    index: number | null;
+  }>({ show: false, index: null });
+  const [showDeleteButton, setShowDeleteButton] = useState<number | null>(null);
   const [sectionHeader, setSectionHeader] = useState({
     badge: "Got Questions?",
     titlePrefix: "Frequently Asked ",
@@ -34,6 +40,31 @@ export default function FaqEditorPage() {
   useEffect(() => {
     fetchFaqs();
   }, []);
+
+  useEffect(() => {
+    // Close delete button when clicking outside
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      // Don't close if clicking on delete button or trash icon
+      if (
+        target.closest("[data-delete-button]") ||
+        target.closest("[data-delete-icon]")
+      ) {
+        return;
+      }
+      if (showDeleteButton !== null) {
+        setShowDeleteButton(null);
+      }
+    };
+
+    if (showDeleteButton !== null) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showDeleteButton]);
 
   const fetchFaqs = async () => {
     try {
@@ -118,6 +149,7 @@ export default function FaqEditorPage() {
   };
 
   const addFaq = () => {
+    const newIndex = faqs.length;
     setFaqs([
       ...faqs,
       {
@@ -125,14 +157,55 @@ export default function FaqEditorPage() {
         answer: "Answer to the question...",
       },
     ]);
+    setOpenIndex(newIndex);
+
+    // Scroll to the newly added card after DOM updates
+    setTimeout(() => {
+      const newCard = cardRefs.current[newIndex];
+      if (newCard) {
+        newCard.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+      }
+    }, 300);
   };
 
   const deleteFaq = (index: number) => {
-    if (faqs.length > 1) {
-      setFaqs(faqs.filter((_, i) => i !== index));
-      toast.success("FAQ deleted");
-    } else {
+    if (faqs.length === 1) {
       toast.error("Must have at least one FAQ");
+      return;
+    }
+
+    setDeleteConfirm({ show: true, index });
+  };
+
+  const confirmDeleteFaq = () => {
+    if (deleteConfirm.index !== null) {
+      const newFaqs = faqs.filter((_, i) => i !== deleteConfirm.index);
+      setFaqs(newFaqs);
+      setShowDeleteButton(null);
+      setDeleteConfirm({ show: false, index: null });
+
+      // Auto-save after deletion
+      setTimeout(async () => {
+        try {
+          const response = await fetch("/api/faq", {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ faqs: newFaqs, sectionHeader }),
+          });
+
+          if (response.ok) {
+            toast.success("FAQ deleted successfully!");
+          } else {
+            toast.error("Failed to save changes");
+          }
+        } catch (error) {
+          console.error("Error saving:", error);
+          toast.error("Error saving changes");
+        }
+      }, 100);
     }
   };
 
@@ -293,15 +366,8 @@ export default function FaqEditorPage() {
 
         {/* CTA Section - Editable */}
         <div className="bg-white dark:bg-dark-800 rounded-2xl p-6 shadow-lg mb-6">
-          <h3 className="text-lg font-bold text-dark-900 dark:text-white mb-4">
-            Call-to-Action Section
-          </h3>
           <div className="space-y-4">
-            {/* CTA Text */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                CTA Text
-              </label>
               {editMode === "ctaText" ? (
                 <input
                   type="text"
@@ -319,18 +385,14 @@ export default function FaqEditorPage() {
               ) : (
                 <p
                   onClick={() => setEditMode("ctaText")}
-                  className="text-gray-600 dark:text-gray-400 cursor-pointer hover:text-green-600 dark:hover:text-green-400 transition-colors px-4 py-2 border-2 border-transparent hover:border-green-200 dark:hover:border-green-800 rounded-lg"
+                  className="text-gray-600 dark:text-gray-400 cursor-pointer hover:text-green-600 dark:hover:text-green-400 transition-colors px-4 py-2 border-2 border-gray-300 dark:border-gray-600 hover:border-green-200 dark:hover:border-green-800 rounded-lg"
                 >
                   {sectionHeader.ctaText}
                 </p>
               )}
             </div>
 
-            {/* Button Text */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Button Text
-              </label>
               {editMode === "ctaButtonText" ? (
                 <input
                   type="text"
@@ -372,14 +434,10 @@ export default function FaqEditorPage() {
               )}
             </div>
 
-            {/* Button Link */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Button Link
-              </label>
               {editMode === "ctaButtonLink" ? (
                 <input
-                  type="text"
+                  type="url"
                   value={sectionHeader.ctaButtonLink}
                   onChange={(e) =>
                     setSectionHeader({
@@ -390,14 +448,19 @@ export default function FaqEditorPage() {
                   onBlur={() => setEditMode(null)}
                   autoFocus
                   className="w-full px-4 py-2 text-gray-600 dark:text-gray-400 bg-white dark:bg-dark-700 border-2 border-green-500 rounded-lg focus:outline-none font-mono text-sm"
-                  placeholder="/contact"
+                  placeholder="e.g., /contact or https://example.com"
                 />
               ) : (
                 <p
                   onClick={() => setEditMode("ctaButtonLink")}
-                  className="text-gray-600 dark:text-gray-400 cursor-pointer hover:text-green-600 dark:hover:text-green-400 transition-colors px-4 py-2 border-2 border-transparent hover:border-green-200 dark:hover:border-green-800 rounded-lg font-mono text-sm"
+                  className={`cursor-pointer transition-colors px-4 py-2 border-2 border-gray-300 dark:border-gray-600 hover:border-green-200 dark:hover:border-green-800 rounded-lg font-mono text-sm ${
+                    sectionHeader.ctaButtonLink
+                      ? "text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400"
+                      : "text-gray-400 dark:text-gray-500 italic hover:text-green-500 dark:hover:text-green-400"
+                  }`}
                 >
-                  {sectionHeader.ctaButtonLink}
+                  {sectionHeader.ctaButtonLink ||
+                    "e.g., /contact or https://example.com"}
                 </p>
               )}
             </div>
@@ -426,20 +489,45 @@ export default function FaqEditorPage() {
           {faqs.map((faq, index) => (
             <motion.div
               key={index}
+              ref={(el) => (cardRefs.current[index] = el)}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
               className="group relative"
             >
               <div className="bg-white dark:bg-dark-800 rounded-2xl overflow-hidden border-2 border-gray-100 dark:border-dark-700 hover:border-green-300 dark:hover:border-green-500 transition-all duration-300 hover:shadow-xl">
-                {/* Delete Button - Positioned Absolute */}
-                <button
-                  onClick={() => deleteFaq(index)}
-                  className="absolute top-4 right-14 p-2 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-20 shadow-lg hover:bg-red-600 hover:scale-110 transform duration-200"
-                  title="Delete FAQ"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
+                {/* Delete Icon Hint & Button - positioned absolutely outside button */}
+                {faqs.length > 1 && (
+                  <div className="absolute top-4 right-12 z-20 flex flex-col items-center gap-2">
+                    {showDeleteButton === index ? (
+                      <Button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          deleteFaq(index);
+                        }}
+                        variant="outline"
+                        className="flex items-center gap-0.5 py-1 text-xs h-7 text-red-600 hover:!text-white !w-auto"
+                        style={{ color: undefined }}
+                        data-delete-button
+                      >
+                        <Trash2 size={12} />
+                        Delete
+                      </Button>
+                    ) : (
+                      <div
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setShowDeleteButton(index);
+                        }}
+                        className="p-1.5 text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity rounded hover:bg-red-50 dark:hover:bg-red-900/20 cursor-pointer"
+                        title="Delete FAQ"
+                        data-delete-icon
+                      >
+                        <Trash2 size={16} />
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 <button
                   onClick={() =>
@@ -486,7 +574,7 @@ export default function FaqEditorPage() {
                     )}
                   </div>
                   <ChevronDown
-                    className={`w-6 h-6 flex-shrink-0 ml-4 transition-all duration-300 ${
+                    className={`w-6 h-6 flex-shrink-0 transition-all duration-300 ${
                       openIndex === index
                         ? "rotate-180 text-green-500 dark:text-green-400"
                         : "text-gray-400 dark:text-gray-600 group-hover:text-green-500 dark:group-hover:text-green-400"
@@ -536,38 +624,41 @@ export default function FaqEditorPage() {
             </motion.div>
           ))}
         </div>
-
-        {/* Contact Us Footer */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-          className="mt-12 text-center"
-        >
-          <p className="text-gray-700 dark:text-gray-300 mb-6 text-base md:text-lg">
-            Still have questions? We're here to help!
-          </p>
-          <a
-            href="/contact"
-            className="inline-flex items-center gap-2 px-8 py-3 bg-green-500 hover:bg-green-600 text-white rounded-full font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
-          >
-            Contact Us
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M17 8l4 4m0 0l-4 4m4-4H3"
-              />
-            </svg>
-          </a>
-        </motion.div>
       </motion.div>
+
+      {/* Delete Confirmation Dialog */}
+      {deleteConfirm.show && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[10000]">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white dark:bg-dark-800 rounded-lg p-6 max-w-md mx-4 shadow-2xl"
+          >
+            <h3 className="text-xl font-bold text-dark-900 dark:text-white mb-2">
+              Delete FAQ
+            </h3>
+            <p className="text-dark-600 dark:text-dark-400 mb-6">
+              Are you sure you want to delete this FAQ? This action cannot be
+              undone.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <Button
+                onClick={() => setDeleteConfirm({ show: false, index: null })}
+                className="flex items-center justify-center px-4 py-1 text-xs h-7"
+                variant="outline"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={confirmDeleteFaq}
+                className="flex items-center justify-center px-4 py-1 text-xs h-7 bg-red-600 hover:bg-red-700"
+              >
+                Delete
+              </Button>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 }
