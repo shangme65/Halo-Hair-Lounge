@@ -11,10 +11,28 @@ export async function GET() {
     });
 
     if (!content) {
-      return NextResponse.json({ testimonials: [] });
+      return NextResponse.json({
+        testimonials: [],
+        sectionHeader: {
+          badge: "Client Reviews",
+          titlePrefix: "Our Client ",
+          titleHighlight: "Reviews",
+          subtitle: "Feedbacks from our satisfied clients",
+          cardsPerRow: 2,
+        },
+      });
     }
 
-    return NextResponse.json({ testimonials: content.testimonials });
+    return NextResponse.json({
+      testimonials: content.testimonials,
+      sectionHeader: content.sectionHeader || {
+        badge: "Client Reviews",
+        titlePrefix: "Our Client ",
+        titleHighlight: "Reviews",
+        subtitle: "Feedbacks from our satisfied clients",
+        cardsPerRow: 2,
+      },
+    });
   } catch (error) {
     // Security: Log error without exposing details
     return NextResponse.json(
@@ -43,12 +61,31 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    const { testimonials } = validation.data;
+    const { testimonials, sectionHeader } = body;
 
     const content = await prisma.testimonialsContent.upsert({
       where: { id: "default" },
-      update: { testimonials },
-      create: { id: "default", testimonials },
+      update: {
+        testimonials,
+        sectionHeader: sectionHeader || {
+          badge: "Client Reviews",
+          titlePrefix: "Our Client ",
+          titleHighlight: "Reviews",
+          subtitle: "Feedbacks from our satisfied clients",
+          cardsPerRow: 2,
+        },
+      },
+      create: {
+        id: "default",
+        testimonials,
+        sectionHeader: sectionHeader || {
+          badge: "Client Reviews",
+          titlePrefix: "Our Client ",
+          titleHighlight: "Reviews",
+          subtitle: "Feedbacks from our satisfied clients",
+          cardsPerRow: 2,
+        },
+      },
     });
 
     return NextResponse.json({ success: true, content });

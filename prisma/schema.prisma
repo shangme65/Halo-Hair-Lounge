@@ -209,6 +209,7 @@ model WhyChooseUsContent {
 model TestimonialsContent {
   id            String   @id @default(cuid())
   testimonials  Json     // Array of testimonials with name, role, rating, text, image, ringColor
+  sectionHeader Json?    // Section header configuration including cardsPerRow
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 

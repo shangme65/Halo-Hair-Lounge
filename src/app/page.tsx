@@ -60,7 +60,7 @@ const testimonials = [
     name: "Sarah Johnson",
     role: "Regular Client",
     verified: true,
-    rating: 4.9,
+    rating: 5,
     text: "Absolutely amazing experience! The stylists are incredibly talented and truly listen to what you want. My hair has never looked better.",
     ringColor: "from-blue-400 to-blue-600",
     image: "/uploads/testimonials/user1.jpg",
@@ -69,7 +69,7 @@ const testimonials = [
     name: "Michael Chen",
     role: "Happy Customer",
     verified: true,
-    rating: 5.0,
+    rating: 5,
     text: "I've been coming here for over two years and they never disappoint. Professional service, premium products, and results that exceed expectations every single time.",
     ringColor: "from-green-400 to-green-600",
     image: "/uploads/testimonials/user2.jpg",
@@ -78,7 +78,7 @@ const testimonials = [
     name: "Emma Williams",
     role: "Loyal Client",
     verified: true,
-    rating: 4.8,
+    rating: 4,
     text: "The best salon experience I've ever had! From the consultation to the final styling, everything was perfect. The team is friendly, skilled, and really passionate about hair care.",
     ringColor: "from-purple-400 to-purple-600",
     image: "/uploads/testimonials/user3.jpg",
@@ -87,7 +87,7 @@ const testimonials = [
     name: "James Rodriguez",
     role: "Satisfied Customer",
     verified: true,
-    rating: 4.9,
+    rating: 5,
     text: "Outstanding service from start to finish! My stylist took the time to understand exactly what I wanted and delivered beyond my expectations.",
     ringColor: "from-orange-400 to-orange-600",
     image: "/uploads/testimonials/user4.jpg",
@@ -96,7 +96,7 @@ const testimonials = [
     name: "Olivia Martinez",
     role: "Beauty Enthusiast",
     verified: true,
-    rating: 5.0,
+    rating: 5,
     text: "I was nervous about trying a new salon, but Halo Hair Lounge exceeded all my expectations. The consultation was thorough, and the results were stunning.",
     ringColor: "from-pink-400 to-pink-600",
     image: "/uploads/testimonials/user5.jpg",
@@ -105,7 +105,7 @@ const testimonials = [
     name: "David Thompson",
     role: "Professional Client",
     verified: true,
-    rating: 4.7,
+    rating: 4,
     text: "Best hair care experience in the city! The attention to detail is remarkable, and they use only top-tier products. Worth every penny!",
     ringColor: "from-teal-400 to-teal-600",
     image: "/uploads/testimonials/user6.jpg",
@@ -114,7 +114,7 @@ const testimonials = [
     name: "Sophia Anderson",
     role: "Regular Visitor",
     verified: true,
-    rating: 4.9,
+    rating: 5,
     text: "I've tried many salons over the years, but none compare to Halo. The stylists are true artists who genuinely care about their craft.",
     ringColor: "from-indigo-400 to-indigo-600",
     image: "/uploads/testimonials/user7.jpg",
@@ -123,7 +123,7 @@ const testimonials = [
     name: "Ryan Mitchell",
     role: "First-Time Client",
     verified: true,
-    rating: 5.0,
+    rating: 5,
     text: "Incredible transformation! I came in with damaged hair and left with healthy, vibrant locks. The team's expertise in hair restoration is unmatched.",
     ringColor: "from-red-400 to-red-600",
     image: "/uploads/testimonials/user8.jpg",
@@ -132,7 +132,7 @@ const testimonials = [
     name: "Isabella Garcia",
     role: "Bridal Client",
     verified: true,
-    rating: 5.0,
+    rating: 5,
     text: "They made me feel like a princess on my wedding day! The bridal styling was absolutely perfect, and it lasted all day and night.",
     ringColor: "from-yellow-400 to-yellow-600",
     image: "/uploads/testimonials/user9.jpg",
@@ -141,7 +141,7 @@ const testimonials = [
     name: "Daniel Lee",
     role: "Corporate Client",
     verified: true,
-    rating: 4.8,
+    rating: 4,
     text: "As someone who values professionalism and quality, I'm impressed by Halo's consistency. Every appointment is punctual, every service is excellent.",
     ringColor: "from-cyan-400 to-cyan-600",
     image: "/uploads/testimonials/user10.jpg",
@@ -188,6 +188,14 @@ export default function Home() {
   const [isPaused, setIsPaused] = useState(false);
   const [isLoadingHero, setIsLoadingHero] = useState(true);
   const [features, setFeatures] = useState(defaultFeatures);
+  const [testimonialsData, setTestimonialsData] = useState(testimonials);
+  const [cardsPerRow, setCardsPerRow] = useState(2);
+  const [testimonialsSectionHeader, setTestimonialsSectionHeader] = useState({
+    badge: "Client Reviews",
+    titlePrefix: "Our Client ",
+    titleHighlight: "Reviews",
+    subtitle: "Feedbacks from our satisfied clients",
+  });
   const [featuresContent, setFeaturesContent] = useState({
     badgeText: "Our Commitment",
     headingPrefix: "Why Choose ",
@@ -279,6 +287,35 @@ export default function Home() {
       }
     };
     fetchFeatures();
+  }, []);
+
+  useEffect(() => {
+    // Fetch testimonials content from database
+    const fetchTestimonials = async () => {
+      try {
+        const response = await fetch("/api/testimonials");
+        const data = await response.json();
+        if (data.testimonials && data.testimonials.length > 0) {
+          setTestimonialsData(data.testimonials);
+        }
+        if (data.sectionHeader) {
+          if (data.sectionHeader.cardsPerRow) {
+            setCardsPerRow(data.sectionHeader.cardsPerRow);
+          }
+          setTestimonialsSectionHeader({
+            badge: data.sectionHeader.badge || "Client Reviews",
+            titlePrefix: data.sectionHeader.titlePrefix || "Our Client ",
+            titleHighlight: data.sectionHeader.titleHighlight || "Reviews",
+            subtitle:
+              data.sectionHeader.subtitle ||
+              "Feedbacks from our satisfied clients",
+          });
+        }
+      } catch (error) {
+        console.error("Error loading testimonials:", error);
+      }
+    };
+    fetchTestimonials();
   }, []);
 
   useEffect(() => {
@@ -577,7 +614,7 @@ export default function Home() {
       </section>
 
       {/* Testimonials Section */}
-      <section className="pt-20 bg-gradient-to-br from-gray-50 via-white to-gray-50 dark:from-dark-900 dark:via-dark-950 dark:to-dark-900 overflow-hidden">
+      <section className="pt-20 pb-20 bg-gradient-to-br from-gray-50 via-white to-gray-50 dark:from-dark-900 dark:via-dark-950 dark:to-dark-900">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           {/* Section Header */}
           <motion.div
@@ -599,130 +636,163 @@ export default function Home() {
               }}
             >
               <span className="text-xs font-semibold text-primary-600 tracking-wider drop-shadow-sm">
-                Client Reviews
+                {testimonialsSectionHeader.badge}
               </span>
             </motion.div>
             <h2 className="text-3xl sm:text-4xl font-display font-bold text-gray-900 dark:text-white mb-3">
-              Our Client{" "}
+              {testimonialsSectionHeader.titlePrefix}
               <span className="text-green-500 dark:text-green-400">
-                Reviews
+                {testimonialsSectionHeader.titleHighlight}
               </span>
             </h2>
             <p className="text-base text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-              Feedbacks from our satisfied clients
+              {testimonialsSectionHeader.subtitle}
             </p>
           </motion.div>
 
           {/* Carousel Testimonials */}
           <div className="relative max-w-6xl mx-auto">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div
+              className={`grid grid-cols-1 ${
+                cardsPerRow === 2
+                  ? "md:grid-cols-2"
+                  : cardsPerRow === 3
+                  ? "md:grid-cols-3"
+                  : cardsPerRow === 4
+                  ? "md:grid-cols-2 lg:grid-cols-4"
+                  : cardsPerRow === 5
+                  ? "md:grid-cols-3 lg:grid-cols-5"
+                  : "md:grid-cols-3 lg:grid-cols-6"
+              } gap-6`}
+            >
               <AnimatePresence mode="wait">
-                {[currentTestimonialIndex, currentTestimonialIndex + 1].map(
-                  (idx, position) => {
-                    const testimonial = testimonials[idx % testimonials.length];
-                    return (
-                      <motion.div
-                        key={`${idx}-${position}`}
-                        initial={{ opacity: 0, x: position === 0 ? -50 : 50 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: position === 0 ? -50 : 50 }}
-                        transition={{ duration: 0.5 }}
-                        className={`bg-white dark:bg-dark-800 rounded-2xl p-6 shadow-2xl hover:shadow-3xl transition-all duration-300 relative group cursor-pointer ${
-                          position === 1 ? "mb-12" : ""
-                        }`}
-                        style={{
-                          boxShadow:
-                            "0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 10px 30px -5px rgba(0, 0, 0, 0.15)",
-                        }}
-                        onMouseEnter={() => setIsPaused(true)}
-                        onMouseLeave={() => setIsPaused(false)}
-                        onClick={() => setIsPaused(!isPaused)}
-                      >
-                        {/* Rating Badge - Top Right */}
-                        <div className="absolute top-4 right-4">
+                {Array.from({ length: cardsPerRow }).map((_, position) => {
+                  const idx = currentTestimonialIndex + position;
+                  const testimonial =
+                    testimonialsData[idx % testimonialsData.length];
+                  return (
+                    <motion.div
+                      key={`${idx}-${position}`}
+                      initial={{ opacity: 0, x: position % 2 === 0 ? -50 : 50 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: position % 2 === 0 ? -50 : 50 }}
+                      transition={{ duration: 0.5, delay: position * 0.1 }}
+                      className="bg-white dark:bg-dark-800 rounded-2xl p-6 shadow-2xl hover:shadow-3xl transition-all duration-300 relative group cursor-pointer"
+                      style={{
+                        boxShadow:
+                          "0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 10px 30px -5px rgba(0, 0, 0, 0.15)",
+                      }}
+                      onMouseEnter={() => setIsPaused(true)}
+                      onMouseLeave={() => setIsPaused(false)}
+                      onClick={() => setIsPaused(!isPaused)}
+                    >
+                      {/* Rating Badge - Top Right */}
+                      <div className="absolute top-4 right-4">
+                        <div
+                          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r ${testimonial.ringColor} text-white shadow-lg`}
+                        >
+                          <Star className="w-3.5 h-3.5 fill-white" />
+                          <span className="text-sm font-bold">
+                            {testimonial.rating.toFixed(1)}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* User Info Section */}
+                      <div className="flex items-start gap-4 mb-4">
+                        {/* Profile Image with Colored Ring */}
+                        <div className="relative flex-shrink-0">
                           <div
-                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r ${testimonial.ringColor} text-white shadow-lg`}
+                            className={`w-16 h-16 rounded-full bg-gradient-to-br ${testimonial.ringColor} p-0.5`}
+                            style={{
+                              boxShadow: testimonial.ringColor.includes(
+                                "purple"
+                              )
+                                ? "0 0 20px rgba(168, 85, 247, 0.5), 0 0 40px rgba(236, 72, 153, 0.3)"
+                                : testimonial.ringColor.includes("blue")
+                                ? "0 0 20px rgba(59, 130, 246, 0.5), 0 0 40px rgba(6, 182, 212, 0.3)"
+                                : testimonial.ringColor.includes("green")
+                                ? "0 0 20px rgba(34, 197, 94, 0.5), 0 0 40px rgba(16, 185, 129, 0.3)"
+                                : testimonial.ringColor.includes("pink")
+                                ? "0 0 20px rgba(236, 72, 153, 0.5), 0 0 40px rgba(219, 39, 119, 0.3)"
+                                : testimonial.ringColor.includes("teal") ||
+                                  testimonial.ringColor.includes("cyan")
+                                ? "0 0 20px rgba(20, 184, 166, 0.5), 0 0 40px rgba(6, 182, 212, 0.3)"
+                                : testimonial.ringColor.includes("indigo")
+                                ? "0 0 20px rgba(99, 102, 241, 0.5), 0 0 40px rgba(79, 70, 229, 0.3)"
+                                : testimonial.ringColor.includes("red")
+                                ? "0 0 20px rgba(239, 68, 68, 0.5), 0 0 40px rgba(220, 38, 38, 0.3)"
+                                : testimonial.ringColor.includes("yellow")
+                                ? "0 0 20px rgba(250, 204, 21, 0.5), 0 0 40px rgba(234, 179, 8, 0.3)"
+                                : testimonial.ringColor.includes("orange")
+                                ? "0 0 20px rgba(249, 115, 22, 0.5), 0 0 40px rgba(234, 88, 12, 0.3)"
+                                : "0 0 20px rgba(168, 85, 247, 0.5), 0 0 40px rgba(236, 72, 153, 0.3)",
+                            }}
                           >
-                            <Star className="w-3.5 h-3.5 fill-white" />
-                            <span className="text-sm font-bold">
-                              {testimonial.rating.toFixed(1)}
-                            </span>
+                            <div className="w-full h-full rounded-full overflow-hidden bg-gray-100">
+                              <Image
+                                src={testimonial.image}
+                                alt={testimonial.name}
+                                width={64}
+                                height={64}
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  // Fallback to initial letter if image fails
+                                  e.currentTarget.style.display = "none";
+                                  const parent = e.currentTarget.parentElement;
+                                  if (parent) {
+                                    parent.innerHTML = `<div class="w-full h-full rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center text-white font-bold text-xl">${testimonial.name.charAt(
+                                      0
+                                    )}</div>`;
+                                  }
+                                }}
+                              />
+                            </div>
                           </div>
                         </div>
 
-                        {/* User Info Section */}
-                        <div className="flex items-start gap-4 mb-4">
-                          {/* Profile Image with Colored Ring */}
-                          <div className="relative flex-shrink-0">
-                            <div
-                              className={`w-16 h-16 rounded-full bg-gradient-to-br ${testimonial.ringColor} p-0.5`}
-                            >
-                              <div className="w-full h-full rounded-full overflow-hidden bg-gray-100">
-                                <Image
-                                  src={testimonial.image}
-                                  alt={testimonial.name}
-                                  width={64}
-                                  height={64}
-                                  className="w-full h-full object-cover"
-                                  onError={(e) => {
-                                    // Fallback to initial letter if image fails
-                                    e.currentTarget.style.display = "none";
-                                    const parent =
-                                      e.currentTarget.parentElement;
-                                    if (parent) {
-                                      parent.innerHTML = `<div class="w-full h-full rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center text-white font-bold text-xl">${testimonial.name.charAt(
-                                        0
-                                      )}</div>`;
-                                    }
-                                  }}
-                                />
+                        {/* Name and Role */}
+                        <div className="flex-1 pt-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <h4 className="font-bold text-gray-900 dark:text-white text-base">
+                              {testimonial.name}
+                            </h4>
+                            {testimonial.verified && (
+                              <div className="relative">
+                                <svg
+                                  viewBox="0 0 22 22"
+                                  className="w-5 h-5"
+                                  fill="none"
+                                >
+                                  <path
+                                    d="M11 0L13.09 2.26L16.18 2.63L16.54 5.72L18.8 7.8L16.54 9.88L16.18 12.97L13.09 13.34L11 15.6L8.91 13.34L5.82 12.97L5.46 9.88L3.2 7.8L5.46 5.72L5.82 2.63L8.91 2.26L11 0Z"
+                                    fill="#22c55e"
+                                    transform="translate(0, 3.2) scale(1)"
+                                  />
+                                  <path
+                                    d="M8.5 11L10 12.5L13.5 9"
+                                    stroke="white"
+                                    strokeWidth="1.5"
+                                    strokeLinecap="square"
+                                    strokeLinejoin="miter"
+                                  />
+                                </svg>
                               </div>
-                            </div>
+                            )}
                           </div>
-
-                          {/* Name and Role */}
-                          <div className="flex-1 pt-1">
-                            <div className="flex items-center gap-2 mb-1">
-                              <h4 className="font-bold text-gray-900 dark:text-white text-base">
-                                {testimonial.name}
-                              </h4>
-                              {testimonial.verified && (
-                                <div className="relative">
-                                  <svg
-                                    viewBox="0 0 22 22"
-                                    className="w-5 h-5"
-                                    fill="none"
-                                  >
-                                    <path
-                                      d="M11 0L13.09 2.26L16.18 2.63L16.54 5.72L18.8 7.8L16.54 9.88L16.18 12.97L13.09 13.34L11 15.6L8.91 13.34L5.82 12.97L5.46 9.88L3.2 7.8L5.46 5.72L5.82 2.63L8.91 2.26L11 0Z"
-                                      fill="#22c55e"
-                                      transform="translate(0, 3.2) scale(1)"
-                                    />
-                                    <path
-                                      d="M8.5 11L10 12.5L13.5 9"
-                                      stroke="white"
-                                      strokeWidth="1.5"
-                                      strokeLinecap="square"
-                                      strokeLinejoin="miter"
-                                    />
-                                  </svg>
-                                </div>
-                              )}
-                            </div>
-                            <p className="text-sm text-gray-600 dark:text-gray-400">
-                              {testimonial.role}
-                            </p>
-                          </div>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            {testimonial.role}
+                          </p>
                         </div>
+                      </div>
 
-                        {/* Testimonial Text */}
-                        <p className="text-gray-700 dark:text-gray-300 leading-relaxed text-sm">
-                          "{testimonial.text}"
-                        </p>
-                      </motion.div>
-                    );
-                  }
-                )}
+                      {/* Testimonial Text */}
+                      <p className="text-gray-700 dark:text-gray-300 leading-relaxed text-sm">
+                        "{testimonial.text}"
+                      </p>
+                    </motion.div>
+                  );
+                })}
               </AnimatePresence>
             </div>
           </div>

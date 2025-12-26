@@ -362,24 +362,34 @@ export const testimonialSchema = z.object({
     .max(100, "Role must be less than 100 characters")
     .trim()
     .optional(),
-  content: z
+  text: z
     .string()
     .min(1)
-    .max(1000, "Content must be less than 1000 characters")
+    .max(1000, "Text must be less than 1000 characters")
     .trim(),
   rating: z
     .number()
     .int()
     .min(1, "Rating must be at least 1")
-    .max(5, "Rating must be at most 5")
-    .optional(),
-  image: z.string().url().optional().or(z.literal("")),
+    .max(5, "Rating must be at most 5"),
+  image: z.string().optional(),
+  ringColor: z.string().optional(),
+  verified: z.boolean().optional(),
 });
 
 export const testimonialsContentSchema = z.object({
   testimonials: z
     .array(testimonialSchema)
     .max(50, "Maximum 50 testimonials allowed"),
+  sectionHeader: z
+    .object({
+      badge: z.string().optional(),
+      titlePrefix: z.string().optional(),
+      titleHighlight: z.string().optional(),
+      subtitle: z.string().optional(),
+      cardsPerRow: z.number().min(2).max(6).optional(),
+    })
+    .optional(),
 });
 
 export const featureSchema = z.object({
