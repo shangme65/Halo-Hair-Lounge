@@ -489,7 +489,9 @@ export default function FaqEditorPage() {
           {faqs.map((faq, index) => (
             <motion.div
               key={index}
-              ref={(el) => (cardRefs.current[index] = el)}
+              ref={(el) => {
+                cardRefs.current[index] = el;
+              }}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
