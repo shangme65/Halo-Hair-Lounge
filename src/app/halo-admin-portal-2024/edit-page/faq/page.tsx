@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronDown, Plus, Trash2, Save } from "lucide-react";
+import { ChevronDown, Plus, Trash2, Save, ArrowLeft } from "lucide-react";
+import { useRouter } from "next/navigation";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import { toast } from "react-hot-toast";
@@ -13,11 +14,22 @@ interface Faq {
 }
 
 export default function FaqEditorPage() {
+  const router = useRouter();
   const [faqs, setFaqs] = useState<Faq[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [editMode, setEditMode] = useState<string | null>(null);
   const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const [sectionHeader, setSectionHeader] = useState({
+    badge: "Got Questions?",
+    titlePrefix: "Frequently Asked ",
+    titleHighlight: "Questions",
+    subtitle:
+      "Everything you need to know about our services and booking process",
+    ctaText: "Still have questions? We're here to help!",
+    ctaButtonText: "Contact Us",
+    ctaButtonLink: "/contact",
+  });
 
   useEffect(() => {
     fetchFaqs();
@@ -30,7 +42,11 @@ export default function FaqEditorPage() {
 
       if (data.faqs && data.faqs.length > 0) {
         setFaqs(data.faqs);
-      } else {
+      }
+      if (data.sectionHeader) {
+        setSectionHeader(data.sectionHeader);
+      }
+      if (!data.faqs || data.faqs.length === 0) {
         setFaqs([
           {
             question: "How do I book an appointment?",
@@ -78,7 +94,7 @@ export default function FaqEditorPage() {
       const response = await fetch("/api/faq", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ faqs }),
+        body: JSON.stringify({ faqs, sectionHeader }),
       });
 
       if (response.ok) {
@@ -135,67 +151,277 @@ export default function FaqEditorPage() {
         animate={{ opacity: 1, y: 0 }}
         className="max-w-4xl mx-auto"
       >
-        {/* FAQ Section Header */}
-        <div className="text-center mb-8">
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="inline-block mb-4"
-          >
-            <span className="inline-block px-6 py-2 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded-full font-semibold text-sm">
-              Got Questions?
-            </span>
-          </motion.div>
-          <motion.h2
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="text-3xl md:text-4xl font-bold mb-4"
-          >
-            Frequently Asked{" "}
-            <span className="bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
-              Questions
-            </span>
-          </motion.h2>
-          <motion.p
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="text-gray-600 dark:text-gray-400 text-base md:text-lg max-w-2xl mx-auto"
-          >
-            Everything you need to know about our services and booking process
-          </motion.p>
-        </div>
-
         {/* Header */}
-        <div className="flex flex-col gap-2 mb-3">
-          <div>
-            <h1 className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+        <div className="mb-4">
+          <div className="flex items-center justify-between mb-2">
+            <h1 className="text-2xl sm:text-3xl font-bold text-green-600 dark:text-green-400">
               Edit FAQ
             </h1>
-            <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">
-              Click to edit
-            </p>
+            <div className="flex items-center gap-1">
+              <Button
+                onClick={() => router.push("/halo-admin-portal-2024/edit-page")}
+                className="flex items-center gap-0.5 py-1 px-1.5 text-xs h-7"
+                variant="outline"
+              >
+                <ArrowLeft size={12} />
+                Back
+              </Button>
+              <Button
+                onClick={handleSave}
+                disabled={saving}
+                className="flex items-center gap-0.5 py-1 px-1.5 text-xs h-7 bg-gradient-to-r from-primary-600 to-primary-700"
+              >
+                <Save size={12} />
+                {saving ? "Saving..." : "Save"}
+              </Button>
+            </div>
           </div>
-          <div className="flex gap-1.5 w-full">
-            <Button
-              onClick={addFaq}
-              className="flex-1 gap-1.5 text-xs py-1.5 px-2"
+          <p className="text-sm text-green-600 dark:text-green-400">
+            Click on any text to edit. Changes will be reflected on the
+            homepage.
+          </p>
+        </div>
+
+        {/* FAQ Section Header - Editable */}
+        <div className="bg-white dark:bg-dark-800 rounded-2xl p-6 shadow-lg mb-6">
+          <div className="text-center">
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="inline-block px-4 py-2 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded-full text-sm font-semibold mb-3 shadow-lg hover:shadow-xl transition-shadow duration-300"
+              style={{
+                boxShadow:
+                  "0 4px 15px rgba(34, 197, 94, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.5)",
+              }}
             >
-              <Plus className="w-3.5 h-3.5" /> Add
-            </Button>
-            <Button
-              onClick={handleSave}
-              disabled={saving}
-              className="flex-1 gap-1.5 text-xs py-1.5 px-2 bg-gradient-to-r from-indigo-600 to-purple-600"
-            >
-              <Save className="w-3.5 h-3.5" />
-              {saving ? "Saving..." : "Save"}
-            </Button>
+              {editMode === "badge" ? (
+                <input
+                  type="text"
+                  value={sectionHeader.badge}
+                  onChange={(e) =>
+                    setSectionHeader({
+                      ...sectionHeader,
+                      badge: e.target.value,
+                    })
+                  }
+                  onBlur={() => setEditMode(null)}
+                  autoFocus
+                  className="text-sm font-semibold text-green-600 dark:text-green-400 bg-transparent border-none outline-none text-center drop-shadow-sm"
+                />
+              ) : (
+                <span
+                  onClick={() => setEditMode("badge")}
+                  className="cursor-pointer drop-shadow-sm"
+                >
+                  {sectionHeader.badge}
+                </span>
+              )}
+            </motion.div>
+            <h2 className="text-2xl sm:text-3xl font-display font-bold mb-2">
+              {editMode === "titlePrefix" ? (
+                <input
+                  type="text"
+                  value={sectionHeader.titlePrefix}
+                  onChange={(e) =>
+                    setSectionHeader({
+                      ...sectionHeader,
+                      titlePrefix: e.target.value,
+                    })
+                  }
+                  onBlur={() => setEditMode(null)}
+                  autoFocus
+                  className="inline-block px-3 py-1 bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent bg-white dark:bg-dark-700 border-2 border-green-500 rounded-lg focus:outline-none"
+                />
+              ) : (
+                <span
+                  onClick={() => setEditMode("titlePrefix")}
+                  className="bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent cursor-pointer"
+                >
+                  {sectionHeader.titlePrefix}
+                </span>
+              )}{" "}
+              {editMode === "titleHighlight" ? (
+                <input
+                  type="text"
+                  value={sectionHeader.titleHighlight}
+                  onChange={(e) =>
+                    setSectionHeader({
+                      ...sectionHeader,
+                      titleHighlight: e.target.value,
+                    })
+                  }
+                  onBlur={() => setEditMode(null)}
+                  autoFocus
+                  className="inline-block px-3 py-1 text-green-500 dark:text-green-400 bg-white dark:bg-dark-700 border-2 border-green-500 rounded-lg focus:outline-none"
+                />
+              ) : (
+                <span
+                  onClick={() => setEditMode("titleHighlight")}
+                  className="text-green-500 dark:text-green-400 cursor-pointer"
+                >
+                  {sectionHeader.titleHighlight}
+                </span>
+              )}
+            </h2>
+            <p className="text-base text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+              {editMode === "subtitle" ? (
+                <input
+                  type="text"
+                  value={sectionHeader.subtitle}
+                  onChange={(e) =>
+                    setSectionHeader({
+                      ...sectionHeader,
+                      subtitle: e.target.value,
+                    })
+                  }
+                  onBlur={() => setEditMode(null)}
+                  autoFocus
+                  className="w-full px-3 py-1 text-center text-base text-gray-600 dark:text-gray-400 bg-white dark:bg-dark-700 border-2 border-green-500 rounded-lg focus:outline-none"
+                />
+              ) : (
+                <span
+                  onClick={() => setEditMode("subtitle")}
+                  className="cursor-pointer"
+                >
+                  {sectionHeader.subtitle}
+                </span>
+              )}
+            </p>
           </div>
         </div>
 
-        {/* FAQs List */}
+        {/* CTA Section - Editable */}
+        <div className="bg-white dark:bg-dark-800 rounded-2xl p-6 shadow-lg mb-6">
+          <h3 className="text-lg font-bold text-dark-900 dark:text-white mb-4">
+            Call-to-Action Section
+          </h3>
+          <div className="space-y-4">
+            {/* CTA Text */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                CTA Text
+              </label>
+              {editMode === "ctaText" ? (
+                <input
+                  type="text"
+                  value={sectionHeader.ctaText}
+                  onChange={(e) =>
+                    setSectionHeader({
+                      ...sectionHeader,
+                      ctaText: e.target.value,
+                    })
+                  }
+                  onBlur={() => setEditMode(null)}
+                  autoFocus
+                  className="w-full px-4 py-2 text-gray-600 dark:text-gray-400 bg-white dark:bg-dark-700 border-2 border-green-500 rounded-lg focus:outline-none"
+                />
+              ) : (
+                <p
+                  onClick={() => setEditMode("ctaText")}
+                  className="text-gray-600 dark:text-gray-400 cursor-pointer hover:text-green-600 dark:hover:text-green-400 transition-colors px-4 py-2 border-2 border-transparent hover:border-green-200 dark:hover:border-green-800 rounded-lg"
+                >
+                  {sectionHeader.ctaText}
+                </p>
+              )}
+            </div>
+
+            {/* Button Text */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Button Text
+              </label>
+              {editMode === "ctaButtonText" ? (
+                <input
+                  type="text"
+                  value={sectionHeader.ctaButtonText}
+                  onChange={(e) =>
+                    setSectionHeader({
+                      ...sectionHeader,
+                      ctaButtonText: e.target.value,
+                    })
+                  }
+                  onBlur={() => setEditMode(null)}
+                  autoFocus
+                  className="w-full px-4 py-2 bg-white dark:bg-dark-700 border-2 border-green-500 rounded-lg focus:outline-none"
+                />
+              ) : (
+                <div
+                  onClick={() => setEditMode("ctaButtonText")}
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-green-500 text-white rounded-full hover:bg-green-600 transition-all duration-300 font-semibold shadow-lg cursor-pointer"
+                  style={{
+                    boxShadow:
+                      "0 4px 20px rgba(34, 197, 94, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2)",
+                  }}
+                >
+                  {sectionHeader.ctaButtonText}
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M17 8l4 4m0 0l-4 4m4-4H3"
+                    />
+                  </svg>
+                </div>
+              )}
+            </div>
+
+            {/* Button Link */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Button Link
+              </label>
+              {editMode === "ctaButtonLink" ? (
+                <input
+                  type="text"
+                  value={sectionHeader.ctaButtonLink}
+                  onChange={(e) =>
+                    setSectionHeader({
+                      ...sectionHeader,
+                      ctaButtonLink: e.target.value,
+                    })
+                  }
+                  onBlur={() => setEditMode(null)}
+                  autoFocus
+                  className="w-full px-4 py-2 text-gray-600 dark:text-gray-400 bg-white dark:bg-dark-700 border-2 border-green-500 rounded-lg focus:outline-none font-mono text-sm"
+                  placeholder="/contact"
+                />
+              ) : (
+                <p
+                  onClick={() => setEditMode("ctaButtonLink")}
+                  className="text-gray-600 dark:text-gray-400 cursor-pointer hover:text-green-600 dark:hover:text-green-400 transition-colors px-4 py-2 border-2 border-transparent hover:border-green-200 dark:hover:border-green-800 rounded-lg font-mono text-sm"
+                >
+                  {sectionHeader.ctaButtonLink}
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="text-2xl font-bold text-dark-900 dark:text-white">
+              Manage Cards: {faqs.length}
+            </h2>
+            <Button
+              onClick={addFaq}
+              className="flex flex-row items-center gap-0.5 py-1 text-xs h-7 bg-gradient-to-r from-primary-600 to-primary-700 !w-auto whitespace-nowrap flex-shrink-0"
+            >
+              <Plus size={12} />
+              Add Card
+            </Button>
+          </div>
+          <p className="text-sm text-dark-600 dark:text-dark-400">
+            {faqs.length} {faqs.length !== 1 ? "cards" : "card"} loaded
+          </p>
+        </div>
+
         <div className="space-y-2">
           {faqs.map((faq, index) => (
             <motion.div

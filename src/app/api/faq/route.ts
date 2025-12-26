@@ -11,10 +11,35 @@ export async function GET() {
     });
 
     if (!content) {
-      return NextResponse.json({ faqs: [] });
+      const defaultSectionHeader = {
+        badge: "Got Questions?",
+        titlePrefix: "Frequently Asked ",
+        titleHighlight: "Questions",
+        subtitle:
+          "Everything you need to know about our services and booking process",
+        ctaText: "Still have questions? We're here to help!",
+        ctaButtonText: "Contact Us",
+        ctaButtonLink: "/contact",
+      };
+      return NextResponse.json({
+        faqs: [],
+        sectionHeader: defaultSectionHeader,
+      });
     }
 
-    return NextResponse.json({ faqs: content.faqs });
+    const contentData = content as any;
+    const sectionHeader = contentData.sectionHeader || {
+      badge: "Got Questions?",
+      titlePrefix: "Frequently Asked ",
+      titleHighlight: "Questions",
+      subtitle:
+        "Everything you need to know about our services and booking process",
+      ctaText: "Still have questions? We're here to help!",
+      ctaButtonText: "Contact Us",
+      ctaButtonLink: "/contact",
+    };
+
+    return NextResponse.json({ faqs: content.faqs, sectionHeader });
   } catch (error) {
     // Security: Log error without exposing details
     return NextResponse.json(
@@ -43,12 +68,12 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    const { faqs } = validation.data;
+    const { faqs, sectionHeader } = validation.data;
 
     const content = await prisma.faqContent.upsert({
       where: { id: "default" },
-      update: { faqs },
-      create: { id: "default", faqs },
+      update: { faqs, sectionHeader } as any,
+      create: { id: "default", faqs, sectionHeader } as any,
     });
 
     return NextResponse.json({ success: true, content });

@@ -36,7 +36,7 @@ const homepageSections = [
     color: "from-blue-500 to-blue-600",
   },
   {
-    name: "Client Reviews",
+    name: "Reviews Section",
     description: "Testimonials and customer feedback carousel",
     icon: MessageSquare,
     path: "/halo-admin-portal-2024/edit-page/testimonials",

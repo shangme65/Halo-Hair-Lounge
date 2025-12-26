@@ -348,6 +348,17 @@ export const faqItemSchema = z.object({
 
 export const faqContentSchema = z.object({
   faqs: z.array(faqItemSchema).max(50, "Maximum 50 FAQs allowed"),
+  sectionHeader: z
+    .object({
+      badge: z.string(),
+      titlePrefix: z.string(),
+      titleHighlight: z.string(),
+      subtitle: z.string(),
+      ctaText: z.string().optional(),
+      ctaButtonText: z.string().optional(),
+      ctaButtonLink: z.string().optional(),
+    })
+    .optional(),
 });
 
 export const testimonialSchema = z.object({
