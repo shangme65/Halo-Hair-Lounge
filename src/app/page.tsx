@@ -203,6 +203,29 @@ export default function Home() {
     titleHighlight: "Questions",
     subtitle:
       "Everything you need to know about our services and booking process",
+  });
+  const [ctaData, setCtaData] = useState({
+    badge: "Book Now & Get Started",
+    title: "Ready for Your Transformation?",
+    description:
+      "Book your appointment today and experience the Halo difference",
+    buttonText: "Book Your Appointment",
+    buttonHref: "/book",
+    trustIndicators: [
+      "Expert Stylists",
+      "Premium Products",
+      "Flexible Scheduling",
+      "Premium Styling",
+      "Expert Care",
+      "Personalized Service",
+    ],
+  });
+  const [faqContent, setFaqContent] = useState({
+    badge: "Got Questions?",
+    titlePrefix: "Frequently Asked ",
+    titleHighlight: "Questions",
+    subtitle:
+      "Everything you need to know about our services and booking process",
     ctaText: "Still have questions? We're here to help!",
     ctaButtonText: "Contact Us",
     ctaButtonLink: "/contact",
@@ -365,6 +388,39 @@ export default function Home() {
 
     return () => clearInterval(testimonialTimer);
   }, [isPaused]);
+
+  // Fetch CTA data
+  useEffect(() => {
+    fetch("/api/cta")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.badge || data.title) {
+          setCtaData({
+            badge: data.badge || "Book Now & Get Started",
+            title: data.title || "Ready for Your Transformation?",
+            description:
+              data.description ||
+              "Book your appointment today and experience the Halo difference",
+            buttonText: data.buttonText || "Book Your Appointment",
+            buttonHref: data.buttonHref || "/book",
+            trustIndicators: data.trustIndicators || [
+              "Expert Stylists",
+              "Premium Products",
+              "Flexible Scheduling",
+              "Premium Styling",
+              "Expert Care",
+              "Personalized Service",
+            ],
+          });
+        }
+      })
+      .catch((error) => console.error("Error fetching CTA:", error));
+  }, []);
+
+  // Scroll to top on page load/refresh
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const slide = heroSlides[currentSlide];
 
@@ -945,17 +1001,17 @@ export default function Home() {
             className="text-center mt-6"
           >
             <p className="text-gray-600 dark:text-gray-400 mb-4">
-              {faqSectionHeader.ctaText}
+              {faqContent.ctaText}
             </p>
             <a
-              href={faqSectionHeader.ctaButtonLink}
+              href={faqContent.ctaButtonLink}
               className="inline-flex items-center gap-2 px-6 py-3 bg-green-500 text-white rounded-full hover:bg-green-600 transition-all duration-300 hover:scale-105 font-semibold shadow-lg hover:shadow-xl"
               style={{
                 boxShadow:
                   "0 4px 20px rgba(34, 197, 94, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2)",
               }}
             >
-              {faqSectionHeader.ctaButtonText}
+              {faqContent.ctaButtonText}
               <svg
                 className="w-5 h-5"
                 fill="none"
@@ -1019,7 +1075,7 @@ export default function Home() {
             >
               <span className="text-xs font-semibold text-white tracking-wider flex items-center gap-2">
                 <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse" />
-                Book Now & Get Started
+                {ctaData.badge}
               </span>
             </motion.div>
 
@@ -1032,7 +1088,7 @@ export default function Home() {
               className="text-2xl sm:text-3xl lg:text-4xl font-display font-bold mb-4 leading-tight"
             >
               <span className="inline-block bg-gradient-to-r from-white via-green-100 to-white bg-clip-text text-transparent drop-shadow-2xl">
-                Ready for Your Transformation?
+                {ctaData.title}
               </span>
             </motion.h2>
 
@@ -1044,7 +1100,7 @@ export default function Home() {
               transition={{ duration: 0.6, delay: 0.4 }}
               className="text-base sm:text-lg lg:text-xl text-green-50 mb-8 max-w-3xl mx-auto leading-relaxed font-light"
             >
-              Book your appointment today and experience the Halo difference
+              {ctaData.description}
             </motion.p>
 
             {/* Enhanced CTA Button */}
@@ -1059,14 +1115,14 @@ export default function Home() {
                 stiffness: 200,
               }}
             >
-              <Link href="/book">
+              <Link href={ctaData.buttonHref}>
                 <Button
                   size="lg"
                   variant="secondary"
                   className="group shadow-2xl hover:shadow-green-500/50 transition-all duration-300 text-base px-6 py-3"
                 >
                   <Calendar className="w-5 h-5 mr-2 group-hover:scale-110 group-hover:rotate-12 transition-all duration-300" />
-                  Book Your Appointment
+                  {ctaData.buttonText}
                   <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-2 transition-transform duration-300" />
                 </Button>
               </Link>
@@ -1080,30 +1136,12 @@ export default function Home() {
               transition={{ duration: 0.6, delay: 0.6 }}
               className="mt-8 flex flex-wrap justify-center gap-6 text-green-100/80 text-sm"
             >
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-5 h-5 text-green-400" />
-                <span>Expert Stylists</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-5 h-5 text-green-400" />
-                <span>Premium Products</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-5 h-5 text-green-400" />
-                <span>Flexible Scheduling</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-5 h-5 text-green-400" />
-                <span>Premium Styling</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-5 h-5 text-green-400" />
-                <span>Expert Care</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-5 h-5 text-green-400" />
-                <span>Personalized Service</span>
-              </div>
+              {ctaData.trustIndicators.map((indicator, index) => (
+                <div key={index} className="flex items-center gap-2">
+                  <CheckCircle2 className="w-5 h-5 text-green-400" />
+                  <span>{indicator}</span>
+                </div>
+              ))}
             </motion.div>
           </motion.div>
         </div>
