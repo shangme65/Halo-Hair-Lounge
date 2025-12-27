@@ -12,10 +12,20 @@ export async function GET() {
 
     if (!content) {
       return NextResponse.json({
-        title: "",
-        description: "",
-        buttonText: "",
-        buttonHref: "",
+        badge: "Book Now & Get Started",
+        title: "Ready for Your Transformation?",
+        description:
+          "Book your appointment today and experience the Halo difference",
+        buttonText: "Book Your Appointment",
+        buttonHref: "/book",
+        trustIndicators: [
+          "Expert Stylists",
+          "Premium Products",
+          "Flexible Scheduling",
+          "Premium Styling",
+          "Expert Care",
+          "Personalized Service",
+        ],
       });
     }
 
@@ -45,12 +55,34 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    const { title, description, buttonText, buttonHref } = validation.data;
+    const {
+      badge,
+      title,
+      description,
+      buttonText,
+      buttonHref,
+      trustIndicators,
+    } = validation.data;
 
     const content = await prisma.ctaContent.upsert({
       where: { id: "default" },
-      update: { title, description, buttonText, buttonHref },
-      create: { id: "default", title, description, buttonText, buttonHref },
+      update: {
+        badge: badge || "Book Now & Get Started",
+        title,
+        description,
+        buttonText,
+        buttonHref,
+        trustIndicators: trustIndicators || [],
+      },
+      create: {
+        id: "default",
+        badge: badge || "Book Now & Get Started",
+        title,
+        description,
+        buttonText,
+        buttonHref,
+        trustIndicators: trustIndicators || [],
+      },
     });
 
     return NextResponse.json({ success: true, content });

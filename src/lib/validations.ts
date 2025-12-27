@@ -318,6 +318,11 @@ export const heroContentSchema = z.object({
 });
 
 export const ctaContentSchema = z.object({
+  badge: z
+    .string()
+    .max(100, "Badge must be less than 100 characters")
+    .trim()
+    .optional(),
   title: z.string().max(200, "Title must be less than 200 characters").trim(),
   description: z
     .string()
@@ -330,6 +335,7 @@ export const ctaContentSchema = z.object({
   buttonHref: z
     .string()
     .max(200, "Button link must be less than 200 characters"),
+  trustIndicators: z.array(z.string()).optional(),
 });
 
 export const faqItemSchema = z.object({

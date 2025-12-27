@@ -227,13 +227,15 @@ model FaqContent {
 }
 
 model CtaContent {
-  id          String   @id @default(cuid())
-  title       String
-  description String   @db.Text
-  buttonText  String
-  buttonHref  String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id              String   @id @default(cuid())
+  badge           String   @default("Book Now & Get Started")
+  title           String
+  description     String   @db.Text
+  buttonText      String
+  buttonHref      String
+  trustIndicators String[] @default([])
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   @@map("cta_content")
 }

@@ -95,6 +95,9 @@ export async function DELETE(req: NextRequest) {
       await prisma.testimonialsContent.deleteMany({});
       await prisma.whyChooseUsContent.deleteMany({});
 
+      // Delete all notifications
+      await prisma.notification.deleteMany({});
+
       // Delete all products (before categories)
       await prisma.product.deleteMany({});
 
