@@ -211,6 +211,8 @@ export default function Home() {
       "Book your appointment today and experience the Halo difference",
     buttonText: "Book Your Appointment",
     buttonHref: "/book",
+    leadingIcon: "Calendar",
+    trailingIcon: "ArrowRight",
     trustIndicators: [
       "Expert Stylists",
       "Premium Products",
@@ -243,7 +245,12 @@ export default function Home() {
       subtitle: "Premium Hair Care Excellence",
       description: "Experience luxury styling with our expert stylists",
       colorScheme: "green" as const,
-      cta: { text: "Book Appointment", href: "/book" },
+      cta: {
+        text: "Book Appointment",
+        href: "/book",
+        startIcon: "Calendar",
+        endIcon: "ArrowRight",
+      },
       secondaryCta: { text: "View Services", href: "/services" },
     },
     {
@@ -251,7 +258,12 @@ export default function Home() {
       subtitle: "Innovative Hair Solutions",
       description: "From classic cuts to bold transformations",
       colorScheme: "green" as const,
-      cta: { text: "View Products", href: "/products" },
+      cta: {
+        text: "View Products",
+        href: "/products",
+        startIcon: "Calendar",
+        endIcon: "ArrowRight",
+      },
       secondaryCta: { text: "Explore Site", href: "/site-map" },
     },
     {
@@ -259,7 +271,12 @@ export default function Home() {
       subtitle: "Starts Here Today",
       description: "Personalized consultations and expert care",
       colorScheme: "green" as const,
-      cta: { text: "About Us", href: "/about" },
+      cta: {
+        text: "About Us",
+        href: "/about",
+        startIcon: "Calendar",
+        endIcon: "ArrowRight",
+      },
       secondaryCta: { text: "Contact", href: "/contact" },
     },
   ]);
@@ -418,6 +435,8 @@ export default function Home() {
               "Book your appointment today and experience the Halo difference",
             buttonText: data.buttonText || "Book Your Appointment",
             buttonHref: data.buttonHref || "/book",
+            leadingIcon: data.leadingIcon || "Calendar",
+            trailingIcon: data.trailingIcon || "ArrowRight",
             trustIndicators: data.trustIndicators || [
               "Expert Stylists",
               "Premium Products",

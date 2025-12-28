@@ -375,8 +375,8 @@ export default function FeaturesEditorPage() {
                 key={`feature-${index}`}
                 ref={(el) => {
                   cardRefs.current[index] = el;
-                  if (isLastFeature) {
-                    newFeatureRef.current = el;
+                  if (isLastFeature && el) {
+                    (newFeatureRef as any).current = el;
                   }
                 }}
                 initial={{ opacity: 0, y: 50 }}
