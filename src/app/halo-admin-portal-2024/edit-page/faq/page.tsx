@@ -182,10 +182,25 @@ export default function FaqEditorPage() {
 
   const confirmDeleteFaq = () => {
     if (deleteConfirm.index !== null) {
+      const deletedIndex = deleteConfirm.index;
       const newFaqs = faqs.filter((_, i) => i !== deleteConfirm.index);
       setFaqs(newFaqs);
       setShowDeleteButton(null);
       setDeleteConfirm({ show: false, index: null });
+
+      // Focus on the previous card or scroll to top
+      setTimeout(() => {
+        if (deletedIndex > 0) {
+          // Focus on the card above (previous card)
+          const prevCard = cardRefs.current[deletedIndex - 1];
+          if (prevCard) {
+            prevCard.scrollIntoView({ behavior: "smooth", block: "center" });
+          }
+        } else {
+          // If it's the first card, scroll to top
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        }
+      }, 100);
 
       // Auto-save after deletion
       setTimeout(async () => {
@@ -218,7 +233,7 @@ export default function FaqEditorPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:from-dark-950 dark:via-dark-900 dark:to-dark-950 pt-16 px-2 pb-4">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:from-dark-950 dark:via-dark-900 dark:to-dark-950 pt-24 px-2 pb-4">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -233,7 +248,7 @@ export default function FaqEditorPage() {
             <div className="flex items-center gap-1">
               <Button
                 onClick={() => router.push("/halo-admin-portal-2024/edit-page")}
-                className="flex items-center gap-0.5 py-1 px-1.5 text-xs h-7"
+                className="flex items-center gap-0.5 py-1 px-1.5 text-xs h-7 transition-shadow duration-500 ease-in-out hover:!shadow-[inset_0_-3px_2px_0_rgba(0,0,0,0.25),inset_2px_0_2px_0_rgba(255,255,255,0.15),inset_-2px_0_2px_0_rgba(0,0,0,0.1),0_4px_0_0_rgba(34,197,94,0.8),0_5px_0_0_rgba(34,197,94,0.6),0_6px_0_0_rgba(34,197,94,0.4),0_10px_12px_-3px_rgba(0,0,0,0.5),0_15px_25px_-5px_rgba(0,0,0,0.3),0_8px_16px_-4px_rgba(34,197,94,0.7)]"
                 variant="outline"
               >
                 <ArrowLeft size={12} />
@@ -242,7 +257,7 @@ export default function FaqEditorPage() {
               <Button
                 onClick={handleSave}
                 disabled={saving}
-                className="flex items-center gap-0.5 py-1 px-1.5 text-xs h-7 bg-gradient-to-r from-primary-600 to-primary-700"
+                className="flex items-center gap-0.5 py-1 px-1.5 text-xs h-7 bg-gradient-to-r from-primary-600 to-primary-700 hover:shadow-2xl hover:shadow-green-500/50 transition-shadow duration-500 ease-in-out"
               >
                 <Save size={12} />
                 {saving ? "Saving..." : "Save"}
@@ -474,7 +489,7 @@ export default function FaqEditorPage() {
             </h2>
             <Button
               onClick={addFaq}
-              className="flex flex-row items-center gap-0.5 py-1 text-xs h-7 bg-gradient-to-r from-primary-600 to-primary-700 !w-auto whitespace-nowrap flex-shrink-0"
+              className="flex flex-row items-center gap-0.5 py-1 text-xs h-7 bg-gradient-to-r from-primary-600 to-primary-700 !w-auto whitespace-nowrap flex-shrink-0 hover:shadow-2xl hover:shadow-green-500/50 transition-shadow duration-500 ease-in-out"
             >
               <Plus size={12} />
               Add Card
@@ -488,7 +503,7 @@ export default function FaqEditorPage() {
         <div className="space-y-2">
           {faqs.map((faq, index) => (
             <motion.div
-              key={index}
+              key={`faq-${index}`}
               ref={(el) => {
                 cardRefs.current[index] = el;
               }}
@@ -508,7 +523,7 @@ export default function FaqEditorPage() {
                           deleteFaq(index);
                         }}
                         variant="outline"
-                        className="flex items-center gap-0.5 py-1 text-xs h-7 text-red-600 hover:!text-white !w-auto"
+                        className="flex items-center gap-0.5 py-1 text-xs h-7 text-red-600 hover:!text-white !w-auto transition-shadow duration-500 ease-in-out hover:!shadow-[inset_0_-3px_2px_0_rgba(0,0,0,0.25),inset_2px_0_2px_0_rgba(255,255,255,0.15),inset_-2px_0_2px_0_rgba(0,0,0,0.1),0_4px_0_0_rgba(239,68,68,0.8),0_5px_0_0_rgba(239,68,68,0.6),0_6px_0_0_rgba(239,68,68,0.4),0_10px_12px_-3px_rgba(0,0,0,0.5),0_15px_25px_-5px_rgba(0,0,0,0.3),0_8px_16px_-4px_rgba(239,68,68,0.7)]"
                         style={{ color: undefined }}
                         data-delete-button
                       >
@@ -646,14 +661,14 @@ export default function FaqEditorPage() {
             <div className="flex gap-3 justify-end">
               <Button
                 onClick={() => setDeleteConfirm({ show: false, index: null })}
-                className="flex items-center justify-center px-4 py-1 text-xs h-7"
+                className="flex items-center justify-center px-4 py-1 text-xs h-7 transition-shadow duration-500 ease-in-out hover:!shadow-[inset_0_-3px_2px_0_rgba(0,0,0,0.25),inset_2px_0_2px_0_rgba(255,255,255,0.15),inset_-2px_0_2px_0_rgba(0,0,0,0.1),0_4px_0_0_rgba(34,197,94,0.8),0_5px_0_0_rgba(34,197,94,0.6),0_6px_0_0_rgba(34,197,94,0.4),0_10px_12px_-3px_rgba(0,0,0,0.5),0_15px_25px_-5px_rgba(0,0,0,0.3),0_8px_16px_-4px_rgba(34,197,94,0.7)]"
                 variant="outline"
               >
                 Cancel
               </Button>
               <Button
                 onClick={confirmDeleteFaq}
-                className="flex items-center justify-center px-4 py-1 text-xs h-7 bg-red-600 hover:bg-red-700"
+                className="flex items-center justify-center px-4 py-1 text-xs h-7 bg-gradient-to-r from-primary-600 to-primary-700 hover:shadow-2xl hover:shadow-red-500/50 transition-shadow duration-500 ease-in-out"
               >
                 Delete
               </Button>

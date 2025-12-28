@@ -276,6 +276,8 @@ export default function Home() {
           data.heroContent.slides &&
           data.heroContent.slides.length > 0
         ) {
+          console.log("Hero slides data:", data.heroContent.slides);
+          console.log("First slide CTA:", data.heroContent.slides[0]?.cta);
           setHeroSlides(data.heroContent.slides);
         }
       } catch (error) {
@@ -363,6 +365,19 @@ export default function Home() {
         }
         if (data.sectionHeader) {
           setFaqSectionHeader(data.sectionHeader);
+          setFaqContent({
+            badge: data.sectionHeader.badge || "Got Questions?",
+            titlePrefix: data.sectionHeader.titlePrefix || "Frequently Asked ",
+            titleHighlight: data.sectionHeader.titleHighlight || "Questions",
+            subtitle:
+              data.sectionHeader.subtitle ||
+              "Everything you need to know about our services and booking process",
+            ctaText:
+              data.sectionHeader.ctaText ||
+              "Still have questions? We're here to help!",
+            ctaButtonText: data.sectionHeader.ctaButtonText || "Contact Us",
+            ctaButtonLink: data.sectionHeader.ctaButtonLink || "/contact",
+          });
         }
       } catch (error) {
         console.error("Error loading FAQs:", error);
@@ -511,15 +526,29 @@ export default function Home() {
               >
                 {slide.cta && slide.cta.href && (
                   <Link href={slide.cta.href}>
-                    <Button size="md" className="group flex items-center">
+                    <Button
+                      size="lg"
+                      variant="secondary"
+                      className="group shadow-2xl hover:shadow-green-500/50 transition-shadow duration-500 ease-in-out px-6"
+                    >
+                      {renderIcon(
+                        slide.cta.startIcon || "Calendar",
+                        "w-5 h-5 mr-2 group-hover:scale-110 group-hover:rotate-12 transition-all duration-300"
+                      )}
                       <span>{slide.cta.text}</span>
-                      <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                      {renderIcon(
+                        slide.cta.endIcon || "ArrowRight",
+                        "w-5 h-5 ml-2 group-hover:translate-x-2 transition-transform duration-300"
+                      )}
                     </Button>
                   </Link>
                 )}
                 {slide.secondaryCta && (
                   <Link href={slide.secondaryCta.href}>
-                    <Button size="md" variant="outline">
+                    <Button
+                      variant="outline"
+                      className="flex items-center gap-1.5 py-2 px-4 text-sm h-10 transition-shadow duration-500 ease-in-out hover:!shadow-[inset_0_-3px_2px_0_rgba(0,0,0,0.25),inset_2px_0_2px_0_rgba(255,255,255,0.15),inset_-2px_0_2px_0_rgba(0,0,0,0.1),0_4px_0_0_rgba(255,255,255,0.8),0_5px_0_0_rgba(255,255,255,0.6),0_6px_0_0_rgba(255,255,255,0.4),0_10px_12px_-3px_rgba(0,0,0,0.5),0_15px_25px_-5px_rgba(0,0,0,0.3),0_8px_16px_-4px_rgba(255,255,255,0.7)]"
+                    >
                       {slide.secondaryCta.text}
                     </Button>
                   </Link>
@@ -601,7 +630,7 @@ export default function Home() {
             {features.map((feature, idx) => {
               return (
                 <motion.div
-                  key={feature.title}
+                  key={`feature-${idx}`}
                   initial={{ opacity: 0, y: 50, rotateX: -15 }}
                   whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
                   viewport={{ once: true }}
@@ -1121,9 +1150,15 @@ export default function Home() {
                   variant="secondary"
                   className="group shadow-2xl hover:shadow-green-500/50 transition-all duration-300 text-base px-6 py-3"
                 >
-                  <Calendar className="w-5 h-5 mr-2 group-hover:scale-110 group-hover:rotate-12 transition-all duration-300" />
+                  {renderIcon(
+                    ctaData.leadingIcon || "Calendar",
+                    "w-5 h-5 mr-2 group-hover:scale-110 group-hover:rotate-12 transition-all duration-300"
+                  )}
                   {ctaData.buttonText}
-                  <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-2 transition-transform duration-300" />
+                  {renderIcon(
+                    ctaData.trailingIcon || "ArrowRight",
+                    "w-5 h-5 ml-2 group-hover:translate-x-2 transition-transform duration-300"
+                  )}
                 </Button>
               </Link>
             </motion.div>

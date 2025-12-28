@@ -195,13 +195,18 @@ export default function AdminSetupPage() {
               can access this page.
             </p>
             <div className="space-y-3 flex flex-col items-center">
-              <Button onClick={() => router.push("/auth/signin")} size="md">
+              <Button
+                onClick={() => router.push("/auth/signin")}
+                size="md"
+                className="transition-shadow duration-500 ease-in-out hover:shadow-2xl hover:shadow-green-500/50"
+              >
                 Sign In as Admin
               </Button>
               <Button
                 onClick={() => router.push("/")}
                 size="md"
                 variant="outline"
+                className="transition-shadow duration-500 ease-in-out hover:!shadow-[inset_0_-3px_2px_0_rgba(0,0,0,0.25),inset_2px_0_2px_0_rgba(255,255,255,0.15),inset_-2px_0_2px_0_rgba(0,0,0,0.1),0_4px_0_0_rgba(34,197,94,0.8),0_5px_0_0_rgba(34,197,94,0.6),0_6px_0_0_rgba(34,197,94,0.4),0_10px_12px_-3px_rgba(0,0,0,0.5),0_15px_25px_-5px_rgba(0,0,0,0.3),0_8px_16px_-4px_rgba(34,197,94,0.7)]"
               >
                 Go to Home
               </Button>
@@ -237,6 +242,7 @@ export default function AdminSetupPage() {
               <Button
                 onClick={() => router.push("/halo-admin-portal-2024")}
                 size="sm"
+                className="transition-shadow duration-500 ease-in-out hover:shadow-2xl hover:shadow-green-500/50"
               >
                 Go to Admin Portal
               </Button>
@@ -245,6 +251,7 @@ export default function AdminSetupPage() {
                   onClick={() => setShowDeleteModal(true)}
                   size="sm"
                   variant="outline"
+                  className="transition-shadow duration-500 ease-in-out hover:!shadow-[inset_0_-3px_2px_0_rgba(0,0,0,0.25),inset_2px_0_2px_0_rgba(255,255,255,0.15),inset_-2px_0_2px_0_rgba(0,0,0,0.1),0_4px_0_0_rgba(239,68,68,0.8),0_5px_0_0_rgba(239,68,68,0.6),0_6px_0_0_rgba(239,68,68,0.4),0_10px_12px_-3px_rgba(0,0,0,0.5),0_15px_25px_-5px_rgba(0,0,0,0.3),0_8px_16px_-4px_rgba(239,68,68,0.7)]"
                 >
                   <Trash2 className="w-5 h-5 mr-2" />
                   Delete My Admin Account
@@ -290,7 +297,7 @@ export default function AdminSetupPage() {
                     onClick={() => setShowDeleteModal(false)}
                     variant="outline"
                     size="sm"
-                    className="flex-1"
+                    className="flex-1 transition-shadow duration-500 ease-in-out hover:!shadow-[inset_0_-3px_2px_0_rgba(0,0,0,0.25),inset_2px_0_2px_0_rgba(255,255,255,0.15),inset_-2px_0_2px_0_rgba(0,0,0,0.1),0_4px_0_0_rgba(34,197,94,0.8),0_5px_0_0_rgba(34,197,94,0.6),0_6px_0_0_rgba(34,197,94,0.4),0_10px_12px_-3px_rgba(0,0,0,0.5),0_15px_25px_-5px_rgba(0,0,0,0.3),0_8px_16px_-4px_rgba(34,197,94,0.7)]"
                     disabled={isDeleting}
                   >
                     Cancel
@@ -298,7 +305,7 @@ export default function AdminSetupPage() {
                   <Button
                     onClick={handleDeleteAccount}
                     size="sm"
-                    className="flex-1 bg-red-600 hover:bg-red-700 text-white"
+                    className="flex-1 bg-red-600 hover:bg-red-700 text-white transition-shadow duration-500 ease-in-out hover:shadow-2xl hover:shadow-red-500/50"
                     isLoading={isDeleting}
                     disabled={isDeleting}
                   >
@@ -352,7 +359,7 @@ export default function AdminSetupPage() {
               <Button
                 onClick={handleInitializeAdmin}
                 size="lg"
-                className="w-full"
+                className="w-full transition-shadow duration-500 ease-in-out hover:shadow-2xl hover:shadow-green-500/50"
                 isLoading={isLoading}
                 disabled={isLoading}
               >

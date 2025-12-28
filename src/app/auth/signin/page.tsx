@@ -104,7 +104,11 @@ function SignInForm() {
               </button>
             </div>
 
-            <Button type="submit" className="w-full" isLoading={isLoading}>
+            <Button
+              type="submit"
+              className="w-full transition-shadow duration-500 ease-in-out hover:shadow-2xl hover:shadow-green-500/50"
+              isLoading={isLoading}
+            >
               Sign In
             </Button>
           </form>

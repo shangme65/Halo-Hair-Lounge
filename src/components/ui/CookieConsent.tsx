@@ -76,7 +76,7 @@ export default function CookieConsent() {
 
                 <Button
                   onClick={handleAcceptAll}
-                  className="!px-3 !py-2 !text-sm w-full"
+                  className="!px-3 !py-2 !text-sm w-full transition-shadow duration-500 ease-in-out hover:shadow-2xl hover:shadow-green-500/50"
                 >
                   OK
                 </Button>

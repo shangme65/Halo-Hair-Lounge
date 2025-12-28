@@ -233,6 +233,8 @@ model CtaContent {
   description     String   @db.Text
   buttonText      String
   buttonHref      String
+  leadingIcon     String?  // Optional name or URL for leading icon
+  trailingIcon    String?  // Optional name or URL for trailing icon
   trustIndicators String[] @default([])
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt

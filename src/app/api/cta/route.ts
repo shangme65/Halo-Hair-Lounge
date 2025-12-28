@@ -61,6 +61,8 @@ export async function PUT(request: NextRequest) {
       description,
       buttonText,
       buttonHref,
+      leadingIcon,
+      trailingIcon,
       trustIndicators,
     } = validation.data;
 
@@ -72,6 +74,8 @@ export async function PUT(request: NextRequest) {
         description,
         buttonText,
         buttonHref,
+        leadingIcon: leadingIcon || null,
+        trailingIcon: trailingIcon || null,
         trustIndicators: trustIndicators || [],
       },
       create: {
@@ -81,6 +85,8 @@ export async function PUT(request: NextRequest) {
         description,
         buttonText,
         buttonHref,
+        leadingIcon: leadingIcon || null,
+        trailingIcon: trailingIcon || null,
         trustIndicators: trustIndicators || [],
       },
     });

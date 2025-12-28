@@ -77,6 +77,7 @@ export default function Navbar() {
   const [notificationCount, setNotificationCount] = useState(0);
   const [showNotifications, setShowNotifications] = useState(false);
   const [notifications, setNotifications] = useState([]);
+  const [showSignOutDialog, setShowSignOutDialog] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
   const { data: session, update } = useSession();
@@ -390,11 +391,8 @@ export default function Navbar() {
                   </Link>
                   <Button
                     variant="outline"
-                    size="sm"
-                    className="w-32 text-sm whitespace-nowrap flex items-center justify-center"
-                    onClick={() =>
-                      signOut({ callbackUrl: "/admin-setup", redirect: true })
-                    }
+                    className="flex items-center gap-0.5 py-1 px-1.5 text-xs h-7 transition-shadow duration-500 ease-in-out hover:!shadow-[inset_0_-3px_2px_0_rgba(0,0,0,0.25),inset_2px_0_2px_0_rgba(255,255,255,0.15),inset_-2px_0_2px_0_rgba(0,0,0,0.1),0_4px_0_0_rgba(34,197,94,0.8),0_5px_0_0_rgba(34,197,94,0.6),0_6px_0_0_rgba(34,197,94,0.4),0_10px_12px_-3px_rgba(0,0,0,0.5),0_15px_25px_-5px_rgba(0,0,0,0.3),0_8px_16px_-4px_rgba(34,197,94,0.7)]"
+                    onClick={() => setShowSignOutDialog(true)}
                   >
                     Sign Out
                   </Button>
@@ -453,7 +451,7 @@ export default function Navbar() {
 
             {/* Sidebar */}
             <motion.div
-              className="fixed top-0 right-0 bottom-0 w-64 bg-white dark:bg-dark-900 shadow-2xl z-[120] lg:hidden overflow-y-auto"
+              className="fixed top-0 right-0 bottom-0 w-56 bg-white dark:bg-dark-900 shadow-2xl z-[120] lg:hidden overflow-y-auto"
               initial={{ x: "100%" }}
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
@@ -510,13 +508,10 @@ export default function Navbar() {
                     </Link>
                     <Button
                       variant="outline"
-                      className="w-36 mx-auto text-sm whitespace-nowrap flex items-center justify-center"
+                      className="flex items-center gap-0.5 py-1 px-1.5 text-xs h-7 mx-auto transition-shadow duration-500 ease-in-out hover:!shadow-[inset_0_-3px_2px_0_rgba(0,0,0,0.25),inset_2px_0_2px_0_rgba(255,255,255,0.15),inset_-2px_0_2px_0_rgba(0,0,0,0.1),0_4px_0_0_rgba(34,197,94,0.8),0_5px_0_0_rgba(34,197,94,0.6),0_6px_0_0_rgba(34,197,94,0.4),0_10px_12px_-3px_rgba(0,0,0,0.5),0_15px_25px_-5px_rgba(0,0,0,0.3),0_8px_16px_-4px_rgba(34,197,94,0.7)]"
                       onClick={() => {
                         setMobileMenuOpen(false);
-                        signOut({
-                          callbackUrl: "/admin-setup",
-                          redirect: true,
-                        });
+                        setShowSignOutDialog(true);
                       }}
                     >
                       Sign Out
@@ -524,6 +519,54 @@ export default function Navbar() {
                   </div>
                 )}
               </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* Sign Out Confirmation Dialog */}
+      <AnimatePresence>
+        {showSignOutDialog && (
+          <>
+            <motion.div
+              className="fixed inset-0 bg-black/60 z-[200] flex items-center justify-center"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowSignOutDialog(false)}
+            >
+              <motion.div
+                className="bg-white dark:bg-dark-800 rounded-lg shadow-2xl p-6 max-w-sm mx-4"
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <h3 className="text-xl font-semibold text-dark-900 dark:text-white mb-4">
+                  Confirm Sign Out
+                </h3>
+                <p className="text-dark-600 dark:text-dark-300 mb-6">
+                  Are you sure you want to sign out?
+                </p>
+                <div className="flex gap-3 justify-end">
+                  <Button
+                    onClick={() => setShowSignOutDialog(false)}
+                    className="flex items-center justify-center px-4 py-1 text-xs h-7 transition-shadow duration-500 ease-in-out hover:!shadow-[inset_0_-3px_2px_0_rgba(0,0,0,0.25),inset_2px_0_2px_0_rgba(255,255,255,0.15),inset_-2px_0_2px_0_rgba(0,0,0,0.1),0_4px_0_0_rgba(34,197,94,0.8),0_5px_0_0_rgba(34,197,94,0.6),0_6px_0_0_rgba(34,197,94,0.4),0_10px_12px_-3px_rgba(0,0,0,0.5),0_15px_25px_-5px_rgba(0,0,0,0.3),0_8px_16px_-4px_rgba(34,197,94,0.7)]"
+                    variant="outline"
+                  >
+                    No
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      setShowSignOutDialog(false);
+                      signOut({ callbackUrl: "/admin-setup", redirect: true });
+                    }}
+                    className="flex items-center justify-center px-4 py-1 text-xs h-7 bg-red-600 hover:bg-red-700 hover:shadow-2xl hover:shadow-red-500/50 transition-shadow duration-500 ease-in-out"
+                  >
+                    Yes
+                  </Button>
+                </div>
+              </motion.div>
             </motion.div>
           </>
         )}

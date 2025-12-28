@@ -20,6 +20,7 @@ import {
   AlignLeft,
   Palette,
   MousePointer,
+  ArrowRight,
 } from "lucide-react";
 import {
   DndContext,
@@ -42,6 +43,7 @@ import { HexColorPicker } from "react-colorful";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import HeroScene from "@/components/3d/HeroScene";
+import IconSelector, { renderIcon } from "@/components/admin/IconSelector";
 import toast from "react-hot-toast";
 
 interface HeroSlide {
@@ -52,6 +54,8 @@ interface HeroSlide {
   cta: {
     text: string;
     href: string;
+    startIcon?: string;
+    endIcon?: string;
   };
   secondaryCta?: {
     text: string;
@@ -207,6 +211,26 @@ function SortableSlide({
               className="w-full px-4 py-2 rounded-lg border border-dark-300 dark:border-dark-600 bg-white dark:bg-dark-900 text-dark-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
             />
           </div>
+          <div>
+            <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
+              Leading Icon
+            </label>
+            <IconSelector
+              value={slide.cta?.startIcon || "Calendar"}
+              onChange={(icon) =>
+                updateSlideField(index, "cta.startIcon", icon)
+              }
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
+              Trailing Icon
+            </label>
+            <IconSelector
+              value={slide.cta?.endIcon || "ArrowRight"}
+              onChange={(icon) => updateSlideField(index, "cta.endIcon", icon)}
+            />
+          </div>
         </div>
 
         {/* Secondary CTA Button */}
@@ -302,7 +326,7 @@ function SortableSlide({
             <Button
               onClick={() => deleteSlide(index)}
               variant="outline"
-              className="flex items-center gap-0.5 py-1 text-xs h-7 text-red-600 hover:!text-white !w-auto"
+              className="flex items-center gap-0.5 py-1 text-xs h-7 text-red-600 hover:!text-white transition-shadow duration-500 ease-in-out hover:!shadow-[inset_0_-3px_2px_0_rgba(0,0,0,0.25),inset_2px_0_2px_0_rgba(255,255,255,0.15),inset_-2px_0_2px_0_rgba(0,0,0,0.1),0_4px_0_0_rgba(239,68,68,0.8),0_5px_0_0_rgba(239,68,68,0.6),0_6px_0_0_rgba(239,68,68,0.4),0_10px_12px_-3px_rgba(0,0,0,0.5),0_15px_25px_-5px_rgba(0,0,0,0.3),0_8px_16px_-4px_rgba(239,68,68,0.7)] !w-auto"
               style={{ color: undefined }}
             >
               <Trash2 size={12} />
@@ -316,7 +340,7 @@ function SortableSlide({
               // Scroll to top to view the preview section
               window.scrollTo({ top: 0, behavior: "smooth" });
             }}
-            className="flex items-center gap-2 py-1 text-xs h-7 bg-gradient-to-r from-primary-600 to-primary-700 !w-auto"
+            className="flex items-center gap-2 py-1 text-xs h-7 bg-gradient-to-r from-primary-600 to-primary-700 hover:shadow-2xl hover:shadow-green-500/50 transition-shadow duration-500 ease-in-out !w-auto"
           >
             <Eye size={12} />
             Preview This Slide
@@ -331,6 +355,7 @@ export default function HeroEditor() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+
   const [slides, setSlides] = useState<HeroSlide[]>([
     {
       title: "Transform Your Look",
@@ -403,10 +428,23 @@ export default function HeroEditor() {
   const handleSave = async () => {
     try {
       setSaving(true);
+
+      // Ensure all slides have icon fields with defaults
+      const slidesWithIcons = slides.map((slide) => ({
+        ...slide,
+        cta: slide.cta
+          ? {
+              ...slide.cta,
+              startIcon: slide.cta.startIcon || "Calendar",
+              endIcon: slide.cta.endIcon || "ArrowRight",
+            }
+          : undefined,
+      }));
+
       const response = await fetch("/api/hero", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ slides }),
+        body: JSON.stringify({ slides: slidesWithIcons }),
       });
 
       if (!response.ok) throw new Error("Failed to save");
@@ -447,7 +485,12 @@ export default function HeroEditor() {
         subtitle: "New Subtitle",
         description: "New description",
         colorScheme: "green",
-        cta: { text: "Get Started", href: "/book" },
+        cta: {
+          text: "Get Started",
+          href: "/book",
+          startIcon: "Calendar",
+          endIcon: "ArrowRight",
+        },
       },
     ]);
     setCurrentSlide(newSlideIndex);
@@ -553,7 +596,7 @@ export default function HeroEditor() {
             <div className="flex items-center gap-1">
               <Button
                 onClick={() => router.push("/halo-admin-portal-2024/edit-page")}
-                className="flex items-center gap-0.5 py-1 px-1.5 text-xs h-7"
+                className="flex items-center gap-0.5 py-1 px-1.5 text-xs h-7 transition-shadow duration-500 ease-in-out hover:!shadow-[inset_0_-3px_2px_0_rgba(0,0,0,0.25),inset_2px_0_2px_0_rgba(255,255,255,0.15),inset_-2px_0_2px_0_rgba(0,0,0,0.1),0_4px_0_0_rgba(34,197,94,0.8),0_5px_0_0_rgba(34,197,94,0.6),0_6px_0_0_rgba(34,197,94,0.4),0_10px_12px_-3px_rgba(0,0,0,0.5),0_15px_25px_-5px_rgba(0,0,0,0.3),0_8px_16px_-4px_rgba(34,197,94,0.7)]"
                 variant="outline"
               >
                 <ArrowLeft size={12} />
@@ -563,7 +606,7 @@ export default function HeroEditor() {
               <Button
                 onClick={handleSave}
                 disabled={saving}
-                className="flex items-center gap-0.5 py-1 px-1.5 text-xs h-7 bg-gradient-to-r from-primary-600 to-primary-700"
+                className="flex items-center gap-0.5 py-1 px-1.5 text-xs h-7 bg-gradient-to-r from-primary-600 to-primary-700 hover:shadow-2xl hover:shadow-green-500/50 transition-shadow duration-500 ease-in-out"
               >
                 {saving ? (
                   <>
@@ -713,7 +756,7 @@ export default function HeroEditor() {
                         onClick={() => setEditMode(`cta-${currentSlide}`)}
                       >
                         {editMode === `cta-${currentSlide}` ? (
-                          <div className="flex gap-1 sm:gap-2">
+                          <div className="flex gap-1 flex-wrap items-center justify-center">
                             <input
                               type="text"
                               value={slide.cta?.text || ""}
@@ -725,7 +768,7 @@ export default function HeroEditor() {
                                 )
                               }
                               placeholder="Button Text"
-                              className="bg-dark-800 text-white px-2 py-1 sm:px-3 sm:py-2 rounded text-xs sm:text-sm outline-none"
+                              className="bg-dark-800 text-white px-3 py-2 rounded text-sm outline-none border border-white/30"
                             />
                             <input
                               type="text"
@@ -738,10 +781,43 @@ export default function HeroEditor() {
                                 )
                               }
                               placeholder="Link URL"
-                              className="bg-dark-800 text-white px-2 py-1 sm:px-3 sm:py-2 rounded text-xs sm:text-sm outline-none"
+                              className="bg-dark-800 text-white px-3 py-2 rounded text-sm outline-none border border-white/30"
                             />
+                            <div className="flex gap-0.5 items-center bg-dark-800 px-1 py-0.5 rounded">
+                              <span className="text-white text-[10px] font-medium">
+                                Start:
+                              </span>
+                              <IconSelector
+                                value={slide.cta?.startIcon || "Calendar"}
+                                onChange={(icon) =>
+                                  updateSlideField(
+                                    currentSlide,
+                                    "cta.startIcon",
+                                    icon
+                                  )
+                                }
+                              />
+                            </div>
+                            <div className="flex gap-0.5 items-center bg-dark-800 px-1 py-0.5 rounded">
+                              <span className="text-white text-[10px] font-medium">
+                                End:
+                              </span>
+                              <IconSelector
+                                value={slide.cta?.endIcon || "ArrowRight"}
+                                onChange={(icon) =>
+                                  updateSlideField(
+                                    currentSlide,
+                                    "cta.endIcon",
+                                    icon
+                                  )
+                                }
+                              />
+                            </div>
                             <button
-                              onClick={() => setEditMode(null)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setEditMode(null);
+                              }}
                               className="bg-green-600 text-white px-2 py-1 sm:px-3 sm:py-2 rounded text-xs sm:text-sm"
                             >
                               <CheckCircle
@@ -751,20 +827,87 @@ export default function HeroEditor() {
                             </button>
                           </div>
                         ) : (
-                          <Button className="group text-sm py-3 px-5 sm:py-4 sm:px-7">
-                            {slide.cta?.text || "Button"}
-                            <Edit2 className="w-3 h-3 sm:w-4 sm:h-4 ml-1 sm:ml-2 opacity-0 group-hover:opacity-100" />
-                          </Button>
+                          <div className="pointer-events-auto">
+                            <Button
+                              size="lg"
+                              variant="secondary"
+                              className="group shadow-2xl hover:shadow-green-500/50 transition-shadow duration-500 ease-in-out px-6"
+                            >
+                              {renderIcon(
+                                slide.cta?.startIcon || "Calendar",
+                                "w-5 h-5 mr-2 group-hover:scale-110 group-hover:rotate-12 transition-all duration-300"
+                              )}
+                              {slide.cta?.text || "Button"}
+                              {renderIcon(
+                                slide.cta?.endIcon || "ArrowRight",
+                                "w-5 h-5 ml-2 group-hover:translate-x-2 transition-transform duration-300"
+                              )}
+                            </Button>
+                          </div>
                         )}
                       </div>
                       {slide.secondaryCta?.text && slide.secondaryCta?.href && (
-                        <div>
-                          <Button
-                            variant="outline"
-                            className="text-sm py-3 px-5 sm:py-4 sm:px-7"
-                          >
-                            {slide.secondaryCta.text}
-                          </Button>
+                        <div
+                          className={`cursor-pointer hover:ring-2 hover:ring-primary-500 rounded-lg transition-all inline-block ${
+                            editMode === `secondaryCta-${currentSlide}`
+                              ? "ring-2 ring-primary-500"
+                              : ""
+                          }`}
+                          onClick={() =>
+                            setEditMode(`secondaryCta-${currentSlide}`)
+                          }
+                        >
+                          {editMode === `secondaryCta-${currentSlide}` ? (
+                            <div className="flex gap-1">
+                              <input
+                                type="text"
+                                value={slide.secondaryCta?.text || ""}
+                                onChange={(e) =>
+                                  updateSlideField(
+                                    currentSlide,
+                                    "secondaryCta.text",
+                                    e.target.value
+                                  )
+                                }
+                                placeholder="Button Text"
+                                className="bg-dark-800 text-white px-3 py-2 rounded text-sm outline-none border border-white/30"
+                              />
+                              <input
+                                type="text"
+                                value={slide.secondaryCta?.href || ""}
+                                onChange={(e) =>
+                                  updateSlideField(
+                                    currentSlide,
+                                    "secondaryCta.href",
+                                    e.target.value
+                                  )
+                                }
+                                placeholder="Link URL"
+                                className="bg-dark-800 text-white px-3 py-2 rounded text-sm outline-none border border-white/30"
+                              />
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setEditMode(null);
+                                }}
+                                className="bg-green-600 text-white px-2 py-1 sm:px-3 sm:py-2 rounded text-xs sm:text-sm"
+                              >
+                                <CheckCircle
+                                  size={14}
+                                  className="sm:w-4 sm:h-4"
+                                />
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="pointer-events-auto">
+                              <Button
+                                variant="outline"
+                                className="flex items-center gap-1.5 py-2 px-4 text-sm h-10 transition-shadow duration-500 ease-in-out hover:!shadow-[inset_0_-3px_2px_0_rgba(0,0,0,0.25),inset_2px_0_2px_0_rgba(255,255,255,0.15),inset_-2px_0_2px_0_rgba(0,0,0,0.1),0_4px_0_0_rgba(255,255,255,0.8),0_5px_0_0_rgba(255,255,255,0.6),0_6px_0_0_rgba(255,255,255,0.4),0_10px_12px_-3px_rgba(0,0,0,0.5),0_15px_25px_-5px_rgba(0,0,0,0.3),0_8px_16px_-4px_rgba(255,255,255,0.7)]"
+                              >
+                                {slide.secondaryCta.text}
+                              </Button>
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>
@@ -785,7 +928,7 @@ export default function HeroEditor() {
               </h2>
               <Button
                 onClick={addSlide}
-                className="flex flex-row items-center gap-0.5 py-1 text-xs h-7 bg-gradient-to-r from-primary-600 to-primary-700 !w-auto whitespace-nowrap flex-shrink-0"
+                className="flex flex-row items-center gap-0.5 py-1 text-xs h-7 bg-gradient-to-r from-primary-600 to-primary-700 hover:shadow-2xl hover:shadow-green-500/50 transition-shadow duration-500 ease-in-out !w-auto whitespace-nowrap flex-shrink-0"
               >
                 <Plus size={12} />
                 Add Slide
@@ -818,7 +961,7 @@ export default function HeroEditor() {
                 <div className="space-y-4">
                   {slides.map((s, index) => (
                     <SortableSlide
-                      key={index}
+                      key={`slide-${index}`}
                       slide={s}
                       index={index}
                       currentSlide={currentSlide}
@@ -853,14 +996,14 @@ export default function HeroEditor() {
             <div className="flex gap-3 justify-end">
               <Button
                 onClick={() => setDeleteConfirm({ show: false, index: null })}
-                className="flex items-center justify-center px-4 py-1 text-xs h-7"
+                className="flex items-center justify-center px-4 py-1 text-xs h-7 transition-shadow duration-500 ease-in-out hover:!shadow-[inset_0_-3px_2px_0_rgba(0,0,0,0.25),inset_2px_0_2px_0_rgba(255,255,255,0.15),inset_-2px_0_2px_0_rgba(0,0,0,0.1),0_4px_0_0_rgba(34,197,94,0.8),0_5px_0_0_rgba(34,197,94,0.6),0_6px_0_0_rgba(34,197,94,0.4),0_10px_12px_-3px_rgba(0,0,0,0.5),0_15px_25px_-5px_rgba(0,0,0,0.3),0_8px_16px_-4px_rgba(34,197,94,0.7)]"
                 variant="outline"
               >
                 Cancel
               </Button>
               <Button
                 onClick={confirmDeleteSlide}
-                className="flex items-center justify-center px-4 py-1 text-xs h-7 bg-red-600 hover:bg-red-700"
+                className="flex items-center justify-center px-4 py-1 text-xs h-7 bg-red-600 hover:bg-red-700 hover:shadow-2xl hover:shadow-red-500/50 transition-shadow duration-500 ease-in-out"
               >
                 Delete
               </Button>

@@ -38,41 +38,41 @@ const Button = forwardRef<HTMLButtonElement, AnimatedButtonProps>(
       primary: clsx(
         // Base gradient with multiple color stops for depth
         "bg-gradient-to-b from-primary-400 via-primary-500 via-50% to-primary-700",
-        // Complex 3D shadow stack
-        "shadow-[inset_0_1px_0_0_rgba(255,255,255,0.3),inset_0_-2px_4px_0_rgba(0,0,0,0.2),0_8px_0_0_#14532d,0_10px_8px_-2px_rgba(0,0,0,0.4),0_15px_25px_-5px_rgba(0,0,0,0.3)]",
-        // Hover state
-        "hover:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.4),inset_0_-2px_4px_0_rgba(0,0,0,0.2),0_6px_0_0_#14532d,0_8px_6px_-2px_rgba(0,0,0,0.4),0_12px_20px_-5px_rgba(0,0,0,0.3)]",
+        // Complex 3D shadow stack (no top highlight)
+        "shadow-[inset_0_-2px_4px_0_rgba(0,0,0,0.2),0_8px_0_0_#14532d,0_10px_8px_-2px_rgba(0,0,0,0.4),0_15px_25px_-5px_rgba(0,0,0,0.3)]",
+        // Hover state (no top highlight)
+        "hover:shadow-[inset_0_-2px_4px_0_rgba(0,0,0,0.2),0_6px_0_0_#14532d,0_8px_6px_-2px_rgba(0,0,0,0.4),0_12px_20px_-5px_rgba(0,0,0,0.3)]",
         "hover:translate-y-[2px]",
         // Active/pressed state
-        "active:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1),inset_0_2px_8px_0_rgba(0,0,0,0.3),0_1px_0_0_#14532d,0_2px_3px_-1px_rgba(0,0,0,0.4)]",
+        "active:shadow-[inset_0_2px_8px_0_rgba(0,0,0,0.3),0_1px_0_0_#14532d,0_2px_3px_-1px_rgba(0,0,0,0.4)]",
         "active:translate-y-[7px]",
-        // Text and border
-        "text-white border-t border-primary-300/40"
+        // Text - no border to avoid visible lines
+        "text-white border-0"
       ),
       secondary: clsx(
         "bg-gradient-to-b from-green-600 via-green-700 via-50% to-green-800",
-        "shadow-[inset_0_1px_0_0_rgba(255,255,255,0.4),inset_0_-2px_4px_0_rgba(0,0,0,0.15),0_8px_0_0_rgba(156,163,175,1),0_10px_8px_-2px_rgba(0,0,0,0.4),0_15px_25px_-5px_rgba(0,0,0,0.3)]",
-        "hover:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.5),inset_0_-2px_4px_0_rgba(0,0,0,0.15),0_6px_0_0_rgba(156,163,175,1),0_8px_6px_-2px_rgba(0,0,0,0.4),0_12px_20px_-5px_rgba(0,0,0,0.3)]",
+        "shadow-[inset_0_-2px_4px_0_rgba(0,0,0,0.15),0_8px_0_0_rgba(156,163,175,1),0_10px_8px_-2px_rgba(0,0,0,0.4),0_15px_25px_-5px_rgba(0,0,0,0.3)]",
+        "hover:shadow-[inset_0_-2px_4px_0_rgba(0,0,0,0.15),0_6px_0_0_rgba(156,163,175,1),0_8px_6px_-2px_rgba(0,0,0,0.4),0_12px_20px_-5px_rgba(0,0,0,0.3)]",
         "hover:translate-y-[2px]",
-        "active:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1),inset_0_2px_8px_0_rgba(0,0,0,0.25),0_1px_0_0_rgba(156,163,175,1),0_2px_3px_-1px_rgba(0,0,0,0.4)]",
+        "active:shadow-[inset_0_2px_8px_0_rgba(0,0,0,0.25),0_1px_0_0_rgba(156,163,175,1),0_2px_3px_-1px_rgba(0,0,0,0.4)]",
         "active:translate-y-[7px]",
-        "text-white border-t border-green-500/50"
+        "text-white border-0"
       ),
       outline: clsx(
-        // Metallic gradient with shine effect
-        "bg-gradient-to-b from-gray-400 via-gray-500 via-40% to-gray-700",
-        // Advanced 3D shadow - beveled metallic look with multiple layers
-        "shadow-[inset_0_2px_1px_0_rgba(255,255,255,0.5),inset_0_-3px_2px_0_rgba(0,0,0,0.3),inset_2px_0_2px_0_rgba(255,255,255,0.1),inset_-2px_0_2px_0_rgba(0,0,0,0.1),0_6px_0_0_#2a2a2a,0_7px_0_0_#1a1a1a,0_8px_0_0_#0f0f0f,0_12px_15px_-3px_rgba(0,0,0,0.5),0_20px_30px_-5px_rgba(0,0,0,0.3)]",
-        // Hover state - lift and glow
-        "hover:shadow-[inset_0_2px_1px_0_rgba(255,255,255,0.6),inset_0_-3px_2px_0_rgba(0,0,0,0.25),inset_2px_0_2px_0_rgba(255,255,255,0.15),inset_-2px_0_2px_0_rgba(0,0,0,0.1),0_4px_0_0_#2a2a2a,0_5px_0_0_#1a1a1a,0_6px_0_0_#0f0f0f,0_10px_12px_-3px_rgba(0,0,0,0.5),0_15px_25px_-5px_rgba(0,0,0,0.3),0_0_15px_rgba(156,163,175,0.3)]",
+        // Metallic gradient with shine effect (positioned to not show at top)
+        "bg-gradient-to-b from-gray-500 via-gray-500 via-40% to-gray-700 bg-clip-padding",
+        // Advanced 3D shadow - beveled metallic look with multiple layers (no top highlight)
+        "shadow-[inset_0_-3px_2px_0_rgba(0,0,0,0.3),inset_2px_0_2px_0_rgba(255,255,255,0.1),inset_-2px_0_2px_0_rgba(0,0,0,0.1),0_6px_0_0_#2a2a2a,0_7px_0_0_#1a1a1a,0_8px_0_0_#0f0f0f,0_12px_15px_-3px_rgba(0,0,0,0.5),0_20px_30px_-5px_rgba(0,0,0,0.3)]",
+        // Hover state - lift and glow (no top highlight)
+        "hover:shadow-[inset_0_-3px_2px_0_rgba(0,0,0,0.25),inset_2px_0_2px_0_rgba(255,255,255,0.15),inset_-2px_0_2px_0_rgba(0,0,0,0.1),0_4px_0_0_#2a2a2a,0_5px_0_0_#1a1a1a,0_6px_0_0_#0f0f0f,0_10px_12px_-3px_rgba(0,0,0,0.5),0_15px_25px_-5px_rgba(0,0,0,0.3),0_0_15px_rgba(156,163,175,0.3)]",
         "hover:translate-y-[2px]",
         "hover:brightness-110",
         // Active/pressed state - deep press with inner glow
         "active:shadow-[inset_0_3px_5px_0_rgba(0,0,0,0.4),inset_0_-1px_1px_0_rgba(255,255,255,0.2),0_1px_0_0_#1a1a1a,0_2px_0_0_#0f0f0f,0_3px_5px_-2px_rgba(0,0,0,0.5)]",
         "active:translate-y-[6px]",
         "active:brightness-95",
-        // Text and border - metallic edge
-        "text-white border border-gray-400/30 border-t-gray-300/50 border-b-gray-800/50"
+        // Text and border - no borders to avoid visible lines
+        "text-white border-0"
       ),
       ghost: "text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-950",
     };

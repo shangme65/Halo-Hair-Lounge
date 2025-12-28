@@ -335,6 +335,14 @@ export const ctaContentSchema = z.object({
   buttonHref: z
     .string()
     .max(200, "Button link must be less than 200 characters"),
+  leadingIcon: z
+    .string()
+    .max(200, "Leading icon must be less than 200 characters")
+    .optional(),
+  trailingIcon: z
+    .string()
+    .max(200, "Trailing icon must be less than 200 characters")
+    .optional(),
   trustIndicators: z.array(z.string()).optional(),
 });
 
